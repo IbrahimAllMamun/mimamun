@@ -1,0 +1,94 @@
+# Production deployment on a single host:
+#
+#   cp .env.example .env.production   # fill in every [prod: required] value
+#   docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+#
+# Caddy terminates TLS (automatic HTTPS) and is the only service with public
+# ports. The database and upload volumes persist across deployments; see
+# docs/deployment.md for backups, updates and rollback.
+
+name: portfolio
+
+x-restart: &restart
+  restart: unless-stopped
+
+services:
+  caddy:
+    <<: *restart
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:?Set SITE_DOMAIN, e.g. mimamun.com}
+      ACME_EMAIL: ${ACME_EMAIL:-}
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      web: { condition: service_healthy }
+      api: { condition: service_healthy }
+
+  web:
+    <<: *restart
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args: { API_INTERNAL_URL: "http://api:4000" }
+    image: portfolio-web:${IMAGE_TAG:-latest}
+    environment:
+      APP_URL: ${APP_URL:?Set APP_URL, e.g. https://mimamun.com}
+      API_INTERNAL_URL: http://api:4000
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET:?Set REVALIDATE_SECRET}
+    depends_on:
+      api: { condition: service_healthy }
+
+  api:
+    <<: *restart
+    build: { context: ., dockerfile: apps/api/Dockerfile }
+    image: portfolio-api:${IMAGE_TAG:-latest}
+    env_file: [.env.production]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://${POSTGRES_USER:-portfolio}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-portfolio}
+      WEB_INTERNAL_URL: http://web:3000
+      UPLOAD_DIR: /data/uploads
+      TRUST_PROXY: ${TRUST_PROXY:-loopback, linklocal, uniquelocal}
+    volumes:
+      - uploads:/data/uploads
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+
+  # Applies pending migrations, then exits. Runs on every `up`.
+  migrate:
+    image: portfolio-api:${IMAGE_TAG:-latest}
+    build: { context: ., dockerfile: apps/api/Dockerfile }
+    command: ["node", "dist/migrate.js"]
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-portfolio}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-portfolio}
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: "no"
+
+  postgres:
+    <<: *restart
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-portfolio}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-portfolio}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:
+  uploads:
+  caddy-data:
+  caddy-config:

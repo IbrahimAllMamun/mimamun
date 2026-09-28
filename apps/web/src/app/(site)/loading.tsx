@@ -1,9 +1,17 @@
 import { Skeleton } from "@/components/ui/states";
 
-/** Shown while a page's data loads: the title block and a few rows, in place. */
+/**
+ * Shown while a page's data loads: the title block and a few rows, in place.
+ * It fills the viewport so the footer stays below the fold and nothing
+ * visible shifts when the page arrives (no layout shift).
+ */
 export default function SiteLoading() {
   return (
-    <div role="status" aria-label="Loading" className="container-page pt-10 sm:pt-14 lg:pt-20">
+    <div
+      role="status"
+      aria-label="Loading"
+      className="container-page min-h-dvh pt-10 sm:pt-14 lg:pt-20"
+    >
       <div className="grid-editorial gap-y-6">
         <div className="col-span-4 sm:col-span-8 lg:col-span-3">
           <Skeleton className="h-3 w-24" />

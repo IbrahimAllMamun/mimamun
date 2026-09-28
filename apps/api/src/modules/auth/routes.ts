@@ -37,14 +37,22 @@ export function authRouter(deps: AppDeps): Router {
     path: "/",
   };
 
+  // Only failed sign-ins count. The per-email limit matches the lockout
+  // threshold, so an unknown address and a locked account answer alike.
   const tooManyLogins = "Too many sign-in attempts. Try again in a few minutes.";
-  const loginByIp = createRateLimit({ windowMs: minutes(15), limit: 30, message: tooManyLogins });
-  const loginByEmail = createRateLimit({
+  const loginByIp = createRateLimit({
     windowMs: minutes(15),
-    limit: 10,
+    limit: 30,
+    message: tooManyLogins,
+    skipSuccessfulRequests: true,
+  });
+  const loginByEmail = createRateLimit({
+    windowMs: minutes(config.login.lockoutMinutes),
+    limit: config.login.maxAttempts,
     message: tooManyLogins,
     key: emailKey,
     keyOnly: true,
+    skipSuccessfulRequests: true,
   });
   const resetLimit = createRateLimit({
     windowMs: minutes(60),

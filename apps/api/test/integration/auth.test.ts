@@ -67,6 +67,23 @@ describe("authentication", () => {
     expect(locked.headers["retry-after"]).toBeDefined();
   });
 
+  it("answers the same for a locked account and an unknown address", async () => {
+    const user = await createUser(ctx.deps, "EDITOR", "enumeration@test.local");
+    const attempt = (email: string) =>
+      request(ctx.app)
+        .post("/api/auth/login")
+        .set("Origin", TEST_ORIGIN)
+        .send({ email, password: "not-the-password" });
+    const existing: number[] = [];
+    const missing: number[] = [];
+    for (let round = 0; round < 5; round += 1) {
+      existing.push((await attempt(user.email)).status);
+      missing.push((await attempt("nobody-here@test.local")).status);
+    }
+    expect(existing).toEqual(missing);
+    expect(existing.at(-1)).toBe(429);
+  });
+
   it("rejects cross-site login attempts", async () => {
     const response = await request(ctx.app)
       .post("/api/auth/login")

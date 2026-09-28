@@ -11,6 +11,8 @@ interface LimitOptions {
   /** Key only by `key(req)`, not by IP (e.g. per-account limits). */
   keyOnly?: boolean;
   skip?: Options["skip"];
+  /** Count only failed requests (status >= 400), e.g. sign-in attempts. */
+  skipSuccessfulRequests?: boolean;
 }
 
 /**
@@ -24,6 +26,7 @@ export function createRateLimit(options: LimitOptions) {
     standardHeaders: "draft-8",
     legacyHeaders: false,
     skip: options.skip,
+    skipSuccessfulRequests: options.skipSuccessfulRequests ?? false,
     keyGenerator: (req) => {
       const ip = ipKeyGenerator(req.ip ?? "unknown");
       const extra = options.key?.(req) ?? null;
