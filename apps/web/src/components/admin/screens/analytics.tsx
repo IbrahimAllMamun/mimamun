@@ -115,7 +115,7 @@ export function AnalyticsPage() {
                 aria-selected={days === period}
                 onClick={() => setDays(period)}
                 className={cn(
-                  "min-h-8 rounded-xs px-3 text-sm",
+                  "min-h-8 pointer-coarse:min-h-11 rounded-xs px-3 text-sm",
                   days === period ? "bg-ink text-paper" : "text-ink-2 hover:bg-muted",
                 )}
               >

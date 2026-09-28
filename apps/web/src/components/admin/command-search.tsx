@@ -123,7 +123,7 @@ export function CommandSearch() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex min-h-10 w-full max-w-sm items-center gap-2 rounded-sm border border-rule-strong bg-elevated px-3 text-sm text-ink-3 hover:border-ink-3"
+        className="inline-flex min-h-10 pointer-coarse:min-h-11 w-full max-w-sm items-center gap-2 rounded-sm border border-rule-strong bg-elevated px-3 text-sm text-ink-3 hover:border-ink-3"
       >
         <Icon icon={Search} size={16} />
         <span className="flex-1 text-left">Search…</span>

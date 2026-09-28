@@ -269,7 +269,7 @@ function BooleanField({ field, path }: { field: AdminField; path: string }) {
     <div className="space-y-1">
       <label
         htmlFor={id}
-        className="flex min-h-10 cursor-pointer items-center gap-3 text-sm text-ink"
+        className="flex min-h-10 pointer-coarse:min-h-11 cursor-pointer items-center gap-3 text-sm text-ink"
       >
         <input
           id={id}

@@ -218,7 +218,7 @@ export function ResourceList({ resource }: { resource: AdminResource }) {
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder={`Search ${resource.plural.toLowerCase()}`}
                 aria-label={`Search ${resource.plural.toLowerCase()}`}
-                className="min-h-10 w-full rounded-sm border border-rule-strong bg-elevated pr-3 pl-9 text-sm"
+                className="min-h-10 pointer-coarse:min-h-11 w-full rounded-sm border border-rule-strong bg-elevated pr-3 pl-9 text-sm"
               />
             </div>
             {resource.editorial ? (
@@ -277,7 +277,7 @@ export function ResourceList({ resource }: { resource: AdminResource }) {
                 value={filters.sort || resource.sorts[0]?.value}
                 onChange={(event) => update({ sort: event.target.value })}
                 aria-label="Sort"
-                className="min-h-10 rounded-sm border border-rule-strong bg-elevated px-2 text-sm"
+                className="min-h-10 pointer-coarse:min-h-11 rounded-sm border border-rule-strong bg-elevated px-2 text-sm"
               >
                 {resource.sorts.map((sort) => (
                   <option key={sort.value} value={sort.value}>
@@ -459,7 +459,7 @@ function FilterSelect({
       onChange={(event) => onChange(event.target.value)}
       aria-label={label}
       className={cn(
-        "min-h-10 rounded-sm border bg-elevated px-2 text-sm",
+        "min-h-10 pointer-coarse:min-h-11 rounded-sm border bg-elevated px-2 text-sm",
         value ? "border-primary text-ink" : "border-rule-strong text-ink-2",
       )}
     >

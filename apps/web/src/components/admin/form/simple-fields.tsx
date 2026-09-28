@@ -60,7 +60,7 @@ export function MarkdownInput({
             aria-selected={mode === item}
             onClick={() => setMode(item)}
             className={cn(
-              "inline-flex min-h-8 items-center gap-1.5 rounded-xs px-2.5 text-xs",
+              "inline-flex min-h-8 pointer-coarse:min-h-11 items-center gap-1.5 rounded-xs px-2.5 text-xs",
               mode === item ? "bg-muted font-medium text-ink" : "text-ink-3 hover:text-ink",
             )}
           >
@@ -204,7 +204,7 @@ export function StringListInput({
           }
         }}
         placeholder={value.length ? "" : (placeholder ?? "Type and press Enter")}
-        className="min-h-8 min-w-32 flex-1 bg-transparent px-1 text-sm outline-none placeholder:text-ink-3"
+        className="min-h-8 pointer-coarse:min-h-11 min-w-32 flex-1 bg-transparent px-1 text-sm outline-none placeholder:text-ink-3"
       />
     </div>
   );
@@ -330,13 +330,13 @@ export function RelationsInput({
               placeholder={`Filter ${label.toLowerCase()}`}
               aria-label={`Filter ${label.toLowerCase()}`}
               aria-controls={id}
-              className="min-h-9 w-full border-b border-rule bg-transparent px-3 text-sm outline-none"
+              className="min-h-9 pointer-coarse:min-h-11 w-full border-b border-rule bg-transparent px-3 text-sm outline-none"
             />
           ) : null}
           <ul id={id} className="max-h-48 overflow-y-auto py-1">
             {visible.map((option) => (
               <li key={option.id}>
-                <label className="flex min-h-9 cursor-pointer items-center gap-2.5 px-3 text-sm hover:bg-muted">
+                <label className="flex min-h-9 pointer-coarse:min-h-11 cursor-pointer items-center gap-2.5 px-3 text-sm hover:bg-muted">
                   <input
                     type="checkbox"
                     checked={value.includes(option.id)}

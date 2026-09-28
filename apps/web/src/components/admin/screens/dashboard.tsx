@@ -162,7 +162,7 @@ export function Dashboard() {
                   <li key={item.key}>
                     <Link
                       href={item.href}
-                      className="flex min-h-9 items-center gap-2.5 rounded-xs px-1 text-sm hover:bg-muted"
+                      className="flex min-h-9 pointer-coarse:min-h-11 items-center gap-2.5 rounded-xs px-1 text-sm hover:bg-muted"
                     >
                       <Icon
                         icon={item.done ? CheckCircle2 : Circle}

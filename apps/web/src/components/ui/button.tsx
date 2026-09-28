@@ -17,7 +17,7 @@ const variants: Record<Variant, string> = {
 };
 
 const sizes: Record<Size, string> = {
-  sm: "min-h-9 px-3 text-sm",
+  sm: "min-h-9 pointer-coarse:min-h-11 px-3 text-sm",
   md: "min-h-11 px-4 text-sm",
 };
 

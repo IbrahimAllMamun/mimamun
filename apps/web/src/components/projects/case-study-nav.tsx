@@ -38,7 +38,7 @@ export function CaseStudyNav({ sections }: { sections: { key: string; label: str
               href={`#${section.key}`}
               aria-current={active === section.key ? "location" : undefined}
               className={cn(
-                "-ml-px flex min-h-9 items-center gap-3 border-l-2 py-1 pl-3 text-sm transition-colors duration-(--duration-fast)",
+                "-ml-px flex min-h-9 pointer-coarse:min-h-11 items-center gap-3 border-l-2 py-1 pl-3 text-sm transition-colors duration-(--duration-fast)",
                 active === section.key
                   ? "border-accent-mark text-ink"
                   : "border-transparent text-ink-3 hover:text-ink",

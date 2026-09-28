@@ -156,7 +156,7 @@ export function MediaPage() {
             }}
             placeholder="Search by name, title or alt text"
             aria-label="Search media"
-            className="min-h-10 w-full rounded-sm border border-rule-strong bg-elevated pr-3 pl-9 text-sm"
+            className="min-h-10 pointer-coarse:min-h-11 w-full rounded-sm border border-rule-strong bg-elevated pr-3 pl-9 text-sm"
           />
         </div>
         <select
@@ -166,7 +166,7 @@ export function MediaPage() {
             setPage(1);
           }}
           aria-label="File kind"
-          className="min-h-10 rounded-sm border border-rule-strong bg-elevated px-2 text-sm"
+          className="min-h-10 pointer-coarse:min-h-11 rounded-sm border border-rule-strong bg-elevated px-2 text-sm"
         >
           <option value="">All kinds</option>
           {MEDIA_KINDS.map((value) => (

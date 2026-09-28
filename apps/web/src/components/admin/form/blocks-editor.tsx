@@ -196,7 +196,7 @@ export function BlocksField({ path }: { path: string }) {
                 type="button"
                 onClick={() => toggle(block.id)}
                 aria-expanded={!isCollapsed}
-                className="flex min-h-9 min-w-0 flex-1 items-center gap-2 text-left"
+                className="flex min-h-9 pointer-coarse:min-h-11 min-w-0 flex-1 items-center gap-2 text-left"
               >
                 <Icon
                   icon={isCollapsed ? ChevronRight : ChevronDown}

@@ -150,7 +150,7 @@ test.describe("public site", () => {
     await expect(page.getByLabel("Subject")).toHaveValue("CV request");
   });
 
-  test("sitemap and robots describe the public site", async ({ request }) => {
+  test("sitemap, robots and manifest describe the public site", async ({ request }) => {
     const sitemap = await (await request.get("/sitemap.xml")).text();
     expect(sitemap).toContain("/projects/flood-event-prediction-bangladesh");
     expect(sitemap).toContain("/research/covariate-dependent-markov-model-internal-migration");
@@ -158,6 +158,13 @@ test.describe("public site", () => {
     const robots = await (await request.get("/robots.txt")).text();
     expect(robots).toContain("Disallow: /admin");
     expect(robots).toContain("Sitemap:");
+    // Named from the CMS settings and profile, not from code.
+    const manifest = (await (await request.get("/manifest.webmanifest")).json()) as {
+      name: string;
+      short_name: string;
+    };
+    expect(manifest.short_name).toBe("Ibrahim All-Mamun");
+    expect(manifest.name).toBe("Ibrahim All-Mamun — Data Scientist");
   });
 
   test("pages carry structured data and social metadata", async ({ page }) => {

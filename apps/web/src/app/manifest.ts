@@ -1,12 +1,19 @@
 import type { MetadataRoute } from "next";
+import { connection } from "next/server";
+import { publicApi } from "@/lib/api/server";
 import { THEME_COLOR } from "@/lib/theme";
 
-export default function manifest(): MetadataRoute.Manifest {
+/** Web app manifest, named from the site settings and profile in the CMS. */
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  // Rendered per request so it reflects the CMS rather than build-time data.
+  await connection();
+  const site = await publicApi.site();
+  const siteName = site.ok ? site.data.settings.siteName : "Portfolio";
+  const headline = site.ok ? site.data.profile.headline : null;
   return {
-    name: "Ibrahim All-Mamun — Data Scientist",
-    short_name: "All-Mamun",
-    description:
-      "Portfolio of Ibrahim All-Mamun, data scientist: projects, research, experience and writing.",
+    name: headline ? `${siteName} — ${headline}` : siteName,
+    short_name: siteName,
+    description: site.ok ? site.data.settings.siteDescription : undefined,
     start_url: "/",
     display: "browser",
     background_color: THEME_COLOR.light,

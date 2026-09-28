@@ -117,7 +117,7 @@ export function AuditLogPage() {
             }}
             placeholder="Search summaries, actions or people"
             aria-label="Search the audit log"
-            className="min-h-10 w-full rounded-sm border border-rule-strong bg-elevated pr-3 pl-9 text-sm"
+            className="min-h-10 pointer-coarse:min-h-11 w-full rounded-sm border border-rule-strong bg-elevated pr-3 pl-9 text-sm"
           />
         </div>
         <select
@@ -127,7 +127,7 @@ export function AuditLogPage() {
             setPage(1);
           }}
           aria-label="Type"
-          className="min-h-10 rounded-sm border border-rule-strong bg-elevated px-2 text-sm"
+          className="min-h-10 pointer-coarse:min-h-11 rounded-sm border border-rule-strong bg-elevated px-2 text-sm"
         >
           <option value="">All types</option>
           {types.map((type) => (
@@ -390,7 +390,7 @@ export function IntegrationsPage() {
                         void update(repo, { projectId: event.target.value || null })
                       }
                       aria-label={`Case study for ${repo.fullName}`}
-                      className="min-h-9 rounded-sm border border-rule-strong bg-elevated px-2 text-sm"
+                      className="min-h-9 pointer-coarse:min-h-11 rounded-sm border border-rule-strong bg-elevated px-2 text-sm"
                     >
                       <option value="">No case study</option>
                       {(projects.data?.projects ?? []).map((option) => (

@@ -82,7 +82,7 @@ export function MessagesPage({ initialStatus }: { initialStatus: string }) {
                 setSelected([]);
               }}
               className={cn(
-                "min-h-9 rounded-sm px-3 text-sm",
+                "min-h-9 pointer-coarse:min-h-11 rounded-sm px-3 text-sm",
                 status === value ? "bg-ink text-paper" : "text-ink-2 hover:bg-muted",
               )}
             >
@@ -105,7 +105,7 @@ export function MessagesPage({ initialStatus }: { initialStatus: string }) {
             }}
             placeholder="Search messages"
             aria-label="Search messages"
-            className="min-h-10 w-full rounded-sm border border-rule-strong bg-elevated pr-3 pl-9 text-sm"
+            className="min-h-10 pointer-coarse:min-h-11 w-full rounded-sm border border-rule-strong bg-elevated pr-3 pl-9 text-sm"
           />
         </div>
       </div>

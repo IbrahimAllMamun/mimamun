@@ -36,7 +36,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
                       onClick={onNavigate}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "flex min-h-9 items-center gap-2.5 rounded-sm px-3 text-sm transition-colors duration-(--duration-fast)",
+                        "flex min-h-9 pointer-coarse:min-h-11 items-center gap-2.5 rounded-sm px-3 text-sm transition-colors duration-(--duration-fast)",
                         active
                           ? "bg-primary-tint font-medium text-ink"
                           : "text-ink-2 hover:bg-muted hover:text-ink",
@@ -84,7 +84,7 @@ function UserMenu() {
       <button
         type="button"
         popoverTarget="admin-user-menu"
-        className="inline-flex min-h-10 items-center gap-2 rounded-sm px-2 text-sm text-ink hover:bg-muted"
+        className="inline-flex min-h-10 pointer-coarse:min-h-11 items-center gap-2 rounded-sm px-2 text-sm text-ink hover:bg-muted"
       >
         <span className="grid size-7 place-items-center rounded-full bg-secondary-tint font-medium text-secondary">
           {session.user.name.charAt(0).toUpperCase()}
@@ -102,7 +102,7 @@ function UserMenu() {
         <p className="border-b border-rule px-3 py-2 text-xs text-ink-3">{session.user.email}</p>
         <Link
           href="/admin/account"
-          className="flex min-h-9 items-center gap-2 rounded-xs px-3 hover:bg-muted"
+          className="flex min-h-9 pointer-coarse:min-h-11 items-center gap-2 rounded-xs px-3 hover:bg-muted"
         >
           <Icon icon={UserRound} size={15} /> Account and password
         </Link>
@@ -110,14 +110,14 @@ function UserMenu() {
           href="/"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex min-h-9 items-center gap-2 rounded-xs px-3 hover:bg-muted"
+          className="flex min-h-9 pointer-coarse:min-h-11 items-center gap-2 rounded-xs px-3 hover:bg-muted"
         >
           <Icon icon={ExternalLink} size={15} /> View site
         </a>
         <button
           type="button"
           onClick={signOut}
-          className="flex min-h-9 w-full items-center gap-2 rounded-xs px-3 text-left hover:bg-muted"
+          className="flex min-h-9 pointer-coarse:min-h-11 w-full items-center gap-2 rounded-xs px-3 text-left hover:bg-muted"
         >
           <Icon icon={LogOut} size={15} /> Sign out
         </button>
@@ -177,7 +177,7 @@ function Shell({ children }: { children: ReactNode }) {
           <button
             type="button"
             onClick={() => drawer.current?.showModal()}
-            className="inline-flex min-h-10 items-center gap-2 rounded-sm px-2 text-sm hover:bg-muted lg:hidden"
+            className="inline-flex min-h-10 pointer-coarse:min-h-11 items-center gap-2 rounded-sm px-2 text-sm hover:bg-muted lg:hidden"
             aria-haspopup="dialog"
           >
             <Icon icon={Menu} size={18} />
