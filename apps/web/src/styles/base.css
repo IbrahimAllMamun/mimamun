@@ -1,0 +1,184 @@
+/* Base element styles and design-system utilities. */
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-optical-sizing: auto;
+    scroll-padding-top: calc(var(--header-height) + 1rem);
+  }
+
+  body {
+    min-height: 100dvh;
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    background-color: var(--color-paper);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-serif);
+    font-weight: 480;
+    letter-spacing: var(--tracking-heading);
+    text-wrap: balance;
+  }
+
+  p,
+  li,
+  dd {
+    text-wrap: pretty;
+  }
+
+  em,
+  i,
+  cite {
+    font-style: italic;
+  }
+
+  .font-serif em,
+  .font-serif i,
+  .font-serif cite,
+  .prose em,
+  .prose i {
+    font-family: var(--font-serif-italic);
+  }
+
+  ::selection {
+    background-color: var(--color-accent-tint);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent-mark);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+  }
+
+  :where(a, button, [role="button"], input, select, textarea, summary) {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  abbr[title] {
+    text-decoration: underline dotted;
+    text-underline-offset: 0.2em;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid var(--color-rule);
+  }
+}
+
+/* Page container: content width plus fluid gutters. */
+@utility container-page {
+  width: 100%;
+  max-width: calc(var(--container-page) + 2 * var(--space-gutter));
+  margin-inline: auto;
+  padding-inline: var(--space-gutter);
+}
+
+/* 4 / 8 / 12 column editorial grid. */
+@utility grid-editorial {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 1rem;
+  @media (width >= 40rem) {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    column-gap: 1.5rem;
+  }
+  @media (width >= 64rem) {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 2rem;
+  }
+}
+
+/* Vertical rhythm between major sections. */
+@utility section-space {
+  padding-block: var(--space-section);
+}
+
+/* Monospaced metadata label: "01 — SELECTED WORK", dates, counts. */
+@utility label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs--line-height);
+  font-weight: 500;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-ink-3);
+}
+
+/* Display type for names and page titles. */
+@utility display {
+  font-family: var(--font-serif);
+  font-weight: 420;
+  letter-spacing: var(--tracking-display);
+  font-variation-settings: "opsz" 72;
+}
+
+/* Booktabs-style strong rule. */
+@utility rule-strong {
+  border-top: 2px solid var(--color-ink);
+}
+
+/* Text link: underline that thickens on hover/focus. */
+@utility link {
+  color: var(--color-primary);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  transition:
+    text-decoration-color var(--duration-fast) var(--ease-out),
+    text-decoration-thickness var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+  &:hover,
+  &:focus-visible {
+    text-decoration-color: currentColor;
+    text-decoration-thickness: 2px;
+  }
+}
+
+/* Subtle analytical grid, used only behind the home front matter. */
+@utility analytic-grid {
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 2rem 2rem;
+  background-position: -1px -1px;
+}
+
+/* Hides scrollbars on horizontally scrolling rails while keeping them scrollable. */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Fades decorative backgrounds out towards the bottom edge. */
+@utility fade-out-bottom {
+  mask-image: linear-gradient(to bottom, black, transparent 85%);
+}
+
+/* Spam trap: invisible and unreachable for people (including screen-reader
+   users, via aria-hidden and tabindex=-1), but present for naive bots. */
+@utility honeypot {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Modal frame: never taller than the viewport, with a gutter on small screens. */
+@utility dialog-frame {
+  max-height: 90dvh;
+  width: calc(100% - 2rem);
+}

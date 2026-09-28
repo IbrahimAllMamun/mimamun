@@ -1,0 +1,46 @@
+{
+  "name": "ibrahim-all-mamun-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Full-stack portfolio and CMS for Ibrahim All-Mamun, Data Scientist",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c green,magenta \"npm run dev -w @portfolio/api\" \"npm run dev -w @portfolio/web\"",
+    "build": "npm run build -w @portfolio/api && npm run build -w @portfolio/web",
+    "start": "concurrently -k -n api,web -c green,magenta \"npm run start -w @portfolio/api\" \"npm run start -w @portfolio/web\"",
+    "typecheck": "npm run typecheck --workspaces --if-present && tsc -p e2e/tsconfig.json",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run test --workspaces --if-present",
+    "test:e2e": "playwright test --project=e2e --project=a11y",
+    "test:visual": "playwright test --project=visual",
+    "test:visual:update": "playwright test --project=visual --update-snapshots",
+    "db:generate": "npm run db:generate -w @portfolio/api --",
+    "db:migrate": "npm run db:migrate -w @portfolio/api",
+    "db:seed": "npm run db:seed -w @portfolio/api",
+    "db:reset": "npm run db:reset -w @portfolio/api"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@eslint/js": "^9.39.5",
+    "@playwright/test": "^1.56.1",
+    "@types/node": "^22.20.4",
+    "concurrently": "^10.0.5",
+    "eslint": "^9.39.5",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.9",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.70.1"
+  },
+  "overrides": {
+    "playwright-core": "1.56.1"
+  }
+}

@@ -1,0 +1,20 @@
+# Keep build contexts small and free of secrets.
+**/node_modules
+**/.next
+**/dist
+**/coverage
+**/*.tsbuildinfo
+.git
+.github
+.env
+.env.*
+!.env.example
+apps/api/uploads
+backups
+test-results
+playwright-report
+e2e
+docs
+*.md
+!apps/web/src/fonts/README.md
+Ibrahim_All_Mamun_Portfolio_Master_Prompt.md

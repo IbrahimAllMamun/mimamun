@@ -1,0 +1,49 @@
+# Caddy: automatic HTTPS, compression, security headers and routing.
+# /api, /media and /cv go straight to the API; everything else to Next.js.
+{
+	email {$ACME_EMAIL}
+	# Caddy takes the client address from the TCP connection and passes it
+	# on in X-Forwarded-For. If you put a load balancer or CDN in front of
+	# Caddy, add its ranges here so the real client address is kept:
+	#   servers {
+	#     trusted_proxies static 203.0.113.0/24
+	#   }
+}
+
+www.{$SITE_DOMAIN} {
+	redir https://{$SITE_DOMAIN}{uri} permanent
+}
+
+{$SITE_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		-Server
+		-X-Powered-By
+	}
+
+	# The revalidation hook is for the API only (it calls the web container directly).
+	@internal path /internal/*
+	respond @internal 404
+
+	# Uploads are limited by the API; this is an outer bound.
+	request_body {
+		max_size 120MB
+	}
+
+	@api path /api/* /media/* /cv
+	handle @api {
+		reverse_proxy api:4000
+	}
+
+	handle {
+		reverse_proxy web:3000
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}

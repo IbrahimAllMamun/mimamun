@@ -1,0 +1,17 @@
+node_modules
+dist
+.next
+coverage
+playwright-report
+test-results
+apps/api/src/database/migrations
+e2e/**/*-snapshots
+package-lock.json
+*.woff2
+# The original brief is kept exactly as provided.
+Ibrahim_All_Mamun_Portfolio_Master_Prompt.md
+# Written by `next dev`; left as generated.
+apps/web/AGENTS.md
+apps/web/CLAUDE.md
+*.woff
+*.png

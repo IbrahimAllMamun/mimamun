@@ -1,0 +1,36 @@
+# dependencies
+node_modules/
+
+# builds
+dist/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# environment & secrets
+.env
+.env.*
+!.env.example
+
+# runtime data
+uploads/
+apps/api/uploads/
+*.dump
+*.sql.gz
+backups/
+
+# test output
+coverage/
+test-results/
+playwright-report/
+blob-report/
+e2e/.auth/
+
+# logs / os / editors
+*.log
+npm-debug.log*
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
