@@ -1,9 +1,10 @@
 # Design system
 
 This is the visual and UX system for Ibrahim All-Mamun's portfolio. It was
-defined before the interface was built and every component draws from it.
-The tokens live in `apps/web/src/styles/tokens.css`; this document explains the
-reasoning so future changes stay consistent.
+defined before the interface was built, every component draws from it, and it
+has been kept in step with the implementation. The tokens live in
+`apps/web/src/styles/tokens.css`; this document explains the reasoning so
+future changes stay consistent.
 
 Method note: the `ui-ux-pro-max` skill was used as the review framework
 (its priority order: accessibility → touch → performance → style → layout →
@@ -55,10 +56,10 @@ Home ─┬─ Projects ── /projects/[slug]        (case studies: problem �
       └─ CV (download, /cv)
 ```
 
-Skills and education live inside About because they explain _who_ Ibrahim is;
-they are reachable via `/about#skills` and `/about#education` and from the
-home page. Navigation items are stored in the database so the owner can show
-Writing/Publications when there is content for them.
+Skills (the toolkit table) and education live inside About because they
+explain _who_ Ibrahim is; degrees are linked as `/about#education`.
+Navigation items are stored in the database, so the owner can show Writing
+and Publications once there is content for them (the seed keeps both hidden).
 
 ### Home page narrative (progressive disclosure)
 
@@ -158,14 +159,16 @@ toggle (stored in a cookie so the server renders the right theme with no flash).
 Categorical series (always paired with a second encoding — marker shape, dash
 pattern or direct label):
 
-| #   | Light            | Dark      | Marker            |
-| --- | ---------------- | --------- | ----------------- |
-| 1   | `#1F5A44` green  | `#86CBA9` | circle, solid     |
-| 2   | `#6B4585` purple | `#C7A8DC` | square, dashed    |
-| 3   | `#C25A24` orange | `#F0915E` | triangle, dotted  |
-| 4   | `#3B6E9C` blue   | `#8FB6E1` | diamond, dash-dot |
-| 5   | `#8A6D1F` ochre  | `#D9C07A` | cross             |
-| 6   | `#5C655F` grey   | `#8F9A93` | plus              |
+| #   | Light            | Dark      | Marker and line             |
+| --- | ---------------- | --------- | --------------------------- |
+| 1   | `#1F5A44` green  | `#86CBA9` | circle, solid               |
+| 2   | `#6B4585` purple | `#C7A8DC` | square, dashed (6 4)        |
+| 3   | `#C25A24` orange | `#F0915E` | triangle, dotted (2 3)      |
+| 4   | `#3B6E9C` blue   | `#8FB6E1` | diamond, dash-dot (8 3 2 3) |
+| 5   | `#8A6D1F` ochre  | `#D9C07A` | cross, long dash (12 4)     |
+| 6   | `#5C655F` grey   | `#8F9A93` | plus, sparse dots (3 6)     |
+
+The encodings are defined once in `components/charts/chart.tsx`.
 
 All series colours are ≥ 3.9:1 against their background.
 
@@ -207,19 +210,23 @@ Asymmetry is always grid-aligned: a large item spans 7–8 columns next to a
 
 ## 8. Components
 
-Primitives (in `components/ui`): Button (primary / secondary / ghost / danger,
-sm / md), TextLink (underline offset animation, optional arrow), Tag (mono,
-rectangular), StatusBadge (dot + label, never colour alone), Field set (label,
-description, error, control), Input, Textarea, Select, Checkbox, Switch,
-Dialog (native `<dialog>`), Toast region (`aria-live`), Tabs, Pagination,
-Breadcrumbs, Skeleton, EmptyState, ErrorState, VisuallyHidden, Icon (Lucide,
-1.5px stroke).
+Primitives (`components/ui`): Button and ButtonLink (primary / secondary /
+ghost / danger, sm / md), TextLink (underline, optional arrow, new-tab hint
+for external links), Tag and TagList (mono, rectangular), StatusBadge (dot +
+label, never colour alone), Field with Input, Textarea and Select (label,
+description, error), CopyButton, Breadcrumbs, Pagination, EmptyState,
+UnavailableNotice, Skeleton, Icon (Lucide, 1.5px stroke). The admin adds a
+native `<dialog>` Dialog with a confirm helper and an `aria-live` toast region
+(`components/admin`).
 
-Editorial components: SectionHeader (margin label + heading + count),
-FrontMatter (definition table), Figure (numbered caption), Prose, BlockRenderer,
-Chart (line / bar / scatter with data-table fallback), Timeline (trajectory),
-ProjectIndex, ResearchEntry (citation style), CredentialTree, SkillMap,
-CaseStudyNav (scroll-spy table of contents).
+Editorial components: PageHeader and SectionHeader (margin label + heading +
+count), MetaTable, FrontMatter (definition table), Blocks (the content-block
+renderer with numbered figures) and Markdown, Chart (line / area / bar /
+scatter with a data-table alternative), Trajectory (Fig. 1), ProjectRow and
+ProjectFilters, CaseStudyNav (scroll-spy contents), ResearchArticle,
+ResearchEntry and PublicationEntry (citation style), RoleEntry and
+EducationEntry, CredentialTree, SkillsMap, PostRow and PostArticle,
+GithubSection and ContactForm.
 
 Rules:
 
@@ -239,19 +246,19 @@ Tokens: `--duration-fast` 150ms, `--duration-base` 220ms, `--duration-slow`
 `--ease-in` `cubic-bezier(0.4,0,1,1)`, `--ease-in-out`
 `cubic-bezier(0.65,0,0.35,1)`.
 
-| Component                  | Priority area | Motion                                                                                                                    | Trigger               | Implementation                                                                      |
-| -------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------------- | ----------------------------------------------------------------------------------- |
-| Front matter               | 1 Hero intro  | Staggered fade + 12px rise (name → statement → actions → facts, 70ms steps, capped 420ms); hairline rule draws left→right | Load                  | CSS keyframes                                                                       |
-| Text links / index rows    | 2 Hover       | Underline thickens, arrow shifts 3px, row tint                                                                            | Hover + focus-visible | CSS transitions                                                                     |
-| Buttons                    | 2 Hover       | Colour 150ms, 1px press                                                                                                   | Hover / active        | CSS                                                                                 |
-| Section content            | 3 Reveal      | Fade + 16px rise while entering viewport                                                                                  | Scroll                | CSS scroll-driven animation (`animation-timeline: view()`), progressive enhancement |
-| Trajectory bars            | 3 Reveal      | Bars grow from their start date, row stagger                                                                              | Scroll                | Scroll-driven `scaleX`                                                              |
-| Charts                     | 3 Reveal      | Lines draw once, bars grow                                                                                                | Scroll                | Scroll-driven stroke offset / `scaleY`                                              |
-| Project filter results     | 3 Reveal      | Stagger fade (40ms, capped 320ms) on result change                                                                        | Filter change         | CSS keyed remount                                                                   |
-| Page change                | 5 Navigation  | 200ms fade + 4px rise of main content                                                                                     | Route change          | `template.tsx` keyed wrapper                                                        |
-| Mobile menu / filter sheet | 5 Navigation  | Panel slide + backdrop fade, 250ms in / 180ms out                                                                         | Click                 | Native `<dialog>` + CSS                                                             |
-| Dialogs, toasts            | State         | Scale 0.98→1 + fade; toasts slide 8px                                                                                     | Open / event          | CSS                                                                                 |
-| Form feedback              | State         | Inline error fade; button spinner only while pending                                                                      | Submit                | CSS                                                                                 |
+| Component                 | Priority area | Motion                                                                                                                    | Trigger               | Implementation                                                                      |
+| ------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------- | --------------------- | ----------------------------------------------------------------------------------- |
+| Front matter              | 1 Hero intro  | Staggered fade + 12px rise (name → statement → actions → facts, 70ms steps, capped 420ms); hairline rule draws left→right | Load                  | CSS keyframes                                                                       |
+| Text links / index rows   | 2 Hover       | Underline thickens, arrow shifts 3px, row tint                                                                            | Hover + focus-visible | CSS transitions                                                                     |
+| Buttons                   | 2 Hover       | Colour 150ms, 1px press                                                                                                   | Hover / active        | CSS                                                                                 |
+| Section content           | 3 Reveal      | Content blocks and home entries fade + rise while entering the viewport                                                   | Scroll                | CSS scroll-driven animation (`animation-timeline: view()`), progressive enhancement |
+| Trajectory bars           | 3 Reveal      | Bars grow from their start date, row stagger                                                                              | Scroll                | Scroll-driven `scaleX`                                                              |
+| Charts                    | 3 Reveal      | Lines draw once, bars grow                                                                                                | Scroll                | Scroll-driven stroke offset / `scaleY`                                              |
+| Project filter results    | 3 Reveal      | The result list fades in (220ms) when the filters change                                                                  | Filter change         | CSS keyed remount                                                                   |
+| Page change               | 5 Navigation  | 220ms fade + 4px rise of main content                                                                                     | Route change          | `template.tsx` keyed wrapper                                                        |
+| Mobile menu, admin drawer | 5 Navigation  | Panel slide + backdrop fade                                                                                               | Click                 | Native `<dialog>` + CSS (`.mobile-sheet`)                                           |
+| Dialogs, toasts           | State         | Scale 0.98→1 + fade; toasts slide 8px                                                                                     | Open / event          | CSS                                                                                 |
+| Form feedback             | State         | Inline errors fade in; buttons show a spinner only while pending                                                          | Submit                | CSS (`animate-fade`)                                                                |
 
 Deliberately not used: parallax, magnetic buttons, cursor followers, drifting
 gradient blobs, word-by-word headline animation (hurts reading) and count-up
@@ -280,8 +287,9 @@ scroll-driven reveals only apply inside
 - Semantic landmarks (`header`, `nav`, `main`, `footer`), one `h1` per page,
   sequential headings, skip link to `#main`.
 - Visible focus ring: 2px `accent-mark` outline with 2px offset.
-- Forms: persistent labels, descriptions via `aria-describedby`, errors next to
-  the field and summarised on submit, focus moved to the first invalid field.
+- Forms: persistent labels, descriptions and errors linked with
+  `aria-describedby`, errors next to the field; the contact form moves focus
+  to the first invalid field.
 - Dialogs use native `<dialog>` (focus containment, Esc to close, focus
   returned to the trigger).
 - Charts: `role="img"` with title and description, direct labels, non-colour
@@ -309,12 +317,14 @@ than rendered with placeholders.
 ## 13. Admin UI
 
 The admin uses the same tokens at a higher density (`text-sm` base for tables,
-compact spacing). Structure: sidebar navigation grouped by Content /
-Library / Site / Administration, top bar with breadcrumbs, global search and
-account menu; list views with search, filters, sortable columns, pagination
-and bulk actions; editors with a main column and a side panel for status,
-publishing, organisation and SEO. Toasts confirm actions; destructive actions
-require confirmation; unsaved changes are protected.
+compact spacing; compact controls grow to 44px on touch screens). Structure:
+sidebar navigation grouped by Overview / Work / Career / Library / Site /
+Administration (a drawer below 1024px), a top bar with global search and the
+account menu, and page headers with breadcrumbs; list views with search,
+filters, a sort menu, pagination and bulk actions; editors with a main column
+of field groups and a side panel for publishing, display options and
+deletion. Toasts confirm actions; destructive actions require confirmation;
+unsaved changes are protected. See `cms.md`.
 
 ## 14. Breakpoints and test viewports
 

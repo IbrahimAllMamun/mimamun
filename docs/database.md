@@ -1,6 +1,7 @@
 # Database
 
-PostgreSQL 16 is the single source of truth. The schema is defined in
+PostgreSQL is the single source of truth (16 or newer; the Compose files
+and CI run 17). The schema is defined in
 TypeScript with Drizzle ORM (`apps/api/src/database/schema/`) and every change
 ships as a reviewed SQL migration in `apps/api/src/database/migrations/`.
 
@@ -150,13 +151,21 @@ search vector), and join tables `blog_post_categories`, `blog_post_tags`,
 
 ## Seed data
 
-`npm run db:seed` is idempotent (upserts by natural keys). It seeds roles and
-permissions, the first admin account (from `SEED_ADMIN_*` variables), and
-portfolio content supported by the CV or explicitly provided by the owner —
-see `content-model.md` for the exact list. Unknown facts (for example the IDLC
+`npm run db:seed` is idempotent: it inserts what is missing (matching on
+slugs and natural keys) and never overwrites edited records. It seeds the
+Administrator and Editor roles with their permissions, the first admin
+account when there are no users (from `SEED_ADMIN_*`), and portfolio content
+supported by the CV or explicitly provided by the owner — see
+`content-model.md` for the exact list. Unknown facts (for example the IDLC
 start date, research findings, credential IDs) are left empty and editable.
+
+`npm run db:reset` drops both schemas, re-applies every migration and seeds;
+it refuses to run with `NODE_ENV=production`.
+
+In Docker the same steps run from the API image: `node dist/migrate.js` (the
+`migrate` service) and `node dist/seed.js`.
 
 ## Backups
 
-See `deployment.md#backups` for `pg_dump` scheduling, retention and the restore
-drill.
+See `deployment.md` (Backups) for `pg_dump` scheduling, retention and
+restoring.

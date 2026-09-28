@@ -3,7 +3,8 @@
 This document describes how the portfolio is put together: the runtime pieces,
 how requests flow, where code lives and why. It is the entry point for anyone
 changing the system. Companion documents go deeper on specific areas
-(`database.md`, `api.md`, `design-system.md`, `security.md`, `deployment.md`).
+(`database.md`, `api.md`, `design-system.md`, `security.md`, `deployment.md`
+and the rest of this folder).
 
 ## 1. Goals that shaped the architecture
 
@@ -32,7 +33,7 @@ changing the system. Companion documents go deeper on specific areas
                          └─────────────────────┘                └───┬─────────┬────────┘
                                                                     │         │
                                                        ┌────────────▼──┐  ┌───▼────────────┐
-                                                       │ PostgreSQL 16 │  │ uploads volume │
+                                                       │ PostgreSQL    │  │ uploads volume │
                                                        └───────────────┘  └────────────────┘
                                                         optional: SMTP, GitHub REST API
 ```
@@ -69,11 +70,14 @@ changing the system. Companion documents go deeper on specific areas
 1. Editor saves a project in `/admin/projects/:id`.
 2. The client component sends `PUT /api/admin/projects/:id` with the session
    cookie and `X-CSRF-Token`.
-3. Express: session → permission (`content:write`) → CSRF → zod validation →
-   transaction (row + relations) → audit log → response.
+3. Express: session lookup → CSRF (origin + token) → authentication →
+   permission (`content:write`, plus `content:publish` if the save changes
+   publication fields) → zod validation → one transaction for the row, its
+   relations and the audit-log entry → response.
 4. After commit the API calls `POST {WEB_INTERNAL_URL}/internal/revalidate`
-   with a shared secret; Next.js expires the `content` cache tag. If that call
-   fails the time-based revalidation still refreshes content within minutes.
+   (debounced, with a shared secret); Next.js expires the `content` cache tag.
+   If that call fails, the time-based revalidation (10 minutes) still
+   refreshes content.
 
 ### Failure modes
 
@@ -82,7 +86,7 @@ changing the system. Companion documents go deeper on specific areas
 | API unreachable from Next.js   | Cached data is served while stale; sections without cached data render an intentional "temporarily unavailable" state. |
 | Database down                  | `/api/health/db` reports 503; API responds `SERVICE_UNAVAILABLE`; public pages degrade as above.                       |
 | GitHub API down / rate limited | Public site reads the last synced repositories from PostgreSQL; the admin shows the integration error.                 |
-| SMTP down                      | Contact messages are still stored; the notification failure is logged and visible in the admin.                        |
+| SMTP down                      | Contact messages are still stored; the failure is logged and the message shows no "Notification sent" in the admin.    |
 
 ## 4. Repository layout
 
@@ -102,7 +106,7 @@ apps/
     test/               unit + integration tests (Vitest + Supertest, real PostgreSQL)
   web/                  Next.js App Router + Tailwind CSS v4
     src/
-      app/              routes: (site) public group, admin, preview, internal
+      app/              routes: (site) public group (incl. draft preview), admin, internal, og
       components/       ui primitives, site chrome, content blocks, charts, admin
       lib/              API clients, SEO helpers, formatting, analytics beacon
       styles/           design tokens and global CSS
@@ -111,8 +115,9 @@ packages/
   shared/               zod schemas, content-block registry, DTO types, permissions,
                         formatting and chart math shared by API and web
 e2e/                    Playwright end-to-end, accessibility and visual regression tests
-docker/                 Caddyfile and container helpers
+docker/                 Caddyfile and the development database init script
 scripts/                backup / restore helpers
+.github/workflows/      CI: checks, end-to-end/accessibility/visual tests, image builds
 docs/                   developer documentation (this folder)
 ```
 
@@ -139,8 +144,9 @@ Dependencies are added deliberately; see `CLAUDE.md` for the checklist.
 - All public routes render dynamically because a strict nonce-based Content
   Security Policy is applied per request. Data, not HTML, is cached: every
   public API call uses the Next.js data cache (`revalidate` + `content` tag).
-- The API sets `Cache-Control` on public endpoints for intermediaries and on
-  `/media/*` (immutable, content-addressed keys).
+- The API sets `Cache-Control: public, max-age=60, stale-while-revalidate=300`
+  on public content endpoints, and a one-year `immutable` policy on `/media/*`
+  (storage keys are random and change when a file is replaced).
 - Preview and admin requests always bypass caches (`cache: "no-store"`).
 
 ## 7. Cross-cutting conventions
@@ -152,6 +158,8 @@ Dependencies are added deliberately; see `CLAUDE.md` for the checklist.
   first day of the month and shown at month precision; timestamps are
   `timestamptz`.
 - **Content status**: projects, research, publications, presentations and posts
-  use `draft → published → archived`; simpler records use `is_visible`.
+  use `draft → published → archived` plus a `visibility` of `public` (listed)
+  or `unlisted` (reachable by URL only); simpler records use `is_visible`.
+  The rules live in one place, `apps/api/src/modules/public/visibility.ts`.
 - **Audit**: every admin mutation writes an `audit_logs` row with before/after
   values (secrets stripped).
