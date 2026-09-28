@@ -15,7 +15,7 @@
     "dev": "concurrently -k -n api,web -c green,magenta \"npm run dev -w @portfolio/api\" \"npm run dev -w @portfolio/web\"",
     "build": "npm run build -w @portfolio/api && npm run build -w @portfolio/web",
     "start": "concurrently -k -n api,web -c green,magenta \"npm run start -w @portfolio/api\" \"npm run start -w @portfolio/web\"",
-    "typecheck": "npm run typecheck --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present && tsc -p e2e/tsconfig.json",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -39,5 +39,8 @@
     "prettier": "^3.9.9",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.70.1"
+  },
+  "overrides": {
+    "playwright-core": "1.56.1"
   }
 }

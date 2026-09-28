@@ -40,7 +40,12 @@ export function Field({
     <div className={cn("space-y-1.5", className)}>
       <label htmlFor={id} className="flex items-baseline gap-2 text-sm font-medium text-ink">
         {label}
-        {required ? <span className="sr-only">(required)</span> : null}
+        {/* Required state reaches assistive technology through the control's required attribute. */}
+        {required ? (
+          <span aria-hidden className="text-accent">
+            *
+          </span>
+        ) : null}
         {!required && optionalLabel ? (
           <span className="font-normal text-ink-3">optional</span>
         ) : null}

@@ -65,7 +65,7 @@ export function ProjectRow({
           ) : null}
         </div>
         <div className="col-span-4 hidden items-start justify-end sm:col-span-8 lg:col-span-3 lg:flex">
-          <span className="inline-flex items-center gap-1.5 text-sm text-primary opacity-70 transition-[opacity,transform] duration-(--duration-base) ease-out group-hover:translate-x-1 group-hover:opacity-100">
+          <span className="inline-flex items-center gap-1.5 text-sm text-ink-3 transition-[color,transform] duration-(--duration-base) ease-out group-hover:translate-x-1 group-hover:text-primary">
             {project.sectionCount > 1 ? "Case study" : "Overview"}
             <Icon icon={ArrowRight} size={14} />
           </span>

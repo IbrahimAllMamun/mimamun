@@ -8,6 +8,8 @@ import {
   CONTENT_STATUS_LABELS,
   EMPTY_SEO,
   PERMISSIONS,
+  PROJECT_SECTIONS,
+  RESEARCH_SECTIONS,
   type ContentStatus,
   type OptionsDTO,
 } from "@portfolio/shared";
@@ -33,6 +35,42 @@ const STATUS_TONES: Record<ContentStatus, "positive" | "attention" | "neutral"> 
   draft: "attention",
   archived: "neutral",
 };
+
+/** Turns an API error path ("sections.results.0.data.markdown") into words. */
+function describePath(resource: AdminResource, path: string): string {
+  const [head = "", ...rest] = path.split(".");
+  const field = resource.groups.flatMap((group) => group.fields).find((item) => item.name === head);
+  const label = field?.label ?? head;
+  if (rest.length === 0 || !field) return rest.length ? `${label} › ${rest.join(" › ")}` : label;
+  const position = (value: string | undefined) =>
+    value !== undefined && /^\d+$/.test(value) ? Number(value) + 1 : null;
+  switch (field.kind) {
+    case "sections": {
+      const section = [...PROJECT_SECTIONS, ...RESEARCH_SECTIONS].find(
+        (item) => item.key === rest[0],
+      );
+      const block = position(rest[1]);
+      return [label, section?.label ?? rest[0], block ? `block ${block}` : null]
+        .filter(Boolean)
+        .join(" › ");
+    }
+    case "blocks": {
+      const block = position(rest[0]);
+      return block ? `${label} › block ${block}` : label;
+    }
+    case "repeater": {
+      const item = position(rest[0]);
+      const sub = field.fields?.find((candidate) => candidate.name === rest[1])?.label;
+      return [label, item ? `${field.itemLabel ?? "item"} ${item}` : null, sub]
+        .filter(Boolean)
+        .join(" › ");
+    }
+    case "seo":
+      return `Search and sharing › ${rest[0]}`;
+    default:
+      return `${label} › ${rest.join(" › ")}`;
+  }
+}
 
 function normalize(resource: AdminResource, record: FormRecord): FormRecord {
   const merged: FormRecord = { ...resource.initial(), ...record };
@@ -334,7 +372,9 @@ function EditorForm({
             <Icon icon={CircleAlert} size={18} className="mt-0.5 shrink-0 text-error" />
             <div className="space-y-1">
               <p className="font-medium text-ink">
-                {errorMessage ?? "Some fields need attention."}
+                {errorCount
+                  ? `Please fix ${errorCount === 1 ? "this field" : `these ${errorCount} fields`} before saving.`
+                  : (errorMessage ?? "The changes could not be saved.")}
               </p>
               {errorCount ? (
                 <ul className="list-disc space-y-0.5 pl-4 text-ink-2">
@@ -342,7 +382,8 @@ function EditorForm({
                     .slice(0, 8)
                     .map(([path, message]) => (
                       <li key={path}>
-                        <span className="font-mono text-xs">{path}</span>: {message}
+                        <span className="font-medium text-ink">{describePath(resource, path)}</span>
+                        : {message}
                       </li>
                     ))}
                 </ul>

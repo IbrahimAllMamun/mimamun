@@ -38,6 +38,8 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: repositoryRoot,
   transpilePackages: ["@portfolio/shared"],
   poweredByHeader: false,
+  // Keeps development screenshots identical to production ones.
+  devIndicators: false,
   reactStrictMode: true,
   images: {
     // Uploaded media is served by the API under /media and optimised here.
