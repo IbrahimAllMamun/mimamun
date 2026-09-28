@@ -50,6 +50,8 @@ export function proxy(request: NextRequest) {
   const csp = contentSecurityPolicy(nonce, process.env.NODE_ENV === "development");
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
+  // Lets server components (the admin session check) build a return path.
+  requestHeaders.set("x-pathname", pathname + search);
   requestHeaders.set("Content-Security-Policy", csp);
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", csp);

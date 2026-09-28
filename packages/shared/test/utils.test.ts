@@ -150,3 +150,11 @@ describe("citations", () => {
     ).toBe("All-Mamun, I. (2025). Flood event prediction [M.S. project, University of Dhaka].");
   });
 });
+
+describe("niceTicks with integer steps", () => {
+  it("never produces fractional ticks for counts", () => {
+    const ticks = niceTicks(0, 1, 5, { integer: true });
+    expect(ticks.values).toEqual([0, 1]);
+    expect(niceTicks(0, 7, 5, { integer: true }).values.every(Number.isInteger)).toBe(true);
+  });
+});

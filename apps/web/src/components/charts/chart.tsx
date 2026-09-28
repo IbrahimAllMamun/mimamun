@@ -66,7 +66,8 @@ function ChartSvg({ chart, geometry, titleId, descId }: { chart: ChartBlockData;
   const values = series.flatMap((s) => s.values);
   const [yMinRaw, yMaxRaw] = extent(values) ?? [0, 1];
   const yDomainMin = chart.chartType === "bar" || chart.chartType === "area" ? Math.min(0, yMinRaw) : yMinRaw;
-  const yTicks = niceTicks(yDomainMin, yMaxRaw, geometry === COMPACT ? 4 : 5);
+  const integerValues = values.every((value) => value === null || Number.isInteger(value));
+  const yTicks = niceTicks(yDomainMin, yMaxRaw, geometry === COMPACT ? 4 : 5, { integer: integerValues && chart.yFormat !== "percent" });
   const y = linearScale([yTicks.min, yTicks.max], [margin.top + innerH, margin.top]);
 
   let xPosition: (index: number) => number;
@@ -88,6 +89,25 @@ function ChartSvg({ chart, geometry, titleId, descId }: { chart: ChartBlockData;
 
   const baseline = y(Math.max(yTicks.min, 0));
   const yLabel = (value: number) => formatNumber(value, chart.yFormat);
+
+  // Direct labels at line ends, nudged apart when series end close together.
+  const endLabels = new Map<number, number>();
+  if (geometry === WIDE && chart.chartType !== "scatter" && chart.chartType !== "bar") {
+    const ends = series
+      .map((item, index) => {
+        const lastIndex = item.values.findLastIndex((value) => value !== null);
+        return lastIndex < 0 ? null : { index, y: y(item.values[lastIndex] as number) };
+      })
+      .filter((end): end is { index: number; y: number } => end !== null)
+      .sort((a, b) => a.y - b.y);
+    const gap = font * 1.3;
+    for (let i = 1; i < ends.length; i += 1) {
+      const previous = ends[i - 1]!;
+      const current = ends[i]!;
+      if (current.y - previous.y < gap) current.y = previous.y + gap;
+    }
+    for (const end of ends) endLabels.set(end.index, end.y);
+  }
 
   return (
     <svg
@@ -205,8 +225,8 @@ function ChartSvg({ chart, geometry, titleId, descId }: { chart: ChartBlockData;
                     <MarkerShape key={index} kind={style.marker} x={point.x} y={point.y} size={chart.chartType === "scatter" ? 7 : 6} color={style.color} />
                   ))
                 : null}
-              {geometry === WIDE && chart.chartType !== "scatter" ? (
-                <text x={last.x + 8} y={last.y} dy="0.32em" fill={style.color} fontWeight={500}>
+              {endLabels.has(seriesIndex) ? (
+                <text x={last.x + 8} y={endLabels.get(seriesIndex)} dy="0.32em" fill={style.color} fontWeight={500}>
                   {item.name.length > 12 ? `${item.name.slice(0, 11)}…` : item.name}
                 </text>
               ) : null}

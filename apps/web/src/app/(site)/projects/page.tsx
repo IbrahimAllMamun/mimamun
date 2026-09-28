@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { GithubSection } from "@/components/projects/github-section";
 import { ProjectFilters } from "@/components/projects/project-filters";
 import { ProjectRow } from "@/components/projects/project-row";
 import { PageHeader } from "@/components/site/page-header";
@@ -36,7 +37,8 @@ export async function generateMetadata({ searchParams }: PageProps<"/projects">)
 
 export default async function ProjectsPage({ searchParams }: PageProps<"/projects">) {
   const params = pickParams(await searchParams);
-  const result = await publicApi.projects(params);
+  const filtered = Object.keys(params).length > 0;
+  const [result, github] = await Promise.all([publicApi.projects(params), filtered ? null : publicApi.github()]);
   const page = Number(params.page ?? 1) || 1;
   const hrefFor = (target: number) => {
     const next = new URLSearchParams({ ...params, page: String(target) });
@@ -86,6 +88,11 @@ export default async function ProjectsPage({ searchParams }: PageProps<"/project
                 <Pagination page={result.meta.page} totalPages={result.meta.totalPages} hrefFor={hrefFor} />
               </div>
             </div>
+            {github?.ok ? (
+              <div className="col-span-4 mt-(--space-block) sm:col-span-8 lg:col-span-12">
+                <GithubSection github={github.data} />
+              </div>
+            ) : null}
           </div>
         )}
       </div>

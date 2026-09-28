@@ -176,3 +176,9 @@
   height: 1px;
   overflow: hidden;
 }
+
+/* Modal frame: never taller than the viewport, with a gutter on small screens. */
+@utility dialog-frame {
+  max-height: 90dvh;
+  width: calc(100% - 2rem);
+}

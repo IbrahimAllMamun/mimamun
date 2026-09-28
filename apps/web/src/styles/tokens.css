@@ -119,6 +119,10 @@
   --space-block: clamp(1.5rem, 1.167rem + 1.481vw, 2.5rem);
   --header-height: 4rem;
   --sticky-offset: calc(var(--header-height) + 2rem);
+  /* Admin: fixed sidebar and a fluid content column. */
+  --admin-columns: 15.5rem minmax(0, 1fr);
+  --editor-columns: minmax(0, 1fr) 20rem;
+  --repo-columns: minmax(0, 1fr) 16rem;
 
   --duration-fast: 150ms;
   --duration-base: 220ms;

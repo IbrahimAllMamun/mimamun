@@ -33,7 +33,11 @@ function roundTo(value: number, step: number): number {
   return Number(value.toFixed(Math.min(decimals, 12)));
 }
 
-export function niceTicks(min: number, max: number, maxTicks = 5): Ticks {
+/**
+ * Round tick values spanning [min, max]. With `integer`, steps never fall
+ * below 1, so counts are not labelled 0.2, 0.4…
+ */
+export function niceTicks(min: number, max: number, maxTicks = 5, { integer = false }: { integer?: boolean } = {}): Ticks {
   if (!Number.isFinite(min) || !Number.isFinite(max)) {
     return { min: 0, max: 1, step: 0.25, values: [0, 0.25, 0.5, 0.75, 1] };
   }
@@ -44,7 +48,8 @@ export function niceTicks(min: number, max: number, maxTicks = 5): Ticks {
   }
   if (min > max) [min, max] = [max, min];
   const range = niceNumber(max - min, false);
-  const step = niceNumber(range / Math.max(1, maxTicks - 1), true);
+  const rawStep = niceNumber(range / Math.max(1, maxTicks - 1), true);
+  const step = integer ? Math.max(1, Math.round(rawStep)) : rawStep;
   const niceMin = Math.floor(min / step) * step;
   const niceMax = Math.ceil(max / step) * step;
   const values: number[] = [];
