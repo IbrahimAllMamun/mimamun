@@ -1,5 +1,7 @@
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import {
+  educationAnchor,
+  experienceAnchor,
   PRESENTATION_TYPE_LABELS,
   type EducationDTO,
   type ExperienceDTO,
@@ -107,7 +109,7 @@ export function buildTrajectory(
       start: item.startDate,
       end: item.endDate,
       isCurrent: item.isCurrent,
-      href: "/about#education",
+      href: `/about#${educationAnchor(item)}`,
     })),
     ...experienceItems.map((item) => ({
       id: item.id,
@@ -117,7 +119,7 @@ export function buildTrajectory(
       start: item.startDate,
       end: item.endDate,
       isCurrent: item.isCurrent,
-      href: `/experience#${item.id}`,
+      href: `/experience#${experienceAnchor(item)}`,
     })),
     ...presentations
       .filter((item) => item.presentedOn)
@@ -145,5 +147,8 @@ export function buildTrajectory(
       })),
   ];
   const sortKey = (item: TrajectoryItemDTO) => item.start ?? item.end ?? "9999";
-  return items.sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
+  // Chronological; on the same month, something that ended then comes before
+  // something that started then (a previous role before the one that followed it).
+  const endedAtKey = (item: TrajectoryItemDTO) => (item.start === null && item.end !== null ? 0 : 1);
+  return items.sort((a, b) => sortKey(a).localeCompare(sortKey(b)) || endedAtKey(a) - endedAtKey(b));
 }

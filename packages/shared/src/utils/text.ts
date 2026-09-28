@@ -97,6 +97,16 @@ export function truncate(text: string, maxLength: number): string {
   return `${(lastSpace >= maxLength * 0.5 ? cut.slice(0, lastSpace) : cut).replace(/[\s,.;:]+$/, "")}…`;
 }
 
+/** Readable fragment id for a role on /experience, e.g. "city-bank-plc-data-scientist". */
+export function experienceAnchor(role: { company: string; position: string }): string {
+  return slugify(`${role.company} ${role.position}`);
+}
+
+/** Fragment id for a degree on /about, e.g. "ms-applied-statistics-and-data-science". */
+export function educationAnchor(item: { degree: string; fieldOfStudy: string | null }): string {
+  return slugify([item.degree, item.fieldOfStudy].filter(Boolean).join(" "));
+}
+
 /** Joins list items as prose: ["R", "Python", "SQL"] → "R, Python and SQL". */
 export function joinList(items: readonly string[], conjunction = "and"): string {
   if (items.length <= 1) return items.join("");

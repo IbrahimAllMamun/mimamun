@@ -47,7 +47,11 @@ describe("media uploads", () => {
     const partial = await request(ctx.app).get(imageUrl).set("Range", "bytes=0-99").expect(206);
     expect(partial.headers["content-range"]).toMatch(/^bytes 0-99\/\d+$/);
     const etag = partial.headers.etag;
-    await request(ctx.app).get(imageUrl).set("If-None-Match", etag).expect(304);
+    expect(etag).toBeTruthy();
+    await request(ctx.app)
+      .get(imageUrl)
+      .set("If-None-Match", etag ?? "")
+      .expect(304);
     await request(ctx.app).get(imageUrl).set("Range", "bytes=999999999-").expect(416);
   });
 

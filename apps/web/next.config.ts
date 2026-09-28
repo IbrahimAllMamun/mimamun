@@ -1,10 +1,21 @@
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { loadEnvConfig } from "@next/env";
+import { parseEnv } from "node:util";
+import { updateInitialEnv } from "@next/env";
 import type { NextConfig } from "next";
 
-// In the monorepo, environment variables live in the repository root .env.
+// In the monorepo, local environment variables live in the repository root
+// .env (containers receive real environment variables instead). Values that
+// are already set win. Next restores process.env from a snapshot when it
+// reloads env files, so the root values are added to that snapshot too.
 const repositoryRoot = path.resolve(process.cwd(), "../..");
-loadEnvConfig(repositoryRoot);
+const rootEnvFile = path.join(repositoryRoot, ".env");
+if (existsSync(rootEnvFile)) {
+  const parsed = parseEnv(readFileSync(rootEnvFile, "utf8"));
+  const missing = Object.fromEntries(Object.entries(parsed).filter(([key]) => process.env[key] === undefined));
+  Object.assign(process.env, missing);
+  updateInitialEnv(missing);
+}
 
 const apiUrl = (process.env.API_INTERNAL_URL ?? "http://localhost:4000").replace(/\/$/, "");
 

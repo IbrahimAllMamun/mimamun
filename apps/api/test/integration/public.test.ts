@@ -46,6 +46,10 @@ describe("public API with seed data", () => {
     ]);
     expect(home.currentExperience[0].company).toBe("City Bank PLC");
     expect(home.trajectory.some((item: { kind: string }) => item.kind === "presentation")).toBe(true);
+    const roles = home.trajectory.filter((item: { kind: string }) => item.kind === "experience");
+    // IDLC ended in August 2026, the month City Bank began: it is listed first.
+    expect(roles.map((item: { sublabel: string }) => item.sublabel)).toEqual(["IDLC Finance PLC", "City Bank PLC"]);
+    expect(roles[1].href).toBe("/experience#city-bank-plc-data-scientist");
   });
 
   it("serves research with a citation derived only from known facts", async () => {

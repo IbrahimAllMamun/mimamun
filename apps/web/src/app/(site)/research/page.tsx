@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
-import { FileDown } from "lucide-react";
-import { PresentationLine, ResearchEntry } from "@/components/research/research-entry";
+import { PresentationLine, PresentationLinks, ResearchEntry } from "@/components/research/research-entry";
 import { PublicationEntry } from "@/components/research/publication-entry";
 import { PageHeader } from "@/components/site/page-header";
 import { SectionHeader } from "@/components/site/section-header";
-import { Icon } from "@/components/ui/icon";
 import { EmptyState, UnavailableNotice } from "@/components/ui/states";
 import { TextLink } from "@/components/ui/text-link";
 import { publicApi } from "@/lib/api/server";
@@ -50,20 +48,7 @@ export default async function ResearchPage() {
                       <div className="col-span-4 space-y-1 sm:col-span-8 lg:col-span-9 lg:col-start-4">
                         <p className="font-serif text-lg text-ink">{presentation.title}</p>
                         <PresentationLine presentation={presentation} />
-                        <div className="flex flex-wrap gap-x-5 text-sm">
-                          {presentation.research ? <TextLink href={`/research/${presentation.research.slug}`}>The research</TextLink> : null}
-                          {presentation.poster ? (
-                            <a href={presentation.poster.url} className="link inline-flex items-center gap-1">
-                              <Icon icon={FileDown} size={14} /> Poster
-                            </a>
-                          ) : null}
-                          {presentation.slides ? (
-                            <a href={presentation.slides.url} className="link inline-flex items-center gap-1">
-                              <Icon icon={FileDown} size={14} /> Slides
-                            </a>
-                          ) : null}
-                          {presentation.eventUrl ? <TextLink href={presentation.eventUrl}>Event page</TextLink> : null}
-                        </div>
+                        <PresentationLinks presentation={presentation} />
                       </div>
                     </li>
                   ))}
@@ -85,7 +70,7 @@ export default async function ResearchPage() {
                 />
                 <div className="mt-6">
                   {research.data.publications.slice(0, 3).map((publication) => (
-                    <PublicationEntry key={publication.id} publication={publication} owner={owner} />
+                    <PublicationEntry key={publication.id} publication={publication} owner={owner} headingLevel={3} />
                   ))}
                 </div>
               </section>

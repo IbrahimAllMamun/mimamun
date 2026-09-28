@@ -166,3 +166,13 @@
 @utility fade-out-bottom {
   mask-image: linear-gradient(to bottom, black, transparent 85%);
 }
+
+/* Spam trap: invisible and unreachable for people (including screen-reader
+   users, via aria-hidden and tabindex=-1), but present for naive bots. */
+@utility honeypot {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}

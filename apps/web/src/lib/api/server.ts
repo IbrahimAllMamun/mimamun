@@ -97,4 +97,6 @@ export const publicApi = {
   github: () => apiFetch<GithubSectionDTO>("/api/public/github"),
   search: (q: string) => apiFetch<SearchResultDTO[]>(`/api/public/search${query({ q })}`),
   sitemap: () => apiFetch<SitemapEntryDTO[]>("/api/public/sitemap"),
+  /** A fresh, signed timestamp for the contact form (never cached). */
+  contactToken: () => apiFetch<{ token: string }>("/api/public/contact/token", { noStore: true }),
 };

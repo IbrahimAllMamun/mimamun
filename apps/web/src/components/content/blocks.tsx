@@ -180,7 +180,7 @@ function CalloutBlock({ block }: { block: BlockOf<"callout"> }) {
     warning: { border: "border-accent-mark", label: "Caveat" },
   }[block.data.tone];
   return (
-    <aside className={cn("reveal border-l-2 bg-surface py-3 pr-4 pl-5", tone.border)}>
+    <aside className={cn("reveal max-w-measure border-l-2 bg-surface py-3 pr-4 pl-5", tone.border)}>
       <p className="label">{block.data.title ?? tone.label}</p>
       <Markdown source={block.data.markdown} className="prose-ui mt-1 text-ink-2" />
     </aside>
@@ -301,7 +301,9 @@ export function BlockView({
     case "heading": {
       const level = Math.min(6, headingBase + block.data.level - 2);
       const Tag = `h${level}` as "h3";
-      return <Tag className="max-w-measure font-serif text-xl text-ink">{block.data.text}</Tag>;
+      // Size follows the rendered level, so a post's h2 outranks a case study's h3.
+      const size = level <= 2 ? "text-3xl pt-4" : level === 3 ? "text-2xl pt-2" : "text-xl";
+      return <Tag className={cn("max-w-measure font-serif text-ink", size)}>{block.data.text}</Tag>;
     }
     case "image":
       return <ImageBlock block={block} media={media} number={number} />;

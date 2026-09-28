@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { FileDown } from "lucide-react";
 import { PRESENTATION_TYPE_LABELS, RESEARCH_KIND_LABELS, formatMonth, type PresentationDTO, type ResearchSummaryDTO } from "@portfolio/shared";
+import { Icon } from "@/components/ui/icon";
 import { TagList } from "@/components/ui/tag";
+import { TextLink } from "@/components/ui/text-link";
 
 function degreeShort(degree: string | null): string | null {
   return degree ? (degree.split(/\s+in\s+/i)[0] ?? degree) : null;
@@ -46,5 +49,27 @@ export function PresentationLine({ presentation, compact = false }: { presentati
       <span aria-hidden className="mr-2 inline-block size-2 rotate-45 bg-accent-mark align-middle" />
       {parts.join(" · ")}
     </p>
+  );
+}
+
+/** Poster, slides, event page and (optionally) the research the presentation came from. */
+export function PresentationLinks({ presentation, showResearch = true }: { presentation: PresentationDTO; showResearch?: boolean }) {
+  const research = showResearch ? presentation.research : null;
+  if (!research && !presentation.poster && !presentation.slides && !presentation.eventUrl) return null;
+  return (
+    <div className="flex flex-wrap gap-x-5 text-sm">
+      {research ? <TextLink href={`/research/${research.slug}`}>The research</TextLink> : null}
+      {presentation.poster ? (
+        <a href={presentation.poster.url} className="link inline-flex min-h-11 items-center gap-1">
+          <Icon icon={FileDown} size={14} /> Poster
+        </a>
+      ) : null}
+      {presentation.slides ? (
+        <a href={presentation.slides.url} className="link inline-flex min-h-11 items-center gap-1">
+          <Icon icon={FileDown} size={14} /> Slides
+        </a>
+      ) : null}
+      {presentation.eventUrl ? <TextLink href={presentation.eventUrl}>Event page</TextLink> : null}
+    </div>
   );
 }

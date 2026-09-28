@@ -4,6 +4,7 @@ import { CopyButton } from "@/components/ui/copy-button";
 import { Icon } from "@/components/ui/icon";
 import { StatusBadge } from "@/components/ui/status";
 import { TextLink } from "@/components/ui/text-link";
+import { cn } from "@/lib/cn";
 
 function Authors({ authors, owner }: { authors: string[]; owner: string }) {
   return (
@@ -19,19 +20,34 @@ function Authors({ authors, owner }: { authors: string[]; owner: string }) {
 }
 
 /** Bibliographic entry with status, links and copyable citations. */
-export function PublicationEntry({ publication, owner }: { publication: PublicationDTO; owner: string }) {
+export function PublicationEntry({
+  publication,
+  owner,
+  headingLevel = 2,
+  stacked = false,
+}: {
+  publication: PublicationDTO;
+  owner: string;
+  headingLevel?: 2 | 3;
+  /** Label above the entry instead of in the margin column (for narrow containers). */
+  stacked?: boolean;
+}) {
+  const Heading = headingLevel === 2 ? "h2" : "h3";
   const year = yearOf(publication.publishedOn);
   return (
-    <article id={publication.slug} className="grid-editorial scroll-mt-(--sticky-offset) gap-y-2 border-t border-rule py-6">
-      <p className="label col-span-4 sm:col-span-8 lg:col-span-3">
+    <article
+      id={publication.slug}
+      className={cn("scroll-mt-(--sticky-offset) gap-y-2 border-t border-rule py-6", stacked ? "flex flex-col" : "grid-editorial")}
+    >
+      <p className={cn("label", !stacked && "col-span-4 sm:col-span-8 lg:col-span-3")}>
         {PUBLICATION_TYPE_LABELS[publication.publicationType]}
         {year ? <span className="block">{year}</span> : null}
       </p>
-      <div className="col-span-4 space-y-2 sm:col-span-8 lg:col-span-9">
+      <div className={cn("space-y-2", !stacked && "col-span-4 sm:col-span-8 lg:col-span-9")}>
         {publication.publicationStatus !== "published" ? (
           <StatusBadge tone="attention">{PUBLICATION_STATUS_LABELS[publication.publicationStatus]}</StatusBadge>
         ) : null}
-        <h2 className="text-xl leading-snug text-ink">{publication.title}</h2>
+        <Heading className="text-xl leading-snug text-ink">{publication.title}</Heading>
         <Authors authors={publication.authors} owner={owner} />
         {publication.venue ? (
           <p className="font-serif-italic text-ink-2 italic">

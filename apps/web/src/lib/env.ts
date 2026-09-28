@@ -6,3 +6,6 @@ export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3
 
 /** Seconds before cached public data is refreshed if no revalidation webhook arrives. */
 export const CONTENT_REVALIDATE_SECONDS = 600;
+
+/** Shared with the API; authenticates `POST /internal/revalidate`. Server-only. */
+export const REVALIDATE_SECRET = process.env.REVALIDATE_SECRET ?? "";
