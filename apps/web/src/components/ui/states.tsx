@@ -40,7 +40,13 @@ export function UnavailableNotice({
   className?: string;
 }) {
   return (
-    <div role="status" className={cn("flex gap-3 rounded-sm border border-warning/40 bg-warning-tint px-4 py-3 text-sm", className)}>
+    <div
+      role="status"
+      className={cn(
+        "flex gap-3 rounded-sm border border-warning/40 bg-warning-tint px-4 py-3 text-sm",
+        className,
+      )}
+    >
       <Icon icon={CircleAlert} size={18} className="mt-0.5 shrink-0 text-warning" />
       <div>
         <p className="font-medium text-ink">{title}</p>

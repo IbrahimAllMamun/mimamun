@@ -30,7 +30,8 @@ export class LocalStorage implements StorageDriver {
   private resolve(key: string): string {
     if (!isValidStorageKey(key)) throw new Error(`Invalid storage key: ${key}`);
     const full = path.resolve(this.root, key);
-    if (!full.startsWith(path.resolve(this.root) + path.sep)) throw new Error("Storage path escapes root");
+    if (!full.startsWith(path.resolve(this.root) + path.sep))
+      throw new Error("Storage path escapes root");
     return full;
   }
 

@@ -12,7 +12,15 @@ import { TagList } from "@/components/ui/tag";
 import { TextLink } from "@/components/ui/text-link";
 import { cn } from "@/lib/cn";
 
-function RuleList({ items, label, tone = "neutral" }: { items: string[]; label: string; tone?: "neutral" | "accent" }) {
+function RuleList({
+  items,
+  label,
+  tone = "neutral",
+}: {
+  items: string[];
+  label: string;
+  tone?: "neutral" | "accent";
+}) {
   if (items.length === 0) return null;
   return (
     <div className="space-y-2">
@@ -20,7 +28,13 @@ function RuleList({ items, label, tone = "neutral" }: { items: string[]; label: 
       <ul className="max-w-measure space-y-1.5">
         {items.map((item) => (
           <li key={item} className="flex gap-3 text-ink-2">
-            <span aria-hidden className={cn("mt-3 h-px w-3 shrink-0", tone === "accent" ? "bg-accent-mark" : "bg-ink-3")} />
+            <span
+              aria-hidden
+              className={cn(
+                "mt-3 h-px w-3 shrink-0",
+                tone === "accent" ? "bg-accent-mark" : "bg-ink-3",
+              )}
+            />
             <span>{item}</span>
           </li>
         ))}
@@ -38,7 +52,11 @@ export function RoleEntry({ role, now = new Date() }: { role: ExperienceDTO; now
   const period = formatPeriod(role.startDate, role.endDate, role.isCurrent);
   const end = role.isCurrent ? now : role.endDate;
   const duration = role.startDate && end ? formatDuration(monthsBetween(role.startDate, end)) : "";
-  const context = [role.department, role.employmentType ? EMPLOYMENT_TYPE_LABELS[role.employmentType] : null, role.location]
+  const context = [
+    role.department,
+    role.employmentType ? EMPLOYMENT_TYPE_LABELS[role.employmentType] : null,
+    role.location,
+  ]
     .filter(Boolean)
     .join(" · ");
 
@@ -52,7 +70,10 @@ export function RoleEntry({ role, now = new Date() }: { role: ExperienceDTO; now
         <p className="label flex items-center gap-2">
           <span
             aria-hidden
-            className={cn("size-2.5 rotate-45", role.isCurrent ? "bg-primary" : "border border-ink-3 bg-transparent")}
+            className={cn(
+              "size-2.5 rotate-45",
+              role.isCurrent ? "bg-primary" : "border border-ink-3 bg-transparent",
+            )}
           />
           {period}
         </p>
@@ -62,10 +83,17 @@ export function RoleEntry({ role, now = new Date() }: { role: ExperienceDTO; now
 
       <div className="col-span-4 space-y-6 sm:col-span-8 lg:col-span-9">
         <header className="space-y-1">
-          <h3 id={`${experienceAnchor(role)}-title`} className="font-serif text-2xl leading-snug text-ink">
+          <h3
+            id={`${experienceAnchor(role)}-title`}
+            className="font-serif text-2xl leading-snug text-ink"
+          >
             {role.position}
             <span className="text-ink-3">, </span>
-            {role.companyUrl ? <TextLink href={role.companyUrl}>{role.company}</TextLink> : role.company}
+            {role.companyUrl ? (
+              <TextLink href={role.companyUrl}>{role.company}</TextLink>
+            ) : (
+              role.company
+            )}
           </h3>
           {context ? <p className="text-ink-2">{context}</p> : null}
         </header>
@@ -78,13 +106,20 @@ export function RoleEntry({ role, now = new Date() }: { role: ExperienceDTO; now
         {role.metrics.length ? (
           <dl className="grid grid-cols-2 border-y border-rule sm:grid-cols-3">
             {role.metrics.map((metric) => (
-              <div key={metric.label} className="border-rule py-4 pr-4 [&:not(:first-child)]:border-l [&:not(:first-child)]:pl-4">
+              <div
+                key={metric.label}
+                className="border-rule py-4 pr-4 [&:not(:first-child)]:border-l [&:not(:first-child)]:pl-4"
+              >
                 <dt className="label">{metric.label}</dt>
                 <dd className="mt-1 font-serif text-2xl text-ink tabular-nums">
                   {metric.value}
-                  {metric.unit ? <span className="ml-1 text-base text-ink-2">{metric.unit}</span> : null}
+                  {metric.unit ? (
+                    <span className="ml-1 text-base text-ink-2">{metric.unit}</span>
+                  ) : null}
                 </dd>
-                {metric.context ? <dd className="mt-1 text-sm text-ink-3">{metric.context}</dd> : null}
+                {metric.context ? (
+                  <dd className="mt-1 text-sm text-ink-3">{metric.context}</dd>
+                ) : null}
               </div>
             ))}
           </dl>
@@ -116,7 +151,9 @@ export function RoleEntry({ role, now = new Date() }: { role: ExperienceDTO; now
                   <TextLink href={`/projects/${project.slug}`} arrow>
                     {project.title}
                   </TextLink>
-                  <span className="font-mono text-xs text-ink-3">{PROJECT_TYPE_LABELS[project.type]}</span>
+                  <span className="font-mono text-xs text-ink-3">
+                    {PROJECT_TYPE_LABELS[project.type]}
+                  </span>
                 </li>
               ))}
             </ul>

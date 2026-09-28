@@ -43,19 +43,29 @@ export function CommandSearch() {
   const router = useRouter();
   const can = useCan();
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<{ query: string; items: AdminSearchResultDTO[] }>({ query: "", items: [] });
+  const [results, setResults] = useState<{ query: string; items: AdminSearchResultDTO[] }>({
+    query: "",
+    items: [],
+  });
   const [active, setActive] = useState(0);
+  const [open, setOpen] = useState(false);
 
-  const open = () => {
-    dialog.current?.showModal();
-    input.current?.select();
-  };
+  useEffect(() => {
+    const element = dialog.current;
+    if (!element) return;
+    if (open && !element.open) {
+      element.showModal();
+      input.current?.select();
+    } else if (!open && element.open) {
+      element.close();
+    }
+  }, [open]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        open();
+        setOpen(true);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -66,7 +76,10 @@ export function CommandSearch() {
     const term = query.trim();
     if (term.length < 2) return;
     const timer = setTimeout(() => {
-      void apiRequest<AdminSearchResultDTO[]>("GET", `/api/admin/search?q=${encodeURIComponent(term)}`).then((result) => {
+      void apiRequest<AdminSearchResultDTO[]>(
+        "GET",
+        `/api/admin/search?q=${encodeURIComponent(term)}`,
+      ).then((result) => {
         if (result.ok) setResults({ query: term, items: result.data });
       });
     }, 200);
@@ -78,7 +91,13 @@ export function CommandSearch() {
     const pages = NAV_GROUPS.flatMap((group) => group.items)
       .filter((item) => can(item.permission) && (!term || item.label.toLowerCase().includes(term)))
       .slice(0, term ? 5 : 8)
-      .map((item) => ({ key: `page:${item.href}`, title: item.label, subtitle: null, href: item.href, group: "Go to" }));
+      .map((item) => ({
+        key: `page:${item.href}`,
+        title: item.label,
+        subtitle: null,
+        href: item.href,
+        group: "Go to",
+      }));
     const content =
       term.length >= 2 && results.query === query.trim()
         ? results.items.map((item) => ({
@@ -94,7 +113,7 @@ export function CommandSearch() {
 
   const go = (entry: Entry | undefined) => {
     if (!entry) return;
-    dialog.current?.close();
+    setOpen(false);
     setQuery("");
     router.push(entry.href);
   };
@@ -103,19 +122,22 @@ export function CommandSearch() {
     <>
       <button
         type="button"
-        onClick={open}
+        onClick={() => setOpen(true)}
         className="inline-flex min-h-10 w-full max-w-sm items-center gap-2 rounded-sm border border-rule-strong bg-elevated px-3 text-sm text-ink-3 hover:border-ink-3"
       >
         <Icon icon={Search} size={16} />
         <span className="flex-1 text-left">Search…</span>
-        <kbd className="hidden rounded-xs border border-rule px-1.5 font-mono text-xs sm:inline">Ctrl K</kbd>
+        <kbd className="hidden rounded-xs border border-rule px-1.5 font-mono text-xs sm:inline">
+          Ctrl K
+        </kbd>
       </button>
       <dialog
         ref={dialog}
         aria-label="Search the admin"
         className="dialog-panel dialog-frame mx-auto mt-24 max-w-xl overflow-hidden rounded-md border border-rule bg-paper p-0 text-ink shadow-dialog backdrop:bg-scrim"
+        onClose={() => setOpen(false)}
         onClick={(event) => {
-          if (event.target === dialog.current) dialog.current?.close();
+          if (event.target === event.currentTarget) setOpen(false);
         }}
       >
         <div className="flex items-center gap-3 border-b border-rule px-4">
@@ -147,9 +169,16 @@ export function CommandSearch() {
             className="min-h-14 flex-1 bg-transparent text-base outline-none placeholder:text-ink-3"
           />
         </div>
-        <ul id="command-results" role="listbox" aria-label="Results" className="max-h-96 overflow-y-auto py-2">
+        <ul
+          id="command-results"
+          role="listbox"
+          aria-label="Results"
+          className="max-h-96 overflow-y-auto py-2"
+        >
           {entries.length === 0 ? (
-            <li className="px-4 py-6 text-center text-sm text-ink-3">{query.trim().length >= 2 ? "No matches." : "Type to search."}</li>
+            <li className="px-4 py-6 text-center text-sm text-ink-3">
+              {query.trim().length >= 2 ? "No matches." : "Type to search."}
+            </li>
           ) : (
             entries.map((entry, index) => (
               <li key={entry.key} role="presentation">
@@ -165,10 +194,15 @@ export function CommandSearch() {
                   aria-selected={index === active}
                   onMouseEnter={() => setActive(index)}
                   onClick={() => go(entry)}
-                  className={cn("flex w-full flex-col items-start px-4 py-2 text-left", index === active && "bg-muted")}
+                  className={cn(
+                    "flex w-full flex-col items-start px-4 py-2 text-left",
+                    index === active && "bg-muted",
+                  )}
                 >
                   <span className="text-sm text-ink">{entry.title}</span>
-                  {entry.subtitle ? <span className="text-xs text-ink-3">{entry.subtitle}</span> : null}
+                  {entry.subtitle ? (
+                    <span className="text-xs text-ink-3">{entry.subtitle}</span>
+                  ) : null}
                 </button>
               </li>
             ))

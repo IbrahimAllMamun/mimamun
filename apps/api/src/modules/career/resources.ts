@@ -1,5 +1,10 @@
 import { asc, desc, sql } from "drizzle-orm";
-import { educationInput, experienceInput, formatPeriod, type ExperienceInput } from "@portfolio/shared";
+import {
+  educationInput,
+  experienceInput,
+  formatPeriod,
+  type ExperienceInput,
+} from "@portfolio/shared";
 import { education, experienceProjects, experiences } from "../../database/schema";
 import { loadLinks, syncLinks } from "../../lib/content";
 import { assertMediaExists } from "../../lib/media-refs";
@@ -22,16 +27,24 @@ export const experienceResource = defineResource<ExperienceInput>({
   listItem: (row) =>
     listItem(row, {
       title: `${String(row.position)} · ${String(row.company)}`,
-      subtitle: formatPeriod(row.startDate as string | null, row.endDate as string | null, Boolean(row.isCurrent)) || null,
+      subtitle:
+        formatPeriod(
+          row.startDate as string | null,
+          row.endDate as string | null,
+          Boolean(row.isCurrent),
+        ) || null,
       extra: { current: Boolean(row.isCurrent) },
     }),
   loadRelations: async (db, ids) => {
     const links = await loadLinks(db, experienceProjects, "experienceId", ids, "projectId");
     return new Map(ids.map((id) => [id, { projectIds: links.get(id) ?? [] }]));
   },
-  saveRelations: (tx, id, input) => syncLinks(tx, experienceProjects, "experienceId", id, "projectId", input.projectIds),
+  saveRelations: (tx, id, input) =>
+    syncLinks(tx, experienceProjects, "experienceId", id, "projectId", input.projectIds),
   validate: async (db, input) => {
-    await assertMediaExists(db, [{ id: input.companyLogoId, kind: "image", path: "companyLogoId" }]);
+    await assertMediaExists(db, [
+      { id: input.companyLogoId, kind: "image", path: "companyLogoId" },
+    ]);
   },
 });
 
@@ -49,6 +62,8 @@ export const educationResource = defineResource({
       subtitle: `${String(row.institution)} · ${formatPeriod(row.startDate as string | null, row.endDate as string | null, Boolean(row.isCurrent))}`,
     }),
   validate: async (db, input) => {
-    await assertMediaExists(db, [{ id: input.institutionLogoId, kind: "image", path: "institutionLogoId" }]);
+    await assertMediaExists(db, [
+      { id: input.institutionLogoId, kind: "image", path: "institutionLogoId" },
+    ]);
   },
 });

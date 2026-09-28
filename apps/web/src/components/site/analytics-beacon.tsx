@@ -5,11 +5,21 @@ import { useEffect, useRef } from "react";
 
 type EventType = "page_view" | "download" | "outbound_click";
 
-function send(body: { type: EventType; path: string; referrer?: string | null; target?: string | null }) {
+function send(body: {
+  type: EventType;
+  path: string;
+  referrer?: string | null;
+  target?: string | null;
+}) {
   try {
     const payload = new Blob([JSON.stringify(body)], { type: "application/json" });
     if (!navigator.sendBeacon?.("/api/analytics/events", payload)) {
-      void fetch("/api/analytics/events", { method: "POST", body: payload, keepalive: true, headers: { "content-type": "application/json" } });
+      void fetch("/api/analytics/events", {
+        method: "POST",
+        body: payload,
+        keepalive: true,
+        headers: { "content-type": "application/json" },
+      });
     }
   } catch {
     // Analytics must never interfere with browsing.
@@ -36,7 +46,11 @@ export function AnalyticsBeacon() {
 
   useEffect(() => {
     if (optedOut() || isPrivatePath(pathname)) return;
-    send({ type: "page_view", path: pathname, referrer: firstView.current ? document.referrer || null : null });
+    send({
+      type: "page_view",
+      path: pathname,
+      referrer: firstView.current ? document.referrer || null : null,
+    });
     firstView.current = false;
   }, [pathname]);
 
@@ -49,7 +63,11 @@ export function AnalyticsBeacon() {
       const url = new URL(anchor.href, window.location.href);
       if (url.pathname === "/cv") return; // counted server-side
       if (url.origin !== window.location.origin && /^https?:$/.test(url.protocol)) {
-        send({ type: "outbound_click", path: window.location.pathname, target: `${url.origin}${url.pathname}` });
+        send({
+          type: "outbound_click",
+          path: window.location.pathname,
+          target: `${url.origin}${url.pathname}`,
+        });
       } else if (url.origin === window.location.origin && url.pathname.startsWith("/media/")) {
         send({ type: "download", path: window.location.pathname, target: url.pathname });
       }

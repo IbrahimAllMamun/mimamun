@@ -11,21 +11,37 @@ export function formatGrade(item: EducationDTO): string | null {
 }
 
 /** A degree: period in the margin, then degree, institution, grade and final project. */
-export function EducationEntry({ item, headingLevel = 3 }: { item: EducationDTO; headingLevel?: 2 | 3 }) {
+export function EducationEntry({
+  item,
+  headingLevel = 3,
+}: {
+  item: EducationDTO;
+  headingLevel?: 2 | 3;
+}) {
   const Heading = headingLevel === 2 ? "h2" : "h3";
   const anchor = educationAnchor(item);
   const grade = formatGrade(item);
   const research = item.research[0];
   return (
-    <article id={anchor} aria-labelledby={`${anchor}-title`} className="grid-editorial scroll-mt-(--sticky-offset) gap-y-3 border-t border-rule py-7">
-      <p className="label col-span-4 sm:col-span-8 lg:col-span-3">{formatPeriod(item.startDate, item.endDate, item.isCurrent)}</p>
+    <article
+      id={anchor}
+      aria-labelledby={`${anchor}-title`}
+      className="grid-editorial scroll-mt-(--sticky-offset) gap-y-3 border-t border-rule py-7"
+    >
+      <p className="label col-span-4 sm:col-span-8 lg:col-span-3">
+        {formatPeriod(item.startDate, item.endDate, item.isCurrent)}
+      </p>
       <div className="col-span-4 space-y-3 sm:col-span-8 lg:col-span-9">
         <header className="space-y-1">
           <Heading id={`${anchor}-title`} className="font-serif text-2xl leading-snug text-ink">
             {[item.degree, item.fieldOfStudy].filter(Boolean).join(" in ")}
           </Heading>
           <p className="text-ink-2">
-            {item.institutionUrl ? <TextLink href={item.institutionUrl}>{item.institution}</TextLink> : item.institution}
+            {item.institutionUrl ? (
+              <TextLink href={item.institutionUrl}>{item.institution}</TextLink>
+            ) : (
+              item.institution
+            )}
             {item.location ? <span className="text-ink-3"> · {item.location}</span> : null}
           </p>
         </header>

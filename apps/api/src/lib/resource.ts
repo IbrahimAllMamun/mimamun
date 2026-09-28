@@ -59,7 +59,10 @@ export interface ResourceDefinition<TInput extends Record<string, unknown>> {
   loadRelations?: (db: DbExecutor, ids: string[]) => Promise<Map<string, Record<string, unknown>>>;
   saveRelations?: (tx: DbExecutor, id: string, input: TInput) => Promise<void>;
   /** Extra/derived column values (e.g. search text, reading time). */
-  derived?: (input: TInput, context: { userId: string | null; existing: Row | null }) => Record<string, unknown>;
+  derived?: (
+    input: TInput,
+    context: { userId: string | null; existing: Row | null },
+  ) => Record<string, unknown>;
   toRecord?: (row: Row) => Record<string, unknown>;
   validate?: (db: DbExecutor, input: TInput, existing: Row | null) => Promise<void>;
   beforeDelete?: (db: DbExecutor, row: Row) => Promise<void>;
@@ -84,7 +87,8 @@ export function listItem(
     featured: (row.featured as boolean | undefined) ?? null,
     isVisible: (row.isVisible as boolean | undefined) ?? null,
     displayOrder: (row.displayOrder as number | undefined) ?? null,
-    updatedAt: (row.updatedAt instanceof Date ? row.updatedAt.toISOString() : String(row.updatedAt ?? "")),
+    updatedAt:
+      row.updatedAt instanceof Date ? row.updatedAt.toISOString() : String(row.updatedAt ?? ""),
     extra: fields.extra ?? {},
   };
 }
@@ -130,7 +134,11 @@ export class ResourceService<TInput extends Record<string, unknown>> {
   }
 
   async find(db: DbExecutor, id: string): Promise<Row | null> {
-    const rows = (await db.select().from(this.table).where(eq(this.col("id"), id)).limit(1)) as Row[];
+    const rows = (await db
+      .select()
+      .from(this.table)
+      .where(eq(this.col("id"), id))
+      .limit(1)) as Row[];
     return rows[0] ?? null;
   }
 
@@ -138,12 +146,16 @@ export class ResourceService<TInput extends Record<string, unknown>> {
     const filters: SQL[] = [...(this.definition.filters?.(query) ?? [])];
     if (query.q && this.definition.searchColumns?.length) {
       const term = likeTerm(query.q);
-      const search = or(...this.definition.searchColumns.map((name) => ilike(this.col(name), term)));
+      const search = or(
+        ...this.definition.searchColumns.map((name) => ilike(this.col(name), term)),
+      );
       if (search) filters.push(search);
     }
     if (query.status && this.editorial) filters.push(eq(this.col("status"), query.status));
-    if (query.featured && this.featurable) filters.push(eq(this.col("featured"), query.featured === "true"));
-    if (query.visible && this.visibleToggle) filters.push(eq(this.col("isVisible"), query.visible === "true"));
+    if (query.featured && this.featurable)
+      filters.push(eq(this.col("featured"), query.featured === "true"));
+    if (query.visible && this.visibleToggle)
+      filters.push(eq(this.col("isVisible"), query.visible === "true"));
     const where = filters.length ? and(...filters) : undefined;
     const sorts: Record<string, SQL[]> = {
       updated: [desc(this.col("updatedAt"))],
@@ -161,7 +173,10 @@ export class ResourceService<TInput extends Record<string, unknown>> {
         .offset((query.page - 1) * query.pageSize) as unknown as Promise<Row[]>,
       db.select({ value: count() }).from(this.table).where(where),
     ]);
-    return { items: rows.map(this.definition.listItem), meta: pageMeta(query.page, query.pageSize, total?.value ?? 0) };
+    return {
+      items: rows.map(this.definition.listItem),
+      meta: pageMeta(query.page, query.pageSize, total?.value ?? 0),
+    };
   }
 
   /** The editable representation returned to the admin editor. */
@@ -170,24 +185,44 @@ export class ResourceService<TInput extends Record<string, unknown>> {
     delete base.searchText;
     delete base.searchVector;
     const relations = (await this.definition.loadRelations?.(db, [row.id]))?.get(row.id) ?? {};
-    const seo = this.definition.seo ? { seo: await loadSeo(db, (row.seoId as string | null) ?? null) } : {};
-    return { ...base, ...relations, ...seo, id: row.id, createdAt: row.createdAt, updatedAt: row.updatedAt };
+    const seo = this.definition.seo
+      ? { seo: await loadSeo(db, (row.seoId as string | null) ?? null) }
+      : {};
+    return {
+      ...base,
+      ...relations,
+      ...seo,
+      id: row.id,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    };
   }
 
-  private async resolveSlug(db: DbExecutor, input: TInput, existing: Row | null): Promise<string | null> {
+  private async resolveSlug(
+    db: DbExecutor,
+    input: TInput,
+    existing: Row | null,
+  ): Promise<string | null> {
     if (!this.sluggable) return null;
     const requested = (input.slug as string | null | undefined) ?? null;
     const scope = this.definition.slugScope?.(input);
     if (requested) {
-      const taken = await uniqueSlug(db, this.table, requested, { excludeId: existing?.id ?? null, scope });
+      const taken = await uniqueSlug(db, this.table, requested, {
+        excludeId: existing?.id ?? null,
+        scope,
+      });
       if (taken !== requested) {
-        throw conflict("That URL slug is already used", [{ path: "slug", message: "Already used by another item" }]);
+        throw conflict("That URL slug is already used", [
+          { path: "slug", message: "Already used by another item" },
+        ]);
       }
       return requested;
     }
     // Slugs are stable: an existing record keeps its slug unless the admin changes it.
     if (existing?.slug) return existing.slug as string;
-    const source = this.definition.slugSource ? String(input[this.definition.slugSource] ?? "") : "";
+    const source = this.definition.slugSource
+      ? String(input[this.definition.slugSource] ?? "")
+      : "";
     return uniqueSlug(db, this.table, slugify(source), { scope });
   }
 
@@ -214,11 +249,14 @@ export class ResourceService<TInput extends Record<string, unknown>> {
   }
 
   private assertPublishAllowed(req: Request, input: Record<string, unknown>, existing: Row | null) {
-    const { publish } = permissionsFor(this.definition as ResourceDefinition<Record<string, unknown>>);
+    const { publish } = permissionsFor(
+      this.definition as ResourceDefinition<Record<string, unknown>>,
+    );
     if (has(req, publish)) return;
     if (!existing) {
       const publishing = this.editorial && (input.status ?? "draft") !== "draft";
-      if (publishing || input.featured === true) throw forbidden("You can save drafts but not publish or feature content");
+      if (publishing || input.featured === true)
+        throw forbidden("You can save drafts but not publish or feature content");
       return;
     }
     for (const field of PUBLISH_FIELDS) {
@@ -238,7 +276,10 @@ export class ResourceService<TInput extends Record<string, unknown>> {
       if (hasColumn(this.table, "createdBy")) values.createdBy = req.auth?.user.id ?? null;
       if (hasColumn(this.table, "updatedBy")) values.updatedBy = req.auth?.user.id ?? null;
       if (this.definition.seo) values.seoId = await upsertSeo(tx, null, input.seo as never);
-      const [row] = (await tx.insert(this.table).values(values as never).returning()) as Row[];
+      const [row] = (await tx
+        .insert(this.table)
+        .values(values as never)
+        .returning()) as Row[];
       if (!row) throw new Error("Insert returned no row");
       await this.definition.saveRelations?.(tx, row.id, input);
       const snapshot = await this.toRecord(tx, row);
@@ -258,7 +299,11 @@ export class ResourceService<TInput extends Record<string, unknown>> {
   async update(req: Request, id: string, raw: unknown): Promise<Record<string, unknown>> {
     const input = parse(this.definition.input, raw);
     const record = await this.deps.db.transaction(async (tx) => {
-      const existing = (await tx.select().from(this.table).where(eq(this.col("id"), id)).for("update")) as Row[];
+      const existing = (await tx
+        .select()
+        .from(this.table)
+        .where(eq(this.col("id"), id))
+        .for("update")) as Row[];
       const current = existing[0];
       if (!current) throw notFound(this.definition.label);
       this.assertPublishAllowed(req, input, current);
@@ -268,7 +313,11 @@ export class ResourceService<TInput extends Record<string, unknown>> {
       const values = this.columnValues(input, slug, current, req.auth?.user.id ?? null);
       if (hasColumn(this.table, "updatedBy")) values.updatedBy = req.auth?.user.id ?? null;
       if (this.definition.seo) {
-        values.seoId = await upsertSeo(tx, (current.seoId as string | null) ?? null, input.seo as never);
+        values.seoId = await upsertSeo(
+          tx,
+          (current.seoId as string | null) ?? null,
+          input.seo as never,
+        );
       }
       const [row] = (await tx
         .update(this.table)
@@ -299,7 +348,8 @@ export class ResourceService<TInput extends Record<string, unknown>> {
       await this.definition.beforeDelete?.(tx, row);
       const before = await this.toRecord(tx, row);
       await tx.delete(this.table).where(eq(this.col("id"), id));
-      if (this.definition.seo && row.seoId) await tx.delete(seoMetadata).where(eq(seoMetadata.id, row.seoId as string));
+      if (this.definition.seo && row.seoId)
+        await tx.delete(seoMetadata).where(eq(seoMetadata.id, row.seoId as string));
       await recordAudit(tx, req, {
         action: `${this.definition.entityType}.delete`,
         entityType: this.definition.entityType,
@@ -320,7 +370,11 @@ export class ResourceService<TInput extends Record<string, unknown>> {
         .update(this.table)
         .set({
           status,
-          publishedAt: resolvePublishedAt(status, null, (current.publishedAt as Date | null) ?? null),
+          publishedAt: resolvePublishedAt(
+            status,
+            null,
+            (current.publishedAt as Date | null) ?? null,
+          ),
         } as never)
         .where(eq(this.col("id"), id))
         .returning()) as Row[];
@@ -356,7 +410,9 @@ export class ResourceService<TInput extends Record<string, unknown>> {
   bulkValues(action: BulkAction): Record<string, unknown> | null {
     switch (action) {
       case "publish":
-        return this.editorial ? { status: "published", publishedAt: sql`coalesce(published_at, now())` } : null;
+        return this.editorial
+          ? { status: "published", publishedAt: sql`coalesce(published_at, now())` }
+          : null;
       case "unpublish":
         return this.editorial ? { status: "draft" } : null;
       case "archive":
@@ -381,13 +437,21 @@ export class ResourceService<TInput extends Record<string, unknown>> {
           await this.remove(req, id);
           succeeded.push(id);
         } catch (error) {
-          failed.push({ id, message: error instanceof AppError ? error.message : "Could not delete" });
+          failed.push({
+            id,
+            message: error instanceof AppError ? error.message : "Could not delete",
+          });
         }
       }
       return { succeeded, failed };
     }
     const values = this.bulkValues(action);
-    if (!values) throw new AppError(400, "VALIDATION_ERROR", `"${action}" does not apply to ${this.definition.label.toLowerCase()} items`);
+    if (!values)
+      throw new AppError(
+        400,
+        "VALIDATION_ERROR",
+        `"${action}" does not apply to ${this.definition.label.toLowerCase()} items`,
+      );
     await this.deps.db.transaction(async (tx) => {
       const rows = (await tx
         .update(this.table)
@@ -408,7 +472,10 @@ export class ResourceService<TInput extends Record<string, unknown>> {
   }
 
   titleOf(row: Row): string {
-    return String(row.title ?? row.name ?? row.label ?? row.position ?? row.degree ?? row.id).slice(0, 120);
+    return String(row.title ?? row.name ?? row.label ?? row.position ?? row.degree ?? row.id).slice(
+      0,
+      120,
+    );
   }
 }
 
@@ -418,7 +485,9 @@ export function resourceRouter<TInput extends Record<string, unknown>>(
   extend?: (router: Router) => void,
 ): Router {
   const router = Router();
-  const permissions = permissionsFor(service.definition as ResourceDefinition<Record<string, unknown>>);
+  const permissions = permissionsFor(
+    service.definition as ResourceDefinition<Record<string, unknown>>,
+  );
   // Malformed ids are "not found", not database errors.
   router.param("id", (_req, _res, next, value: string) => {
     next(UUID_PATTERN.test(value) ? undefined : notFound(service.definition.label));

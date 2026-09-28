@@ -12,7 +12,9 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           </Link>
           <p className="label">Portfolio admin</p>
         </div>
-        <div className="rounded-md border border-rule bg-elevated p-6 shadow-popover">{children}</div>
+        <div className="rounded-md border border-rule bg-elevated p-6 shadow-popover">
+          {children}
+        </div>
       </div>
     </main>
   );

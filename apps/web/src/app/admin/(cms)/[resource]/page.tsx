@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { findResource } from "@/components/admin/resources/registry";
 import { ResourceListPage } from "@/components/admin/resources/resource-pages";
 
-export async function generateMetadata({ params }: PageProps<"/admin/[resource]">): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<"/admin/[resource]">): Promise<Metadata> {
   const { resource } = await params;
   return { title: findResource(resource)?.plural ?? "Not found" };
 }

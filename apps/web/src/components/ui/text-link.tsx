@@ -38,7 +38,11 @@ export function TextLink({
   const classes = cn("link group inline-flex items-baseline gap-1", className);
   if (isExternal || href.startsWith("mailto:") || href.startsWith("/media/") || href === "/cv") {
     return (
-      <a href={href} className={classes} {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
+      <a
+        href={href}
+        className={classes}
+        {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      >
         {content}
       </a>
     );

@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { ChevronDown, ChevronRight, ExternalLink, RefreshCw, Search } from "lucide-react";
 import { useState } from "react";
-import type { AdminGithubRepoDTO, AuditLogDTO, OptionsDTO, PageMeta, SystemStatusDTO } from "@portfolio/shared";
+import type {
+  AdminGithubRepoDTO,
+  AuditLogDTO,
+  OptionsDTO,
+  PageMeta,
+  SystemStatusDTO,
+} from "@portfolio/shared";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { StatusBadge } from "@/components/ui/status";
@@ -27,16 +33,25 @@ function Changes({ before, after }: { before: unknown; after: unknown }) {
   const a = (before && typeof before === "object" ? before : {}) as Record<string, unknown>;
   const b = (after && typeof after === "object" ? after : {}) as Record<string, unknown>;
   const keys = [...new Set([...Object.keys(a), ...Object.keys(b)])].filter(
-    (key) => !["updatedAt", "createdAt", "searchText", "updatedBy"].includes(key) && JSON.stringify(a[key]) !== JSON.stringify(b[key]),
+    (key) =>
+      !["updatedAt", "createdAt", "searchText", "updatedBy"].includes(key) &&
+      JSON.stringify(a[key]) !== JSON.stringify(b[key]),
   );
-  if (keys.length === 0) return <p className="text-sm text-ink-3">No field-level changes recorded.</p>;
+  if (keys.length === 0)
+    return <p className="text-sm text-ink-3">No field-level changes recorded.</p>;
   return (
     <table className="w-full text-xs">
       <thead>
         <tr className="text-left text-ink-3">
-          <th scope="col" className="py-1 pr-3 font-medium">Field</th>
-          <th scope="col" className="py-1 pr-3 font-medium">Before</th>
-          <th scope="col" className="py-1 font-medium">After</th>
+          <th scope="col" className="py-1 pr-3 font-medium">
+            Field
+          </th>
+          <th scope="col" className="py-1 pr-3 font-medium">
+            Before
+          </th>
+          <th scope="col" className="py-1 font-medium">
+            After
+          </th>
         </tr>
       </thead>
       <tbody className="divide-y divide-rule">
@@ -57,15 +72,42 @@ export function AuditLogPage() {
   const [entityType, setEntityType] = useState("");
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState<string | null>(null);
-  const logs = useApiQuery<AuditLogDTO[], PageMeta>(withQuery("/api/admin/audit-logs", { q, entityType, page }));
-  const types = ["project", "research", "publication", "presentation", "blog_post", "experience", "education", "credential", "skill", "media", "user", "role", "settings", "profile", "seo", "message", "integration"];
+  const logs = useApiQuery<AuditLogDTO[], PageMeta>(
+    withQuery("/api/admin/audit-logs", { q, entityType, page }),
+  );
+  const types = [
+    "project",
+    "research",
+    "publication",
+    "presentation",
+    "blog_post",
+    "experience",
+    "education",
+    "credential",
+    "skill",
+    "media",
+    "user",
+    "role",
+    "settings",
+    "profile",
+    "seo",
+    "message",
+    "integration",
+  ];
 
   return (
     <>
-      <AdminPageHeader title="Audit log" description="Every sign-in, change and deletion, with who did it and what changed. Entries cannot be edited." />
+      <AdminPageHeader
+        title="Audit log"
+        description="Every sign-in, change and deletion, with who did it and what changed. Entries cannot be edited."
+      />
       <div className="mb-4 flex flex-wrap gap-2">
         <div className="relative min-w-56 flex-1">
-          <Icon icon={Search} size={16} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ink-3" />
+          <Icon
+            icon={Search}
+            size={16}
+            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ink-3"
+          />
           <input
             type="search"
             value={q}
@@ -99,7 +141,12 @@ export function AuditLogPage() {
       {!logs.data && !logs.error ? <LoadingRows /> : null}
       {logs.data && logs.data.length === 0 ? <EmptyPanel title="Nothing recorded" /> : null}
       {logs.data?.length ? (
-        <ol className={cn("divide-y divide-rule rounded-md border border-rule bg-elevated", logs.loading && "opacity-60")}>
+        <ol
+          className={cn(
+            "divide-y divide-rule rounded-md border border-rule bg-elevated",
+            logs.loading && "opacity-60",
+          )}
+        >
           {logs.data.map((entry) => {
             const expanded = open === entry.id;
             const hasChanges = entry.previousValue !== null || entry.newValue !== null;
@@ -112,15 +159,24 @@ export function AuditLogPage() {
                   disabled={!hasChanges}
                   className="flex w-full items-start gap-3 text-left disabled:cursor-default"
                 >
-                  <Icon icon={expanded ? ChevronDown : ChevronRight} size={14} className={cn("mt-1 shrink-0 text-ink-3", !hasChanges && "invisible")} />
+                  <Icon
+                    icon={expanded ? ChevronDown : ChevronRight}
+                    size={14}
+                    className={cn("mt-1 shrink-0 text-ink-3", !hasChanges && "invisible")}
+                  />
                   <span className="min-w-0 flex-1 text-sm">
                     <span className="text-ink">{entry.summary ?? entry.action}</span>
                     <span className="block text-xs text-ink-3">
-                      {entry.actor.name ?? entry.actor.email ?? "System"} · <span className="font-mono">{entry.action}</span>
+                      {entry.actor.name ?? entry.actor.email ?? "System"} ·{" "}
+                      <span className="font-mono">{entry.action}</span>
                       {entry.ipAddress ? ` · ${entry.ipAddress}` : ""}
                     </span>
                   </span>
-                  <time dateTime={entry.createdAt} title={new Date(entry.createdAt).toLocaleString("en-GB")} className="shrink-0 text-xs text-ink-3">
+                  <time
+                    dateTime={entry.createdAt}
+                    title={new Date(entry.createdAt).toLocaleString("en-GB")}
+                    className="shrink-0 text-xs text-ink-3"
+                  >
                     {relativeTime(entry.createdAt)}
                   </time>
                 </button>
@@ -142,7 +198,12 @@ export function AuditLogPage() {
           <span className="text-ink-3">
             Page {logs.meta.page} of {logs.meta.totalPages}
           </span>
-          <Button variant="ghost" size="sm" disabled={page >= logs.meta.totalPages} onClick={() => setPage(page + 1)}>
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={page >= logs.meta.totalPages}
+            onClick={() => setPage(page + 1)}
+          >
             Older
           </Button>
         </nav>
@@ -157,7 +218,12 @@ interface GithubAdminDTO {
   username: string | null;
   syncEnabled: boolean;
   tokenConfigured: boolean;
-  status: { lastRunAt: string | null; lastSuccessAt: string | null; lastErrorAt: string | null; lastError: string | null };
+  status: {
+    lastRunAt: string | null;
+    lastSuccessAt: string | null;
+    lastErrorAt: string | null;
+    lastError: string | null;
+  };
   repositories: AdminGithubRepoDTO[];
 }
 
@@ -169,16 +235,34 @@ export function IntegrationsPage() {
 
   const sync = async () => {
     setSyncing(true);
-    const result = await apiRequest<{ repositories: number }>("POST", "/api/admin/integrations/github/sync");
+    const result = await apiRequest<{ repositories: number }>(
+      "POST",
+      "/api/admin/integrations/github/sync",
+    );
     setSyncing(false);
     if (!result.ok) toast.error(result.error.message);
     else toast.success(`Synced ${result.data.repositories} repositories`);
     github.reload();
   };
 
-  const update = async (repo: AdminGithubRepoDTO, changes: Partial<Pick<AdminGithubRepoDTO, "isSelected" | "displayOrder" | "customDescription" | "projectId">>) => {
-    const body = { isSelected: repo.isSelected, displayOrder: repo.displayOrder, customDescription: repo.customDescription, projectId: repo.projectId, ...changes };
-    const result = await apiRequest("PATCH", `/api/admin/integrations/github/repositories/${repo.id}`, body);
+  const update = async (
+    repo: AdminGithubRepoDTO,
+    changes: Partial<
+      Pick<AdminGithubRepoDTO, "isSelected" | "displayOrder" | "customDescription" | "projectId">
+    >,
+  ) => {
+    const body = {
+      isSelected: repo.isSelected,
+      displayOrder: repo.displayOrder,
+      customDescription: repo.customDescription,
+      projectId: repo.projectId,
+      ...changes,
+    };
+    const result = await apiRequest(
+      "PATCH",
+      `/api/admin/integrations/github/repositories/${repo.id}`,
+      body,
+    );
     if (!result.ok) toast.error(result.error.message);
     else github.reload();
   };
@@ -205,7 +289,12 @@ export function IntegrationsPage() {
                 <dt className="label">Account</dt>
                 <dd className="mt-1">
                   {data.username ? (
-                    <a href={`https://github.com/${data.username}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-primary hover:underline">
+                    <a
+                      href={`https://github.com/${data.username}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-primary hover:underline"
+                    >
                       @{data.username} <Icon icon={ExternalLink} size={12} />
                     </a>
                   ) : (
@@ -217,46 +306,89 @@ export function IntegrationsPage() {
               </div>
               <div>
                 <dt className="label">Automatic sync</dt>
-                <dd className="mt-1">{data.syncEnabled ? <StatusBadge tone="positive">On</StatusBadge> : <StatusBadge tone="neutral">Off</StatusBadge>}</dd>
+                <dd className="mt-1">
+                  {data.syncEnabled ? (
+                    <StatusBadge tone="positive">On</StatusBadge>
+                  ) : (
+                    <StatusBadge tone="neutral">Off</StatusBadge>
+                  )}
+                </dd>
               </div>
               <div>
                 <dt className="label">API token</dt>
-                <dd className="mt-1 text-ink-2">{data.tokenConfigured ? "Configured (higher rate limit)" : "Not set (public rate limit)"}</dd>
+                <dd className="mt-1 text-ink-2">
+                  {data.tokenConfigured
+                    ? "Configured (higher rate limit)"
+                    : "Not set (public rate limit)"}
+                </dd>
               </div>
               <div>
                 <dt className="label">Last successful sync</dt>
-                <dd className="mt-1 text-ink-2">{data.status.lastSuccessAt ? relativeTime(data.status.lastSuccessAt) : "Never"}</dd>
+                <dd className="mt-1 text-ink-2">
+                  {data.status.lastSuccessAt ? relativeTime(data.status.lastSuccessAt) : "Never"}
+                </dd>
               </div>
             </dl>
-            {data.status.lastError && data.status.lastErrorAt && (!data.status.lastSuccessAt || data.status.lastErrorAt > data.status.lastSuccessAt) ? (
+            {data.status.lastError &&
+            data.status.lastErrorAt &&
+            (!data.status.lastSuccessAt || data.status.lastErrorAt > data.status.lastSuccessAt) ? (
               <p className="mt-4 rounded-sm border border-error/40 bg-error-tint px-3 py-2 text-sm">
-                Last attempt failed {relativeTime(data.status.lastErrorAt)}: {data.status.lastError}. The site keeps showing the previous data.
+                Last attempt failed {relativeTime(data.status.lastErrorAt)}: {data.status.lastError}
+                . The site keeps showing the previous data.
               </p>
             ) : null}
           </Panel>
 
-          <Panel title="Repositories" description="Choose which repositories appear on the Projects page and link them to case studies." padded={false}>
+          <Panel
+            title="Repositories"
+            description="Choose which repositories appear on the Projects page and link them to case studies."
+            padded={false}
+          >
             {data.repositories.length === 0 ? (
-              <p className="p-5 text-sm text-ink-3">{data.username ? "Nothing synced yet. Use “Sync now”." : "Set a GitHub username in Settings first."}</p>
+              <p className="p-5 text-sm text-ink-3">
+                {data.username
+                  ? "Nothing synced yet. Use “Sync now”."
+                  : "Set a GitHub username in Settings first."}
+              </p>
             ) : (
               <ul className="divide-y divide-rule">
                 {data.repositories.map((repo) => (
-                  <li key={repo.id} className="grid gap-3 px-5 py-3 md:grid-cols-(--repo-columns) md:items-start">
+                  <li
+                    key={repo.id}
+                    className="grid gap-3 px-5 py-3 md:grid-cols-(--repo-columns) md:items-start"
+                  >
                     <label className="flex items-start gap-3">
-                      <input type="checkbox" checked={repo.isSelected} onChange={(event) => void update(repo, { isSelected: event.target.checked })} className="mt-1 size-4 accent-primary" />
+                      <input
+                        type="checkbox"
+                        checked={repo.isSelected}
+                        onChange={(event) =>
+                          void update(repo, { isSelected: event.target.checked })
+                        }
+                        className="mt-1 size-4 accent-primary"
+                      />
                       <span className="min-w-0 text-sm">
                         <span className="block font-mono text-ink">{repo.fullName}</span>
                         <span className="block text-ink-3">
-                          {[repo.primaryLanguage, repo.stars ? `★ ${repo.stars}` : null, repo.pushedAt ? `updated ${relativeTime(repo.pushedAt)}` : null, repo.isFork ? "fork" : null, repo.isArchived ? "archived" : null]
+                          {[
+                            repo.primaryLanguage,
+                            repo.stars ? `★ ${repo.stars}` : null,
+                            repo.pushedAt ? `updated ${relativeTime(repo.pushedAt)}` : null,
+                            repo.isFork ? "fork" : null,
+                            repo.isArchived ? "archived" : null,
+                          ]
                             .filter(Boolean)
                             .join(" · ")}
                         </span>
-                        {repo.description ? <span className="mt-1 block text-ink-2">{repo.description}</span> : null}
+                        {repo.description ? (
+                          <span className="mt-1 block text-ink-2">{repo.description}</span>
+                        ) : null}
                       </span>
                     </label>
                     <select
                       value={repo.projectId ?? ""}
-                      onChange={(event) => void update(repo, { projectId: event.target.value || null })}
+                      onChange={(event) =>
+                        void update(repo, { projectId: event.target.value || null })
+                      }
                       aria-label={`Case study for ${repo.fullName}`}
                       className="min-h-9 rounded-sm border border-rule-strong bg-elevated px-2 text-sm"
                     >
@@ -284,7 +416,9 @@ function duration(seconds: number): string {
   const days = Math.floor(seconds / 86_400);
   const hours = Math.floor((seconds % 86_400) / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
-  return [days ? `${days}d` : null, hours ? `${hours}h` : null, `${minutes}m`].filter(Boolean).join(" ");
+  return [days ? `${days}d` : null, hours ? `${hours}h` : null, `${minutes}m`]
+    .filter(Boolean)
+    .join(" ");
 }
 
 export function SystemPage() {
@@ -306,36 +440,99 @@ export function SystemPage() {
         <div className="grid gap-6 lg:grid-cols-2">
           <Panel title="Application">
             <dl className="grid grid-cols-2 gap-4 text-sm">
-              <div><dt className="label">Version</dt><dd className="mt-1 font-mono">{data.version}</dd></div>
-              <div><dt className="label">Environment</dt><dd className="mt-1">{data.environment}</dd></div>
-              <div><dt className="label">Node.js</dt><dd className="mt-1 font-mono">{data.nodeVersion}</dd></div>
-              <div><dt className="label">Uptime</dt><dd className="mt-1">{duration(data.uptimeSeconds)}</dd></div>
-              <div><dt className="label">Memory (RSS)</dt><dd className="mt-1">{formatBytes(data.memory.rssBytes)}</dd></div>
-              <div><dt className="label">Heap used</dt><dd className="mt-1">{formatBytes(data.memory.heapUsedBytes)}</dd></div>
+              <div>
+                <dt className="label">Version</dt>
+                <dd className="mt-1 font-mono">{data.version}</dd>
+              </div>
+              <div>
+                <dt className="label">Environment</dt>
+                <dd className="mt-1">{data.environment}</dd>
+              </div>
+              <div>
+                <dt className="label">Node.js</dt>
+                <dd className="mt-1 font-mono">{data.nodeVersion}</dd>
+              </div>
+              <div>
+                <dt className="label">Uptime</dt>
+                <dd className="mt-1">{duration(data.uptimeSeconds)}</dd>
+              </div>
+              <div>
+                <dt className="label">Memory (RSS)</dt>
+                <dd className="mt-1">{formatBytes(data.memory.rssBytes)}</dd>
+              </div>
+              <div>
+                <dt className="label">Heap used</dt>
+                <dd className="mt-1">{formatBytes(data.memory.heapUsedBytes)}</dd>
+              </div>
             </dl>
           </Panel>
           <Panel title="Database">
             <dl className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <dt className="label">Status</dt>
-                <dd className="mt-1">{data.database.status === "ok" ? <StatusBadge tone="positive">Connected</StatusBadge> : <StatusBadge tone="negative">Unavailable</StatusBadge>}</dd>
+                <dd className="mt-1">
+                  {data.database.status === "ok" ? (
+                    <StatusBadge tone="positive">Connected</StatusBadge>
+                  ) : (
+                    <StatusBadge tone="negative">Unavailable</StatusBadge>
+                  )}
+                </dd>
               </div>
-              <div><dt className="label">Latency</dt><dd className="mt-1">{data.database.latencyMs !== null ? `${data.database.latencyMs} ms` : "—"}</dd></div>
-              <div><dt className="label">Migrations applied</dt><dd className="mt-1">{data.database.migrationsApplied}</dd></div>
-              <div><dt className="label">Last migration</dt><dd className="mt-1">{data.database.lastMigrationAt ? relativeTime(data.database.lastMigrationAt) : "—"}</dd></div>
-              <div><dt className="label">Size</dt><dd className="mt-1">{data.database.sizeBytes !== null ? formatBytes(data.database.sizeBytes) : "—"}</dd></div>
+              <div>
+                <dt className="label">Latency</dt>
+                <dd className="mt-1">
+                  {data.database.latencyMs !== null ? `${data.database.latencyMs} ms` : "—"}
+                </dd>
+              </div>
+              <div>
+                <dt className="label">Migrations applied</dt>
+                <dd className="mt-1">{data.database.migrationsApplied}</dd>
+              </div>
+              <div>
+                <dt className="label">Last migration</dt>
+                <dd className="mt-1">
+                  {data.database.lastMigrationAt
+                    ? relativeTime(data.database.lastMigrationAt)
+                    : "—"}
+                </dd>
+              </div>
+              <div>
+                <dt className="label">Size</dt>
+                <dd className="mt-1">
+                  {data.database.sizeBytes !== null ? formatBytes(data.database.sizeBytes) : "—"}
+                </dd>
+              </div>
             </dl>
           </Panel>
           <Panel title="Storage and mail">
             <dl className="grid grid-cols-2 gap-4 text-sm">
-              <div><dt className="label">Storage</dt><dd className="mt-1">{data.storage.driver}</dd></div>
-              <div><dt className="label">Files</dt><dd className="mt-1">{data.storage.files} · {formatBytes(data.storage.totalBytes)}</dd></div>
+              <div>
+                <dt className="label">Storage</dt>
+                <dd className="mt-1">{data.storage.driver}</dd>
+              </div>
+              <div>
+                <dt className="label">Files</dt>
+                <dd className="mt-1">
+                  {data.storage.files} · {formatBytes(data.storage.totalBytes)}
+                </dd>
+              </div>
               <div>
                 <dt className="label">Email (SMTP)</dt>
-                <dd className="mt-1">{data.mail.configured ? <StatusBadge tone="positive">Configured</StatusBadge> : <StatusBadge tone="attention">Not configured</StatusBadge>}</dd>
+                <dd className="mt-1">
+                  {data.mail.configured ? (
+                    <StatusBadge tone="positive">Configured</StatusBadge>
+                  ) : (
+                    <StatusBadge tone="attention">Not configured</StatusBadge>
+                  )}
+                </dd>
               </div>
             </dl>
-            {!data.mail.configured ? <p className="mt-3 text-sm text-ink-3">Set the SMTP variables on the server to receive contact notifications and password reset emails.</p> : null}
+            {!data.mail.configured ? (
+              <p className="mt-3 text-sm text-ink-3">
+                Set the SMTP variables on the server to receive contact notifications and password
+                reset emails.
+              </p>
+            ) : null}
           </Panel>
           <Panel title="Integrations">
             <ul className="space-y-2 text-sm">
@@ -343,7 +540,11 @@ export function SystemPage() {
                 <li key={integration.key} className="flex items-center justify-between gap-3">
                   <span>{integration.label}</span>
                   <span className="text-ink-3">
-                    {integration.enabled ? (integration.lastSuccessAt ? `last sync ${relativeTime(integration.lastSuccessAt)}` : "never synced") : "off"}
+                    {integration.enabled
+                      ? integration.lastSuccessAt
+                        ? `last sync ${relativeTime(integration.lastSuccessAt)}`
+                        : "never synced"
+                      : "off"}
                   </span>
                 </li>
               ))}

@@ -17,7 +17,9 @@ export function CaseStudyNav({ sections }: { sections: { key: string; label: str
     if (targets.length === 0) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
         if (visible[0]) setActive(visible[0].target.id);
       },
       { rootMargin: "-20% 0px -65% 0px" },
@@ -37,10 +39,14 @@ export function CaseStudyNav({ sections }: { sections: { key: string; label: str
               aria-current={active === section.key ? "location" : undefined}
               className={cn(
                 "-ml-px flex min-h-9 items-center gap-3 border-l-2 py-1 pl-3 text-sm transition-colors duration-(--duration-fast)",
-                active === section.key ? "border-accent-mark text-ink" : "border-transparent text-ink-3 hover:text-ink",
+                active === section.key
+                  ? "border-accent-mark text-ink"
+                  : "border-transparent text-ink-3 hover:text-ink",
               )}
             >
-              <span className="font-mono text-xs tabular-nums">{String(index + 1).padStart(2, "0")}</span>
+              <span className="font-mono text-xs tabular-nums">
+                {String(index + 1).padStart(2, "0")}
+              </span>
               {section.label}
             </a>
           </li>

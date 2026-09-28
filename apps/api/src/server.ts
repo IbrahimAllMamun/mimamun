@@ -60,7 +60,9 @@ async function main() {
   };
   process.on("SIGTERM", () => shutdown("SIGTERM"));
   process.on("SIGINT", () => shutdown("SIGINT"));
-  process.on("unhandledRejection", (reason) => logger.error({ err: reason }, "unhandled rejection"));
+  process.on("unhandledRejection", (reason) =>
+    logger.error({ err: reason }, "unhandled rejection"),
+  );
 }
 
 main().catch((error: unknown) => {

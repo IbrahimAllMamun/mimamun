@@ -17,7 +17,9 @@ export function setIn<T>(source: T, path: string, value: unknown): T {
     ? [...source]
     : { ...((source as Record<string, unknown> | null) ?? {}) };
   const current = (container as Record<string, unknown>)[head];
-  const next = rest.length ? setIn(current ?? (/^\d+$/.test(rest[0] ?? "") ? [] : {}), rest.join("."), value) : value;
+  const next = rest.length
+    ? setIn(current ?? (/^\d+$/.test(rest[0] ?? "") ? [] : {}), rest.join("."), value)
+    : value;
   (container as Record<string, unknown>)[head] = next;
   return container as T;
 }

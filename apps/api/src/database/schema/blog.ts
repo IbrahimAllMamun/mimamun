@@ -15,7 +15,10 @@ export const blogPosts = pgTable(
     slug: text().notNull().unique(),
     excerpt: text(),
     coverMediaId: uuid().references(() => media.id, { onDelete: "restrict" }),
-    body: jsonb().$type<Block[]>().notNull().default(sql`'[]'::jsonb`),
+    body: jsonb()
+      .$type<Block[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
     authorId: uuid().references(() => users.id, { onDelete: "set null" }),
     status: contentStatusEnum().notNull().default("draft"),
     visibility: visibilityEnum().notNull().default("public"),

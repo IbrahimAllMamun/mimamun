@@ -12,7 +12,9 @@ const repositoryRoot = path.resolve(process.cwd(), "../..");
 const rootEnvFile = path.join(repositoryRoot, ".env");
 if (existsSync(rootEnvFile)) {
   const parsed = parseEnv(readFileSync(rootEnvFile, "utf8"));
-  const missing = Object.fromEntries(Object.entries(parsed).filter(([key]) => process.env[key] === undefined));
+  const missing = Object.fromEntries(
+    Object.entries(parsed).filter(([key]) => process.env[key] === undefined),
+  );
   Object.assign(process.env, missing);
   updateInitialEnv(missing);
 }

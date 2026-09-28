@@ -8,7 +8,10 @@ function countDescendants(node: CredentialNodeDTO): number {
 }
 
 /** Keeps nodes of the given type, plus the ancestors needed to show where they sit. */
-export function filterTree(nodes: CredentialNodeDTO[], typeSlug: string | null): CredentialNodeDTO[] {
+export function filterTree(
+  nodes: CredentialNodeDTO[],
+  typeSlug: string | null,
+): CredentialNodeDTO[] {
   if (!typeSlug) return nodes;
   return nodes.flatMap((node) => {
     const children = filterTree(node.children, typeSlug);
@@ -52,7 +55,13 @@ function CredentialRow({ node }: { node: CredentialNodeDTO }) {
  * native disclosure widgets, open by default, so long programmes can be
  * folded without JavaScript.
  */
-export function CredentialTree({ nodes, depth = 0 }: { nodes: CredentialNodeDTO[]; depth?: number }) {
+export function CredentialTree({
+  nodes,
+  depth = 0,
+}: {
+  nodes: CredentialNodeDTO[];
+  depth?: number;
+}) {
   if (nodes.length === 0) return null;
   return (
     <ol className={cn(depth > 0 && "ml-1.5 border-l border-rule pl-5")}>
@@ -62,7 +71,10 @@ export function CredentialTree({ nodes, depth = 0 }: { nodes: CredentialNodeDTO[
           {node.children.length ? (
             <details open className="group/branch pb-3">
               <summary className="inline-flex min-h-11 cursor-pointer items-center gap-2 font-mono text-xs text-primary">
-                <span aria-hidden className="transition-transform duration-(--duration-fast) group-open/branch:rotate-90">
+                <span
+                  aria-hidden
+                  className="transition-transform duration-(--duration-fast) group-open/branch:rotate-90"
+                >
                   ›
                 </span>
                 {pluralize(countDescendants(node), "item")} in this {node.type.name.toLowerCase()}

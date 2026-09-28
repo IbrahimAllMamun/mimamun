@@ -32,7 +32,8 @@ export function numberFigures(groups: Block[][]): Map<string, number> {
   let next = 1;
   for (const blocks of groups) {
     for (const block of blocks) {
-      if (["image", "gallery", "chart", "table", "video", "embed"].includes(block.type)) numbers.set(block.id, next++);
+      if (["image", "gallery", "chart", "table", "video", "embed"].includes(block.type))
+        numbers.set(block.id, next++);
     }
   }
   return numbers;
@@ -48,7 +49,17 @@ function Caption({ number, children }: { number?: number; children?: React.React
   );
 }
 
-function FigureImage({ media, alt, sizes, priority = false }: { media: MediaDTO; alt: string; sizes: string; priority?: boolean }) {
+function FigureImage({
+  media,
+  alt,
+  sizes,
+  priority = false,
+}: {
+  media: MediaDTO;
+  alt: string;
+  sizes: string;
+  priority?: boolean;
+}) {
   if (!media.width || !media.height) return null;
   return (
     <Image
@@ -64,24 +75,52 @@ function FigureImage({ media, alt, sizes, priority = false }: { media: MediaDTO;
   );
 }
 
-function ImageBlock({ block, media, number }: { block: BlockOf<"image">; media: MediaMap; number?: number }) {
+function ImageBlock({
+  block,
+  media,
+  number,
+}: {
+  block: BlockOf<"image">;
+  media: MediaMap;
+  number?: number;
+}) {
   const item = media[block.data.mediaId];
   if (!item) return null;
-  const widthClass = block.data.width === "full" ? "lg:-mx-24" : block.data.width === "wide" ? "lg:-mx-12" : "";
+  const widthClass =
+    block.data.width === "full" ? "lg:-mx-24" : block.data.width === "wide" ? "lg:-mx-12" : "";
   return (
     <figure className={cn("reveal", widthClass)}>
-      <FigureImage media={item} alt={block.data.alt || item.alt} sizes="(min-width: 1024px) 760px, 100vw" />
+      <FigureImage
+        media={item}
+        alt={block.data.alt || item.alt}
+        sizes="(min-width: 1024px) 760px, 100vw"
+      />
       <Caption number={number}>{block.data.caption ?? item.caption}</Caption>
     </figure>
   );
 }
 
-function GalleryBlock({ block, media, number }: { block: BlockOf<"gallery">; media: MediaMap; number?: number }) {
-  const items = block.data.items.map((entry) => ({ entry, media: media[entry.mediaId] })).filter((item) => item.media);
+function GalleryBlock({
+  block,
+  media,
+  number,
+}: {
+  block: BlockOf<"gallery">;
+  media: MediaMap;
+  number?: number;
+}) {
+  const items = block.data.items
+    .map((entry) => ({ entry, media: media[entry.mediaId] }))
+    .filter((item) => item.media);
   if (items.length === 0) return null;
   return (
     <figure className="reveal">
-      <ul className={cn("grid grid-cols-1 gap-3", block.data.columns === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
+      <ul
+        className={cn(
+          "grid grid-cols-1 gap-3",
+          block.data.columns === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2",
+        )}
+      >
         {items.map(({ entry, media: item }) => (
           <li key={entry.mediaId} className="space-y-1.5">
             <FigureImage media={item!} alt={item!.alt} sizes="(min-width: 640px) 380px, 100vw" />
@@ -96,7 +135,11 @@ function GalleryBlock({ block, media, number }: { block: BlockOf<"gallery">; med
 
 function TableBlock({ block, number }: { block: BlockOf<"table">; number?: number }) {
   const { columns, rows, caption, note } = block.data;
-  const numeric = columns.map((_, index) => rows.length > 0 && rows.every((row) => /^[-+]?[\d.,%]+$/.test((row[index] ?? "").trim()) || !row[index]));
+  const numeric = columns.map(
+    (_, index) =>
+      rows.length > 0 &&
+      rows.every((row) => /^[-+]?[\d.,%]+$/.test((row[index] ?? "").trim()) || !row[index]),
+  );
   return (
     <figure className="reveal">
       <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={caption ?? "Table"}>
@@ -108,7 +151,14 @@ function TableBlock({ block, number }: { block: BlockOf<"table">; number?: numbe
                 <th
                   key={column.label}
                   scope="col"
-                  className={cn("py-2 pr-4 font-semibold", numeric[index] || column.align === "right" ? "text-right" : column.align === "center" ? "text-center" : "text-left")}
+                  className={cn(
+                    "py-2 pr-4 font-semibold",
+                    numeric[index] || column.align === "right"
+                      ? "text-right"
+                      : column.align === "center"
+                        ? "text-center"
+                        : "text-left",
+                  )}
                 >
                   {column.label}
                 </th>
@@ -119,7 +169,13 @@ function TableBlock({ block, number }: { block: BlockOf<"table">; number?: numbe
             {rows.map((row, rowIndex) => (
               <tr key={rowIndex} className="border-t border-rule">
                 {row.map((cell, index) => (
-                  <td key={index} className={cn("py-1.5 pr-4", numeric[index] ? "text-right font-mono text-xs" : "text-left")}>
+                  <td
+                    key={index}
+                    className={cn(
+                      "py-1.5 pr-4",
+                      numeric[index] ? "text-right font-mono text-xs" : "text-left",
+                    )}
+                  >
                     {cell}
                   </td>
                 ))}
@@ -140,7 +196,10 @@ function MetricBlock({ block }: { block: BlockOf<"metric"> }) {
   return (
     <dl className="reveal grid grid-cols-2 border-y border-rule sm:grid-cols-3">
       {block.data.items.map((item) => (
-        <div key={item.label} className="border-rule py-4 pr-4 [&:not(:first-child)]:border-l [&:not(:first-child)]:pl-4">
+        <div
+          key={item.label}
+          className="border-rule py-4 pr-4 [&:not(:first-child)]:border-l [&:not(:first-child)]:pl-4"
+        >
           <dt className="label">{item.label}</dt>
           <dd className="mt-1 font-serif text-3xl tabular-nums text-ink">
             {item.value}
@@ -165,7 +224,10 @@ function CodeBlock({ block }: { block: BlockOf<"code"> }) {
         <span className="label">{language}</span>
         {caption ? <span className="font-mono text-xs text-ink-3">{caption}</span> : null}
       </div>
-      <pre className="overflow-x-auto bg-surface px-4 py-3 font-mono text-sm leading-relaxed text-ink" tabIndex={0}>
+      <pre
+        className="overflow-x-auto bg-surface px-4 py-3 font-mono text-sm leading-relaxed text-ink"
+        tabIndex={0}
+      >
         {/* highlight.js output is escaped HTML built from the code string. */}
         {html ? <code dangerouslySetInnerHTML={{ __html: html }} /> : <code>{code}</code>}
       </pre>
@@ -194,7 +256,10 @@ function MethodologyBlock({ block }: { block: BlockOf<"methodology"> }) {
       <ol className="relative space-y-5 border-l border-rule-strong pl-6">
         {block.data.steps.map((step, index) => (
           <li key={`${step.title}-${index}`} className="relative">
-            <span aria-hidden className="absolute top-1.5 -left-6 size-2.5 -translate-x-1/2 rounded-full border-2 border-paper bg-primary" />
+            <span
+              aria-hidden
+              className="absolute top-1.5 -left-6 size-2.5 -translate-x-1/2 rounded-full border-2 border-paper bg-primary"
+            />
             <p className="font-mono text-xs text-ink-3">Step {index + 1}</p>
             <p className="font-serif text-lg text-ink">{step.title}</p>
             <Markdown source={step.description} className="prose-ui text-ink-2" />
@@ -205,13 +270,26 @@ function MethodologyBlock({ block }: { block: BlockOf<"methodology"> }) {
   );
 }
 
-function VideoBlock({ block, media, number }: { block: BlockOf<"video">; media: MediaMap; number?: number }) {
+function VideoBlock({
+  block,
+  media,
+  number,
+}: {
+  block: BlockOf<"video">;
+  media: MediaMap;
+  number?: number;
+}) {
   if (block.data.source === "upload") {
     const file = block.data.mediaId ? media[block.data.mediaId] : undefined;
     if (!file) return null;
     return (
       <figure className="reveal">
-        <video controls preload="metadata" className="w-full rounded-xs border border-rule bg-muted" aria-label={block.data.title}>
+        <video
+          controls
+          preload="metadata"
+          className="w-full rounded-xs border border-rule bg-muted"
+          aria-label={block.data.title}
+        >
           <source src={file.url} type={file.mimeType} />
         </video>
         <Caption number={number}>{block.data.caption ?? block.data.title}</Caption>
@@ -241,7 +319,10 @@ function VideoBlock({ block, media, number }: { block: BlockOf<"video">; media: 
 function EmbedBlock({ block, number }: { block: BlockOf<"embed">; number?: number }) {
   return (
     <figure className="reveal">
-      <div className="overflow-hidden rounded-xs border border-rule bg-muted" style={{ height: block.data.height }}>
+      <div
+        className="overflow-hidden rounded-xs border border-rule bg-muted"
+        style={{ height: block.data.height }}
+      >
         <iframe
           src={block.data.url}
           title={block.data.title}
@@ -272,10 +353,13 @@ function FileBlock({ block, media }: { block: BlockOf<"file">; media: MediaMap }
       >
         <Icon icon={FileDown} size={20} className="mt-0.5 shrink-0 text-primary" />
         <span>
-          <span className="block font-medium text-ink group-hover:underline">{block.data.label ?? file.title ?? file.fileName}</span>
+          <span className="block font-medium text-ink group-hover:underline">
+            {block.data.label ?? file.title ?? file.fileName}
+          </span>
           <span className="block text-sm text-ink-3">
             {block.data.description ? `${block.data.description} · ` : ""}
-            {file.mimeType === "application/pdf" ? "PDF" : file.mimeType} · {Math.max(1, Math.round(file.sizeBytes / 1024))} KB
+            {file.mimeType === "application/pdf" ? "PDF" : file.mimeType} ·{" "}
+            {Math.max(1, Math.round(file.sizeBytes / 1024))} KB
           </span>
         </span>
       </a>
@@ -312,7 +396,9 @@ export function BlockView({
     case "quote":
       return (
         <blockquote className="reveal max-w-measure border-l-2 border-secondary pl-5">
-          <p className="font-serif-italic text-2xl leading-snug text-ink italic">“{block.data.text}”</p>
+          <p className="font-serif-italic text-2xl leading-snug text-ink italic">
+            “{block.data.text}”
+          </p>
           {block.data.attribution || block.data.source ? (
             <footer className="mt-2 text-sm text-ink-3">
               — {block.data.attribution}
@@ -368,7 +454,13 @@ export function Blocks({
   return (
     <div className={cn("space-y-(--space-block)", className)}>
       {blocks.map((block) => (
-        <BlockView key={block.id} block={block} media={media} figureNumbers={numbers} headingBase={headingBase} />
+        <BlockView
+          key={block.id}
+          block={block}
+          media={media}
+          figureNumbers={numbers}
+          headingBase={headingBase}
+        />
       ))}
     </div>
   );

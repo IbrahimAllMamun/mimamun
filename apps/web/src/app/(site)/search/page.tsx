@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Search } from "lucide-react";
-import { ENTITY_TYPE_LABELS, pluralize, type EntityType, type SearchResultDTO } from "@portfolio/shared";
+import {
+  ENTITY_TYPE_LABELS,
+  pluralize,
+  type EntityType,
+  type SearchResultDTO,
+} from "@portfolio/shared";
 import { PageHeader } from "@/components/site/page-header";
 import { Icon } from "@/components/ui/icon";
 import { EmptyState, UnavailableNotice } from "@/components/ui/states";
@@ -12,7 +17,13 @@ import { pageMetadata } from "@/lib/seo";
 export async function generateMetadata(): Promise<Metadata> {
   const site = await publicApi.site();
   // Result pages are thin and unbounded; keep them out of search engines.
-  return pageMetadata({ site: site.ok ? site.data : null, title: "Search", path: "/search", routeKey: "search", noindex: true });
+  return pageMetadata({
+    site: site.ok ? site.data : null,
+    title: "Search",
+    path: "/search",
+    routeKey: "search",
+    noindex: true,
+  });
 }
 
 function escapeRegExp(value: string): string {
@@ -66,13 +77,21 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
 
   return (
     <>
-      <PageHeader eyebrow="Search" title="Search" lead="Projects, research, publications, certifications and writing.">
+      <PageHeader
+        eyebrow="Search"
+        title="Search"
+        lead="Projects, research, publications, certifications and writing."
+      >
         <form action="/search" role="search" className="flex max-w-2xl gap-2">
           <label htmlFor="site-search" className="sr-only">
             Search the site
           </label>
           <div className="relative flex-1">
-            <Icon icon={Search} size={18} className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-ink-3" />
+            <Icon
+              icon={Search}
+              size={18}
+              className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-ink-3"
+            />
             <input
               id="site-search"
               name="q"
@@ -84,7 +103,10 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
               className="min-h-12 w-full rounded-sm border border-rule-strong bg-elevated pr-3 pl-11 text-base text-ink placeholder:text-ink-3 focus:border-ink"
             />
           </div>
-          <button type="submit" className="min-h-12 rounded-sm bg-primary px-5 text-sm font-medium text-on-primary transition-colors duration-(--duration-fast) hover:bg-primary-hover">
+          <button
+            type="submit"
+            className="min-h-12 rounded-sm bg-primary px-5 text-sm font-medium text-on-primary transition-colors duration-(--duration-fast) hover:bg-primary-hover"
+          >
             Search
           </button>
         </form>
@@ -124,18 +146,30 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
         ) : (
           <>
             <p role="status" className="label mb-6">
-              {pluralize(result.data.length, "result")} for <span className="normal-case">“{q}”</span>
+              {pluralize(result.data.length, "result")} for{" "}
+              <span className="normal-case">“{q}”</span>
             </p>
             <div className="space-y-12">
               {[...groups.entries()].map(([type, items]) => (
-                <section key={type} aria-labelledby={`results-${type}`} className="grid-editorial gap-y-3">
-                  <h2 id={`results-${type}`} className="label col-span-4 sm:col-span-8 lg:col-span-3">
-                    {GROUP_LABELS[type] ?? ENTITY_TYPE_LABELS[type]} <span className="text-ink-3">({items.length})</span>
+                <section
+                  key={type}
+                  aria-labelledby={`results-${type}`}
+                  className="grid-editorial gap-y-3"
+                >
+                  <h2
+                    id={`results-${type}`}
+                    className="label col-span-4 sm:col-span-8 lg:col-span-3"
+                  >
+                    {GROUP_LABELS[type] ?? ENTITY_TYPE_LABELS[type]}{" "}
+                    <span className="text-ink-3">({items.length})</span>
                   </h2>
                   <ol className="col-span-4 border-t border-rule sm:col-span-8 lg:col-span-9">
                     {items.map((item) => (
                       <li key={item.url} className="group relative border-b border-rule py-4">
-                        <Link href={item.url} className="font-serif text-xl text-ink after:absolute after:inset-0 group-hover:underline">
+                        <Link
+                          href={item.url}
+                          className="font-serif text-xl text-ink after:absolute after:inset-0 group-hover:underline"
+                        >
                           <Highlight text={item.title} terms={terms} />
                         </Link>
                         {item.excerpt ? (
@@ -143,7 +177,9 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
                             <Highlight text={item.excerpt} terms={terms} />
                           </p>
                         ) : null}
-                        {item.meta ? <p className="mt-1 font-mono text-xs text-ink-3">{item.meta}</p> : null}
+                        {item.meta ? (
+                          <p className="mt-1 font-mono text-xs text-ink-3">{item.meta}</p>
+                        ) : null}
                       </li>
                     ))}
                   </ol>

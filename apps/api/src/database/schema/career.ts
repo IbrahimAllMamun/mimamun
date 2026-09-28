@@ -38,12 +38,27 @@ export const experiences = pgTable(
     endDate: date({ mode: "string" }),
     isCurrent: boolean().notNull().default(false),
     summary: text(),
-    responsibilities: text().array().notNull().default(sql`'{}'::text[]`),
-    achievements: text().array().notNull().default(sql`'{}'::text[]`),
-    technologies: text().array().notNull().default(sql`'{}'::text[]`),
-    domains: text().array().notNull().default(sql`'{}'::text[]`),
+    responsibilities: text()
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    achievements: text()
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    technologies: text()
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    domains: text()
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     /** Presentation-only annotations; never queried, so JSONB is appropriate. */
-    metrics: jsonb().$type<ExperienceMetric[]>().notNull().default(sql`'[]'::jsonb`),
+    metrics: jsonb()
+      .$type<ExperienceMetric[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
     featured: boolean().notNull().default(false),
     displayOrder: integer().notNull().default(0),
     isVisible: boolean().notNull().default(true),
@@ -77,7 +92,10 @@ export const education = pgTable(
     gradeScale: numeric({ precision: 5, scale: 2, mode: "number" }),
     projectTitle: text(),
     description: text(),
-    courses: text().array().notNull().default(sql`'{}'::text[]`),
+    courses: text()
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     featured: boolean().notNull().default(false),
     displayOrder: integer().notNull().default(0),
     isVisible: boolean().notNull().default(true),

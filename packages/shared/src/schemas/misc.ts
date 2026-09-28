@@ -1,10 +1,5 @@
 import { z } from "zod";
-import {
-  ANALYTICS_EVENT_TYPES,
-  CONTACT_STATUSES,
-  ENTITY_TYPES,
-  MEDIA_KINDS,
-} from "../enums";
+import { ANALYTICS_EVENT_TYPES, CONTACT_STATUSES, ENTITY_TYPES, MEDIA_KINDS } from "../enums";
 import { email, emptyToNull, nullableText, requiredText, uuid } from "./common";
 
 // ── Contact ───────────────────────────────────────────────────────────────

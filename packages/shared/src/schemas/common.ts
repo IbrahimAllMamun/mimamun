@@ -29,7 +29,10 @@ export const requiredText = (max: number, label = "This field") =>
 export const nullableText = (max: number, label = "This field") =>
   z.preprocess(
     emptyToNull,
-    z.string().max(max, { error: `${label} must be at most ${max} characters` }).nullable(),
+    z
+      .string()
+      .max(max, { error: `${label} must be at most ${max} characters` })
+      .nullable(),
   );
 
 export const slug = z
@@ -100,7 +103,9 @@ export const stringList = (maxItems: number, maxLength: number, label = "Item") 
         .filter((item) => item !== "");
     },
     z
-      .array(z.string().max(maxLength, { error: `${label} must be at most ${maxLength} characters` }))
+      .array(
+        z.string().max(maxLength, { error: `${label} must be at most ${maxLength} characters` }),
+      )
       .max(maxItems, { error: `At most ${maxItems} entries` })
       .transform((items) => [...new Set(items)]),
   );
@@ -137,7 +142,16 @@ export type ReorderInput = z.infer<typeof reorderInput>;
 
 export const bulkInput = z.object({
   ids: z.array(uuid).min(1).max(200),
-  action: z.enum(["publish", "unpublish", "archive", "feature", "unfeature", "show", "hide", "delete"]),
+  action: z.enum([
+    "publish",
+    "unpublish",
+    "archive",
+    "feature",
+    "unfeature",
+    "show",
+    "hide",
+    "delete",
+  ]),
 });
 export type BulkInput = z.infer<typeof bulkInput>;
 export type BulkAction = BulkInput["action"];

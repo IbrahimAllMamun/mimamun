@@ -44,7 +44,9 @@ export interface TestContext {
 
 export const ADMIN = { email: "admin@test.local", password: "admin-password-for-tests" };
 
-export async function createTestContext(overrides: Partial<Record<string, string>> = {}): Promise<TestContext> {
+export async function createTestContext(
+  overrides: Partial<Record<string, string>> = {},
+): Promise<TestContext> {
   const uploadDir = await mkdtemp(path.join(os.tmpdir(), "portfolio-uploads-"));
   const config: AppConfig = loadConfig({
     NODE_ENV: "test",
@@ -92,7 +94,9 @@ export async function resetDatabase(deps: AppDeps): Promise<void> {
   );
   const tables = result.rows.map((row) => `"${row.tablename}"`).join(", ");
   if (tables) await deps.db.execute(sql.raw(`TRUNCATE ${tables} RESTART IDENTITY CASCADE`));
-  await seed(deps.db, { admin: { email: ADMIN.email, name: "Test Admin", password: ADMIN.password } });
+  await seed(deps.db, {
+    admin: { email: ADMIN.email, name: "Test Admin", password: ADMIN.password },
+  });
 }
 
 export async function createUser(
@@ -105,7 +109,12 @@ export async function createUser(
   if (!role) throw new Error(`role ${roleKey} missing`);
   const [user] = await deps.db
     .insert(users)
-    .values({ email, name: email.split("@")[0] ?? email, roleId: role.id, passwordHash: await hashPassword(password) })
+    .values({
+      email,
+      name: email.split("@")[0] ?? email,
+      roleId: role.id,
+      passwordHash: await hashPassword(password),
+    })
     .returning();
   return { email, password, id: user!.id };
 }
@@ -117,7 +126,10 @@ export interface Session {
   headers: Record<string, string>;
 }
 
-export async function login(app: Express, credentials: { email: string; password: string }): Promise<Session> {
+export async function login(
+  app: Express,
+  credentials: { email: string; password: string },
+): Promise<Session> {
   const agent = request.agent(app);
   const response = await agent
     .post("/api/auth/login")

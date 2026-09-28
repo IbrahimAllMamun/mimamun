@@ -35,7 +35,9 @@ export function SectionHeader({
           {index ? <span className="text-ink-2">{index} — </span> : null}
           {label}
         </p>
-        {count ? <p className="label mt-1 hidden font-normal normal-case lg:block">{count}</p> : null}
+        {count ? (
+          <p className="label mt-1 hidden font-normal normal-case lg:block">{count}</p>
+        ) : null}
       </div>
       <div className="col-span-4 space-y-3 sm:col-span-8 lg:col-span-9">
         <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">

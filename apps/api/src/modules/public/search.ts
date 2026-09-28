@@ -9,7 +9,14 @@ import type { DbExecutor } from "../../database/client";
  */
 export async function searchPublic(db: DbExecutor, q: string): Promise<SearchResultDTO[]> {
   const like = `%${q.replace(/[%_\\]/g, "\\$&")}%`;
-  const result = await db.execute<{ type: SearchResultDTO["type"]; title: string; slug: string; excerpt: string | null; meta: string | null; rank: number }>(sql`
+  const result = await db.execute<{
+    type: SearchResultDTO["type"];
+    title: string;
+    slug: string;
+    excerpt: string | null;
+    meta: string | null;
+    rank: number;
+  }>(sql`
     WITH query AS (SELECT websearch_to_tsquery('english', ${q}) AS tsq)
     SELECT * FROM (
       SELECT 'project' AS type, title, slug, summary AS excerpt, NULL::text AS meta,

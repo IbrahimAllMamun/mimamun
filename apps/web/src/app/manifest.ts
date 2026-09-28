@@ -5,7 +5,8 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Ibrahim All-Mamun — Data Scientist",
     short_name: "All-Mamun",
-    description: "Portfolio of Ibrahim All-Mamun, data scientist: projects, research, experience and writing.",
+    description:
+      "Portfolio of Ibrahim All-Mamun, data scientist: projects, research, experience and writing.",
     start_url: "/",
     display: "browser",
     background_color: THEME_COLOR.light,

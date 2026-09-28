@@ -1,14 +1,5 @@
 import { sql } from "drizzle-orm";
-import {
-  boolean,
-  check,
-  index,
-  integer,
-  pgTable,
-  smallint,
-  text,
-  uuid,
-} from "drizzle-orm/pg-core";
+import { boolean, check, index, integer, pgTable, smallint, text, uuid } from "drizzle-orm/pg-core";
 import { id, timestamps, updatedAt } from "./_helpers";
 import { navLocationEnum } from "./enums";
 import { media } from "./media";
@@ -121,9 +112,6 @@ export const siteSettings = pgTable(
   },
   (t) => [
     check("site_settings_singleton", sql`${t.id} = 1`),
-    check(
-      "site_settings_retention_range",
-      sql`${t.analyticsRetentionDays} BETWEEN 30 AND 1095`,
-    ),
+    check("site_settings_retention_range", sql`${t.analyticsRetentionDays} BETWEEN 30 AND 1095`),
   ],
 );

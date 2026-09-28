@@ -31,7 +31,11 @@ export function mediaRouter(deps: AppDeps): Router {
   const upload = multer({
     storage: multer.memoryStorage(),
     limits: {
-      fileSize: Math.max(config.uploads.maxImageBytes, config.uploads.maxDocumentBytes, config.uploads.maxVideoBytes),
+      fileSize: Math.max(
+        config.uploads.maxImageBytes,
+        config.uploads.maxDocumentBytes,
+        config.uploads.maxVideoBytes,
+      ),
       files: 1,
       fields: 10,
       fieldSize: 2000,
@@ -40,7 +44,9 @@ export function mediaRouter(deps: AppDeps): Router {
   }).single("file");
 
   router.use(requirePermission(PERMISSIONS.MEDIA_MANAGE));
-  router.param("id", (_req, _res, next, value: string) => next(UUID_PATTERN.test(value) ? undefined : notFound("File")));
+  router.param("id", (_req, _res, next, value: string) =>
+    next(UUID_PATTERN.test(value) ? undefined : notFound("File")),
+  );
 
   router.get("/", async (req, res) => {
     const query = parse(mediaListQuery, req.query);
@@ -49,7 +55,8 @@ export function mediaRouter(deps: AppDeps): Router {
   });
 
   router.post("/", upload, async (req, res) => {
-    if (!req.file) throw badRequest("Choose a file to upload", [{ path: "file", message: "Required" }]);
+    if (!req.file)
+      throw badRequest("Choose a file to upload", [{ path: "file", message: "Required" }]);
     const fields = parse(uploadFields, req.body ?? {});
     const processed = await processUpload(req.file, config.uploads);
     const storageKey = newStorageKey(processed.type.ext);
@@ -77,7 +84,11 @@ export function mediaRouter(deps: AppDeps): Router {
           entityType: "media",
           entityId: inserted.id,
           summary: `Uploaded ${inserted.originalName}`,
-          after: { originalName: inserted.originalName, mimeType: inserted.mimeType, sizeBytes: inserted.sizeBytes },
+          after: {
+            originalName: inserted.originalName,
+            mimeType: inserted.mimeType,
+            sizeBytes: inserted.sizeBytes,
+          },
         });
         return inserted;
       });
@@ -95,7 +106,10 @@ export function mediaRouter(deps: AppDeps): Router {
       .leftJoin(users, eq(users.id, media.uploadedBy))
       .where(eq(media.id, String(req.params.id)));
     if (!row) throw notFound("File");
-    ok(res, { ...toAdminMediaDTO(row.media, row.uploader), usage: await findMediaUsage(db, row.media.id) });
+    ok(res, {
+      ...toAdminMediaDTO(row.media, row.uploader),
+      usage: await findMediaUsage(db, row.media.id),
+    });
   });
 
   router.patch("/:id", async (req, res) => {
@@ -104,13 +118,21 @@ export function mediaRouter(deps: AppDeps): Router {
     const row = await db.transaction(async (tx) => {
       const [before] = await tx.select().from(media).where(eq(media.id, id));
       if (!before) throw notFound("File");
-      const [updated] = await tx.update(media).set(metadataValues(input)).where(eq(media.id, id)).returning();
+      const [updated] = await tx
+        .update(media)
+        .set(metadataValues(input))
+        .where(eq(media.id, id))
+        .returning();
       await recordAudit(tx, req, {
         action: "media.update",
         entityType: "media",
         entityId: id,
         summary: `Updated details of ${before.originalName}`,
-        before: metadataValues({ title: before.title, altText: before.altText, caption: before.caption }),
+        before: metadataValues({
+          title: before.title,
+          altText: before.altText,
+          caption: before.caption,
+        }),
         after: metadataValues(input),
       });
       return updated!;
@@ -121,7 +143,8 @@ export function mediaRouter(deps: AppDeps): Router {
 
   /** Replaces the file but keeps the id, so every reference picks up the new file. */
   router.post("/:id/replace", upload, async (req, res) => {
-    if (!req.file) throw badRequest("Choose a file to upload", [{ path: "file", message: "Required" }]);
+    if (!req.file)
+      throw badRequest("Choose a file to upload", [{ path: "file", message: "Required" }]);
     const id = String(req.params.id);
     const [existing] = await db.select().from(media).where(eq(media.id, id));
     if (!existing) throw notFound("File");

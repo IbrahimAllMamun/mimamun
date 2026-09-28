@@ -37,10 +37,16 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
                       aria-current={active ? "page" : undefined}
                       className={cn(
                         "flex min-h-9 items-center gap-2.5 rounded-sm px-3 text-sm transition-colors duration-(--duration-fast)",
-                        active ? "bg-primary-tint font-medium text-ink" : "text-ink-2 hover:bg-muted hover:text-ink",
+                        active
+                          ? "bg-primary-tint font-medium text-ink"
+                          : "text-ink-2 hover:bg-muted hover:text-ink",
                       )}
                     >
-                      <Icon icon={item.icon} size={16} className={active ? "text-primary" : "text-ink-3"} />
+                      <Icon
+                        icon={item.icon}
+                        size={16}
+                        className={active ? "text-primary" : "text-ink-3"}
+                      />
                       {item.label}
                     </Link>
                   </li>
@@ -94,13 +100,25 @@ function UserMenu() {
         className="inset-auto top-14 right-4 m-0 w-60 rounded-sm border border-rule bg-elevated p-1 text-sm text-ink shadow-popover"
       >
         <p className="border-b border-rule px-3 py-2 text-xs text-ink-3">{session.user.email}</p>
-        <Link href="/admin/account" className="flex min-h-9 items-center gap-2 rounded-xs px-3 hover:bg-muted">
+        <Link
+          href="/admin/account"
+          className="flex min-h-9 items-center gap-2 rounded-xs px-3 hover:bg-muted"
+        >
           <Icon icon={UserRound} size={15} /> Account and password
         </Link>
-        <a href="/" target="_blank" rel="noopener noreferrer" className="flex min-h-9 items-center gap-2 rounded-xs px-3 hover:bg-muted">
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex min-h-9 items-center gap-2 rounded-xs px-3 hover:bg-muted"
+        >
           <Icon icon={ExternalLink} size={15} /> View site
         </a>
-        <button type="button" onClick={signOut} className="flex min-h-9 w-full items-center gap-2 rounded-xs px-3 text-left hover:bg-muted">
+        <button
+          type="button"
+          onClick={signOut}
+          className="flex min-h-9 w-full items-center gap-2 rounded-xs px-3 text-left hover:bg-muted"
+        >
           <Icon icon={LogOut} size={15} /> Sign out
         </button>
       </div>
@@ -140,7 +158,12 @@ function Shell({ children }: { children: ReactNode }) {
       >
         <div className="flex items-center justify-between border-b border-rule py-3 pr-2">
           <Brand />
-          <button type="button" onClick={() => drawer.current?.close()} className="rounded-sm p-2 text-ink-3 hover:bg-muted" aria-label="Close navigation">
+          <button
+            type="button"
+            onClick={() => drawer.current?.close()}
+            className="rounded-sm p-2 text-ink-3 hover:bg-muted"
+            aria-label="Close navigation"
+          >
             <Icon icon={X} size={18} />
           </button>
         </div>
@@ -165,7 +188,11 @@ function Shell({ children }: { children: ReactNode }) {
           </div>
           <UserMenu />
         </header>
-        <main id="admin-main" tabIndex={-1} className="flex-1 px-4 py-6 focus:outline-none sm:px-6 lg:px-10 lg:py-8">
+        <main
+          id="admin-main"
+          tabIndex={-1}
+          className="flex-1 px-4 py-6 focus:outline-none sm:px-6 lg:px-10 lg:py-8"
+        >
           {children}
         </main>
       </div>

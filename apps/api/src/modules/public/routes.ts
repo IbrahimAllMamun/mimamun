@@ -148,10 +148,16 @@ export function cvRouter(deps: AppDeps): Router {
       res.redirect(302, "/contact?topic=cv");
       return;
     }
-    const [settings] = await deps.db.select({ enabled: siteSettings.analyticsEnabled }).from(siteSettings);
+    const [settings] = await deps.db
+      .select({ enabled: siteSettings.analyticsEnabled })
+      .from(siteSettings);
     if (settings?.enabled && shouldTrack(req)) {
       try {
-        await recordEvent(deps.db, deps.config, req, { type: "download", path: "/cv", target: "/cv" });
+        await recordEvent(deps.db, deps.config, req, {
+          type: "download",
+          path: "/cv",
+          target: "/cv",
+        });
       } catch (error) {
         deps.logger.warn({ err: error }, "could not record CV download");
       }

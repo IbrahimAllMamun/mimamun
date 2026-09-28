@@ -30,7 +30,9 @@ export function startScheduler(deps: AppDeps): () => void {
         const weekAgo = new Date(Date.now() - 7 * 24 * hour);
         await db
           .delete(passwordResetTokens)
-          .where(or(lt(passwordResetTokens.expiresAt, weekAgo), isNotNull(passwordResetTokens.usedAt)));
+          .where(
+            or(lt(passwordResetTokens.expiresAt, weekAgo), isNotNull(passwordResetTokens.usedAt)),
+          );
         logger.info({ events, sessions: sessionCount }, "maintenance completed");
       },
     },

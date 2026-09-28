@@ -11,7 +11,9 @@ const bool = (fallback: boolean) =>
   z
     .enum(["true", "false", "1", "0", ""])
     .optional()
-    .transform((value) => (value === undefined || value === "" ? fallback : value === "true" || value === "1"));
+    .transform((value) =>
+      value === undefined || value === "" ? fallback : value === "true" || value === "1",
+    );
 
 const optionalString = z
   .string()
@@ -30,11 +32,26 @@ const envSchema = z
     APP_SECRET: z.string().optional(),
     TRUST_PROXY: z.string().default("loopback, linklocal, uniquelocal"),
     SESSION_COOKIE_NAME: optionalString,
-    SESSION_TTL_HOURS: z.coerce.number().int().min(1).max(24 * 90).default(24 * 7),
-    SESSION_IDLE_TIMEOUT_HOURS: z.coerce.number().int().min(1).max(24 * 30).default(12),
+    SESSION_TTL_HOURS: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(24 * 90)
+      .default(24 * 7),
+    SESSION_IDLE_TIMEOUT_HOURS: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(24 * 30)
+      .default(12),
     COOKIE_SECURE: z.enum(["true", "false", ""]).optional(),
     LOGIN_MAX_ATTEMPTS: z.coerce.number().int().min(3).max(50).default(5),
-    LOGIN_LOCKOUT_MINUTES: z.coerce.number().int().min(1).max(24 * 60).default(15),
+    LOGIN_LOCKOUT_MINUTES: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(24 * 60)
+      .default(15),
     LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).optional(),
     UPLOAD_DIR: z.string().default("uploads"),
     UPLOAD_MAX_IMAGE_MB: z.coerce.number().min(1).max(50).default(10),
@@ -48,7 +65,12 @@ const envSchema = z
     MAIL_FROM: optionalString,
     GITHUB_TOKEN: optionalString,
     GITHUB_API_URL: z.url().default("https://api.github.com"),
-    GITHUB_SYNC_INTERVAL_MINUTES: z.coerce.number().int().min(15).max(24 * 60 * 7).default(360),
+    GITHUB_SYNC_INTERVAL_MINUTES: z.coerce
+      .number()
+      .int()
+      .min(15)
+      .max(24 * 60 * 7)
+      .default(360),
     WEB_INTERNAL_URL: optionalString,
     REVALIDATE_SECRET: optionalString,
     ANALYTICS_COUNTRY_HEADER: optionalString,
@@ -65,11 +87,19 @@ const envSchema = z
         });
       }
       if (!env.APP_URL.startsWith("https://")) {
-        ctx.addIssue({ code: "custom", path: ["APP_URL"], message: "APP_URL must use https in production" });
+        ctx.addIssue({
+          code: "custom",
+          path: ["APP_URL"],
+          message: "APP_URL must use https in production",
+        });
       }
     }
     if (env.SMTP_HOST && !env.MAIL_FROM) {
-      ctx.addIssue({ code: "custom", path: ["MAIL_FROM"], message: "MAIL_FROM is required when SMTP_HOST is set" });
+      ctx.addIssue({
+        code: "custom",
+        path: ["MAIL_FROM"],
+        message: "MAIL_FROM is required when SMTP_HOST is set",
+      });
     }
   });
 
@@ -145,13 +175,16 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
     database: { url: env.DATABASE_URL, poolMax: env.DATABASE_POOL_MAX, ssl: env.DATABASE_SSL },
     session: {
       // The __Host- prefix forces Secure, Path=/ and no Domain attribute.
-      cookieName: env.SESSION_COOKIE_NAME ?? (cookieSecure ? "__Host-portfolio_session" : "portfolio_session"),
+      cookieName:
+        env.SESSION_COOKIE_NAME ??
+        (cookieSecure ? "__Host-portfolio_session" : "portfolio_session"),
       cookieSecure,
       ttlHours: env.SESSION_TTL_HOURS,
       idleTimeoutHours: env.SESSION_IDLE_TIMEOUT_HOURS,
     },
     login: { maxAttempts: env.LOGIN_MAX_ATTEMPTS, lockoutMinutes: env.LOGIN_LOCKOUT_MINUTES },
-    logLevel: env.LOG_LEVEL ?? (env.NODE_ENV === "test" ? "silent" : isProduction ? "info" : "debug"),
+    logLevel:
+      env.LOG_LEVEL ?? (env.NODE_ENV === "test" ? "silent" : isProduction ? "info" : "debug"),
     uploads: {
       dir: path.resolve(env.UPLOAD_DIR),
       maxImageBytes: env.UPLOAD_MAX_IMAGE_MB * mb,

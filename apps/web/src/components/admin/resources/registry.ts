@@ -23,12 +23,22 @@ import {
 import type { AdminField, AdminResource, FormRecord } from "./types";
 
 const optionsFrom = <T extends string>(values: readonly T[], labels?: Record<T, string>) =>
-  values.map((value) => ({ value, label: labels?.[value] ?? value.charAt(0).toUpperCase() + value.slice(1).replace(/_/g, " ") }));
+  values.map((value) => ({
+    value,
+    label: labels?.[value] ?? value.charAt(0).toUpperCase() + value.slice(1).replace(/_/g, " "),
+  }));
 
 const str = (value: unknown) => (typeof value === "string" ? value : "");
-const published = (record: FormRecord) => record.status === "published" && record.visibility !== "unlisted";
+const published = (record: FormRecord) =>
+  record.status === "published" && record.visibility !== "unlisted";
 
-const EDITORIAL_DEFAULTS = { status: "draft", visibility: "public", featured: false, displayOrder: 0, publishedAt: null };
+const EDITORIAL_DEFAULTS = {
+  status: "draft",
+  visibility: "public",
+  featured: false,
+  displayOrder: 0,
+  publishedAt: null,
+};
 const DISPLAY_DEFAULTS = { featured: false, isVisible: true, displayOrder: 0 };
 
 const slug = (base: string): AdminField => ({
@@ -38,8 +48,20 @@ const slug = (base: string): AdminField => ({
   slugBase: base,
   help: "Created from the title when left empty. Changing it later breaks existing links.",
 });
-const seoGroup = { title: "Search and sharing", description: "Optional overrides for search engines and social cards.", fields: [{ name: "seo", label: "SEO", kind: "seo" } as AdminField] };
-const summary = (help: string): AdminField => ({ name: "summary", label: "Short description", kind: "textarea", required: true, maxLength: 320, rows: 3, help });
+const seoGroup = {
+  title: "Search and sharing",
+  description: "Optional overrides for search engines and social cards.",
+  fields: [{ name: "seo", label: "SEO", kind: "seo" } as AdminField],
+};
+const summary = (help: string): AdminField => ({
+  name: "summary",
+  label: "Short description",
+  kind: "textarea",
+  required: true,
+  maxLength: 320,
+  rows: 3,
+  help,
+});
 
 const projects: AdminResource = {
   path: "projects",
@@ -51,7 +73,8 @@ const projects: AdminResource = {
   featurable: true,
   orderable: true,
   preview: "projects",
-  publicPath: (record) => (published(record) && record.slug ? `/projects/${str(record.slug)}` : null),
+  publicPath: (record) =>
+    published(record) && record.slug ? `/projects/${str(record.slug)}` : null,
   typeFilter: { label: "Type", options: optionsFrom(PROJECT_TYPES, PROJECT_TYPE_LABELS) },
   columns: [{ key: "type", label: "Type" }],
   sorts: [
@@ -66,12 +89,37 @@ const projects: AdminResource = {
         { name: "title", label: "Title", kind: "text", required: true, maxLength: 200 },
         slug("/projects/"),
         summary("One or two sentences, used on cards, in search results and as the page lead."),
-        { name: "type", label: "Type", kind: "select", options: optionsFrom(PROJECT_TYPES, PROJECT_TYPE_LABELS), width: "half" },
-        { name: "categoryId", label: "Category", kind: "relation", optionsType: "project-categories", emptyLabel: "No category", width: "half" },
+        {
+          name: "type",
+          label: "Type",
+          kind: "select",
+          options: optionsFrom(PROJECT_TYPES, PROJECT_TYPE_LABELS),
+          width: "half",
+        },
+        {
+          name: "categoryId",
+          label: "Category",
+          kind: "relation",
+          optionsType: "project-categories",
+          emptyLabel: "No category",
+          width: "half",
+        },
         { name: "role", label: "My role", kind: "text", maxLength: 160, width: "half" },
-        { name: "organization", label: "Organisation", kind: "text", maxLength: 160, width: "half" },
+        {
+          name: "organization",
+          label: "Organisation",
+          kind: "text",
+          maxLength: 160,
+          width: "half",
+        },
         { name: "startedOn", label: "Started", kind: "month", width: "half" },
-        { name: "completedOn", label: "Completed", kind: "month", width: "half", help: "Leave empty if ongoing." },
+        {
+          name: "completedOn",
+          label: "Completed",
+          kind: "month",
+          width: "half",
+          help: "Leave empty if ongoing.",
+        },
       ],
     },
     {
@@ -90,10 +138,33 @@ const projects: AdminResource = {
           itemLabel: "Metric",
           maxItems: 12,
           fields: [
-            { name: "label", label: "Label", kind: "text", required: true, maxLength: 80, width: "half", placeholder: "e.g. AUC" },
-            { name: "value", label: "Value", kind: "text", required: true, maxLength: 40, width: "half", placeholder: "e.g. 0.81" },
+            {
+              name: "label",
+              label: "Label",
+              kind: "text",
+              required: true,
+              maxLength: 80,
+              width: "half",
+              placeholder: "e.g. AUC",
+            },
+            {
+              name: "value",
+              label: "Value",
+              kind: "text",
+              required: true,
+              maxLength: 40,
+              width: "half",
+              placeholder: "e.g. 0.81",
+            },
             { name: "unit", label: "Unit", kind: "text", maxLength: 20, width: "half" },
-            { name: "context", label: "Context", kind: "text", maxLength: 200, width: "half", placeholder: "e.g. hold-out set, 2024" },
+            {
+              name: "context",
+              label: "Context",
+              kind: "text",
+              maxLength: 200,
+              width: "half",
+              placeholder: "e.g. hold-out set, 2024",
+            },
           ],
         },
       ],
@@ -110,7 +181,13 @@ const projects: AdminResource = {
           maxItems: 40,
           fields: [
             { name: "mediaId", label: "File", kind: "media", accept: "any", required: true },
-            { name: "kind", label: "Kind", kind: "select", options: optionsFrom(PROJECT_MEDIA_KINDS), width: "half" },
+            {
+              name: "kind",
+              label: "Kind",
+              kind: "select",
+              options: optionsFrom(PROJECT_MEDIA_KINDS),
+              width: "half",
+            },
             { name: "caption", label: "Caption", kind: "text", maxLength: 300, width: "half" },
           ],
         },
@@ -119,7 +196,12 @@ const projects: AdminResource = {
     {
       title: "Links and keywords",
       fields: [
-        { name: "technologies", label: "Technologies", kind: "string-list", help: "Press Enter after each one." },
+        {
+          name: "technologies",
+          label: "Technologies",
+          kind: "string-list",
+          help: "Press Enter after each one.",
+        },
         { name: "tags", label: "Tags", kind: "string-list" },
         { name: "githubUrl", label: "Code repository", kind: "url", width: "half" },
         { name: "demoUrl", label: "Live demo", kind: "url", width: "half" },
@@ -130,7 +212,12 @@ const projects: AdminResource = {
       title: "Related",
       fields: [
         { name: "researchIds", label: "Research", kind: "relations", optionsType: "research" },
-        { name: "publicationIds", label: "Publications", kind: "relations", optionsType: "publications" },
+        {
+          name: "publicationIds",
+          label: "Publications",
+          kind: "relations",
+          optionsType: "publications",
+        },
       ],
     },
     seoGroup,
@@ -171,7 +258,8 @@ const research: AdminResource = {
   featurable: true,
   orderable: true,
   preview: "research",
-  publicPath: (record) => (published(record) && record.slug ? `/research/${str(record.slug)}` : null),
+  publicPath: (record) =>
+    published(record) && record.slug ? `/research/${str(record.slug)}` : null,
   typeFilter: { label: "Kind", options: optionsFrom(RESEARCH_KINDS, RESEARCH_KIND_LABELS) },
   columns: [{ key: "kind", label: "Kind" }],
   sorts: [
@@ -185,11 +273,36 @@ const research: AdminResource = {
       fields: [
         { name: "title", label: "Title", kind: "text", required: true, maxLength: 300 },
         slug("/research/"),
-        { name: "kind", label: "Kind", kind: "select", options: optionsFrom(RESEARCH_KINDS, RESEARCH_KIND_LABELS), width: "half" },
-        { name: "educationId", label: "Degree", kind: "relation", optionsType: "education", emptyLabel: "Not part of a degree", width: "half" },
+        {
+          name: "kind",
+          label: "Kind",
+          kind: "select",
+          options: optionsFrom(RESEARCH_KINDS, RESEARCH_KIND_LABELS),
+          width: "half",
+        },
+        {
+          name: "educationId",
+          label: "Degree",
+          kind: "relation",
+          optionsType: "education",
+          emptyLabel: "Not part of a degree",
+          width: "half",
+        },
         summary("One or two sentences for lists and search results."),
-        { name: "authors", label: "Authors", kind: "string-list", help: "In citation order, e.g. Ibrahim All-Mamun." },
-        { name: "degree", label: "Programme", kind: "text", maxLength: 200, width: "half", placeholder: "e.g. M.S. in Applied Statistics and Data Science" },
+        {
+          name: "authors",
+          label: "Authors",
+          kind: "string-list",
+          help: "In citation order, e.g. Ibrahim All-Mamun.",
+        },
+        {
+          name: "degree",
+          label: "Programme",
+          kind: "text",
+          maxLength: 200,
+          width: "half",
+          placeholder: "e.g. M.S. in Applied Statistics and Data Science",
+        },
         { name: "institution", label: "Institution", kind: "text", maxLength: 200, width: "half" },
         { name: "supervisor", label: "Supervisor", kind: "text", maxLength: 200, width: "half" },
         { name: "externalUrl", label: "Repository record", kind: "url", width: "half" },
@@ -200,11 +313,28 @@ const research: AdminResource = {
     {
       title: "Abstract",
       fields: [
-        { name: "abstract", label: "Abstract", kind: "textarea", rows: 8, maxLength: 6000, help: "Plain text. Separate paragraphs with a blank line." },
-        { name: "researchQuestion", label: "Research question", kind: "textarea", rows: 3, maxLength: 1000 },
+        {
+          name: "abstract",
+          label: "Abstract",
+          kind: "textarea",
+          rows: 8,
+          maxLength: 6000,
+          help: "Plain text. Separate paragraphs with a blank line.",
+        },
+        {
+          name: "researchQuestion",
+          label: "Research question",
+          kind: "textarea",
+          rows: 3,
+          maxLength: 1000,
+        },
       ],
     },
-    { title: "Sections", description: "Optional structured write-up.", fields: [{ name: "sections", label: "Sections", kind: "sections", sectionSet: "research" }] },
+    {
+      title: "Sections",
+      description: "Optional structured write-up.",
+      fields: [{ name: "sections", label: "Sections", kind: "sections", sectionSet: "research" }],
+    },
     {
       title: "Keywords and methods",
       fields: [
@@ -221,7 +351,12 @@ const research: AdminResource = {
         { name: "coverMediaId", label: "Cover image", kind: "media", accept: "image" },
       ],
     },
-    { title: "Related", fields: [{ name: "projectIds", label: "Projects", kind: "relations", optionsType: "projects" }] },
+    {
+      title: "Related",
+      fields: [
+        { name: "projectIds", label: "Projects", kind: "relations", optionsType: "projects" },
+      ],
+    },
     seoGroup,
   ],
   initial: () => ({
@@ -261,7 +396,8 @@ const publications: AdminResource = {
   editorial: true,
   featurable: true,
   orderable: true,
-  publicPath: (record) => (published(record) && record.slug ? `/publications#${str(record.slug)}` : null),
+  publicPath: (record) =>
+    published(record) && record.slug ? `/publications#${str(record.slug)}` : null,
   columns: [{ key: "publicationStatus", label: "Stage" }],
   sorts: [
     { value: "updated", label: "Recently updated" },
@@ -274,16 +410,41 @@ const publications: AdminResource = {
       fields: [
         { name: "title", label: "Title", kind: "text", required: true, maxLength: 300 },
         slug("/publications#"),
-        { name: "authors", label: "Authors", kind: "string-list", required: true, help: "In the order they appear on the paper." },
-        { name: "publicationType", label: "Type", kind: "select", options: optionsFrom(PUBLICATION_TYPES, PUBLICATION_TYPE_LABELS), width: "half" },
-        { name: "publicationStatus", label: "Stage", kind: "select", options: optionsFrom(PUBLICATION_STATUSES, PUBLICATION_STATUS_LABELS), width: "half" },
+        {
+          name: "authors",
+          label: "Authors",
+          kind: "string-list",
+          required: true,
+          help: "In the order they appear on the paper.",
+        },
+        {
+          name: "publicationType",
+          label: "Type",
+          kind: "select",
+          options: optionsFrom(PUBLICATION_TYPES, PUBLICATION_TYPE_LABELS),
+          width: "half",
+        },
+        {
+          name: "publicationStatus",
+          label: "Stage",
+          kind: "select",
+          options: optionsFrom(PUBLICATION_STATUSES, PUBLICATION_STATUS_LABELS),
+          width: "half",
+        },
         { name: "venue", label: "Journal or conference", kind: "text", maxLength: 300 },
         { name: "volume", label: "Volume", kind: "text", maxLength: 40, width: "half" },
         { name: "issue", label: "Issue", kind: "text", maxLength: 40, width: "half" },
         { name: "pages", label: "Pages", kind: "text", maxLength: 40, width: "half" },
         { name: "publishedOn", label: "Publication date", kind: "date", width: "half" },
         { name: "publisher", label: "Publisher", kind: "text", maxLength: 200 },
-        { name: "doi", label: "DOI", kind: "text", placeholder: "10.1234/abcd.5678", width: "half", help: "Only a real DOI; leave empty otherwise." },
+        {
+          name: "doi",
+          label: "DOI",
+          kind: "text",
+          placeholder: "10.1234/abcd.5678",
+          width: "half",
+          help: "Only a real DOI; leave empty otherwise.",
+        },
         { name: "url", label: "Publisher page", kind: "url", width: "half" },
         { name: "pdfMediaId", label: "PDF", kind: "media", accept: "document" },
       ],
@@ -301,14 +462,26 @@ const publications: AdminResource = {
       title: "Citation",
       description: "Leave empty to generate APA and BibTeX from the reference fields.",
       fields: [
-        { name: "citationText", label: "Citation override", kind: "textarea", rows: 3, maxLength: 2000 },
+        {
+          name: "citationText",
+          label: "Citation override",
+          kind: "textarea",
+          rows: 3,
+          maxLength: 2000,
+        },
         { name: "bibtex", label: "BibTeX override", kind: "code", rows: 6, maxLength: 6000 },
       ],
     },
     {
       title: "Related",
       fields: [
-        { name: "researchId", label: "Research", kind: "relation", optionsType: "research", emptyLabel: "None" },
+        {
+          name: "researchId",
+          label: "Research",
+          kind: "relation",
+          optionsType: "research",
+          emptyLabel: "None",
+        },
         { name: "projectIds", label: "Projects", kind: "relations", optionsType: "projects" },
       ],
     },
@@ -358,11 +531,37 @@ const presentations: AdminResource = {
       title: "Presentation",
       fields: [
         { name: "title", label: "Title", kind: "text", required: true, maxLength: 300 },
-        { name: "presentationType", label: "Type", kind: "select", options: optionsFrom(PRESENTATION_TYPES, PRESENTATION_TYPE_LABELS), width: "half" },
+        {
+          name: "presentationType",
+          label: "Type",
+          kind: "select",
+          options: optionsFrom(PRESENTATION_TYPES, PRESENTATION_TYPE_LABELS),
+          width: "half",
+        },
         { name: "presentedOn", label: "Date", kind: "month", width: "half" },
-        { name: "conferenceName", label: "Conference", kind: "text", required: true, maxLength: 300 },
-        { name: "conferenceShortName", label: "Short name", kind: "text", maxLength: 40, width: "half", placeholder: "e.g. ICASDS" },
-        { name: "edition", label: "Edition", kind: "text", maxLength: 40, width: "half", placeholder: "e.g. 3rd" },
+        {
+          name: "conferenceName",
+          label: "Conference",
+          kind: "text",
+          required: true,
+          maxLength: 300,
+        },
+        {
+          name: "conferenceShortName",
+          label: "Short name",
+          kind: "text",
+          maxLength: 40,
+          width: "half",
+          placeholder: "e.g. ICASDS",
+        },
+        {
+          name: "edition",
+          label: "Edition",
+          kind: "text",
+          maxLength: 40,
+          width: "half",
+          placeholder: "e.g. 3rd",
+        },
         { name: "location", label: "Location", kind: "text", maxLength: 160 },
         { name: "eventUrl", label: "Event page", kind: "url" },
         { name: "abstract", label: "Abstract", kind: "textarea", rows: 5, maxLength: 6000 },
@@ -373,7 +572,13 @@ const presentations: AdminResource = {
       fields: [
         { name: "posterMediaId", label: "Poster", kind: "media", accept: "any" },
         { name: "slidesMediaId", label: "Slides (PDF)", kind: "media", accept: "document" },
-        { name: "researchId", label: "Research", kind: "relation", optionsType: "research", emptyLabel: "None" },
+        {
+          name: "researchId",
+          label: "Research",
+          kind: "relation",
+          optionsType: "research",
+          emptyLabel: "None",
+        },
       ],
     },
   ],
@@ -415,7 +620,14 @@ const blogPosts: AdminResource = {
       fields: [
         { name: "title", label: "Title", kind: "text", required: true, maxLength: 200 },
         slug("/blog/"),
-        { name: "excerpt", label: "Excerpt", kind: "textarea", rows: 3, maxLength: 400, help: "Shown in lists and as the page lead." },
+        {
+          name: "excerpt",
+          label: "Excerpt",
+          kind: "textarea",
+          rows: 3,
+          maxLength: 400,
+          help: "Shown in lists and as the page lead.",
+        },
         { name: "coverMediaId", label: "Cover image", kind: "media", accept: "image" },
       ],
     },
@@ -423,10 +635,25 @@ const blogPosts: AdminResource = {
     {
       title: "Organisation",
       fields: [
-        { name: "categoryIds", label: "Categories", kind: "relations", optionsType: "blog-categories" },
+        {
+          name: "categoryIds",
+          label: "Categories",
+          kind: "relations",
+          optionsType: "blog-categories",
+        },
         { name: "tags", label: "Tags", kind: "string-list" },
-        { name: "projectIds", label: "Related projects", kind: "relations", optionsType: "projects" },
-        { name: "researchIds", label: "Related research", kind: "relations", optionsType: "research" },
+        {
+          name: "projectIds",
+          label: "Related projects",
+          kind: "relations",
+          optionsType: "projects",
+        },
+        {
+          name: "researchIds",
+          label: "Related research",
+          kind: "relations",
+          optionsType: "research",
+        },
       ],
     },
     seoGroup,
@@ -451,7 +678,8 @@ const experiences: AdminResource = {
   label: "Role",
   plural: "Experience",
   description: "Positions shown on the experience page and the trajectory figure.",
-  title: (record) => [str(record.position), str(record.company)].filter(Boolean).join(", ") || "New role",
+  title: (record) =>
+    [str(record.position), str(record.company)].filter(Boolean).join(", ") || "New role",
   featurable: true,
   visibleToggle: true,
   orderable: true,
@@ -460,14 +688,46 @@ const experiences: AdminResource = {
     {
       title: "Position",
       fields: [
-        { name: "position", label: "Position", kind: "text", required: true, maxLength: 160, width: "half" },
-        { name: "company", label: "Company", kind: "text", required: true, maxLength: 160, width: "half" },
+        {
+          name: "position",
+          label: "Position",
+          kind: "text",
+          required: true,
+          maxLength: 160,
+          width: "half",
+        },
+        {
+          name: "company",
+          label: "Company",
+          kind: "text",
+          required: true,
+          maxLength: 160,
+          width: "half",
+        },
         { name: "department", label: "Department or team", kind: "text", maxLength: 200 },
-        { name: "employmentType", label: "Employment type", kind: "select", options: optionsFrom(EMPLOYMENT_TYPES, EMPLOYMENT_TYPE_LABELS), emptyLabel: "Not stated", width: "half" },
+        {
+          name: "employmentType",
+          label: "Employment type",
+          kind: "select",
+          options: optionsFrom(EMPLOYMENT_TYPES, EMPLOYMENT_TYPE_LABELS),
+          emptyLabel: "Not stated",
+          width: "half",
+        },
         { name: "location", label: "Location", kind: "text", maxLength: 160, width: "half" },
-        { name: "startDate", label: "Start", kind: "month", width: "half", help: "Leave empty if not known." },
+        {
+          name: "startDate",
+          label: "Start",
+          kind: "month",
+          width: "half",
+          help: "Leave empty if not known.",
+        },
         { name: "endDate", label: "End", kind: "month", width: "half" },
-        { name: "isCurrent", label: "This is my current position", kind: "boolean", help: "A current position has no end date." },
+        {
+          name: "isCurrent",
+          label: "This is my current position",
+          kind: "boolean",
+          help: "A current position has no end date.",
+        },
         { name: "companyUrl", label: "Company website", kind: "url", width: "half" },
         { name: "companyLogoId", label: "Company logo", kind: "media", accept: "image" },
       ],
@@ -476,8 +736,20 @@ const experiences: AdminResource = {
       title: "Work",
       fields: [
         { name: "summary", label: "Summary", kind: "textarea", rows: 3, maxLength: 4000 },
-        { name: "responsibilities", label: "Responsibilities", kind: "lines", rows: 6, help: "One per line." },
-        { name: "achievements", label: "Achievements", kind: "lines", rows: 4, help: "One per line. Only results you can stand behind." },
+        {
+          name: "responsibilities",
+          label: "Responsibilities",
+          kind: "lines",
+          rows: 6,
+          help: "One per line.",
+        },
+        {
+          name: "achievements",
+          label: "Achievements",
+          kind: "lines",
+          rows: 4,
+          help: "One per line. Only results you can stand behind.",
+        },
         {
           name: "metrics",
           label: "Metrics",
@@ -485,14 +757,33 @@ const experiences: AdminResource = {
           itemLabel: "Metric",
           maxItems: 8,
           fields: [
-            { name: "label", label: "Label", kind: "text", required: true, maxLength: 80, width: "half" },
-            { name: "value", label: "Value", kind: "text", required: true, maxLength: 40, width: "half" },
+            {
+              name: "label",
+              label: "Label",
+              kind: "text",
+              required: true,
+              maxLength: 80,
+              width: "half",
+            },
+            {
+              name: "value",
+              label: "Value",
+              kind: "text",
+              required: true,
+              maxLength: 40,
+              width: "half",
+            },
             { name: "context", label: "Context", kind: "text", maxLength: 200 },
           ],
         },
         { name: "technologies", label: "Tools", kind: "string-list" },
         { name: "domains", label: "Domains", kind: "string-list" },
-        { name: "projectIds", label: "Projects from this role", kind: "relations", optionsType: "projects" },
+        {
+          name: "projectIds",
+          label: "Projects from this role",
+          kind: "relations",
+          optionsType: "projects",
+        },
       ],
     },
   ],
@@ -523,7 +814,8 @@ const education: AdminResource = {
   label: "Degree",
   plural: "Education",
   description: "Degrees and programmes, with grades and final projects.",
-  title: (record) => [str(record.degree), str(record.fieldOfStudy)].filter(Boolean).join(" in ") || "New degree",
+  title: (record) =>
+    [str(record.degree), str(record.fieldOfStudy)].filter(Boolean).join(" in ") || "New degree",
   featurable: true,
   visibleToggle: true,
   orderable: true,
@@ -532,8 +824,22 @@ const education: AdminResource = {
     {
       title: "Programme",
       fields: [
-        { name: "degree", label: "Degree", kind: "text", required: true, maxLength: 120, width: "half", placeholder: "e.g. M.S." },
-        { name: "fieldOfStudy", label: "Field of study", kind: "text", maxLength: 200, width: "half" },
+        {
+          name: "degree",
+          label: "Degree",
+          kind: "text",
+          required: true,
+          maxLength: 120,
+          width: "half",
+          placeholder: "e.g. M.S.",
+        },
+        {
+          name: "fieldOfStudy",
+          label: "Field of study",
+          kind: "text",
+          maxLength: 200,
+          width: "half",
+        },
         { name: "institution", label: "Institution", kind: "text", required: true, maxLength: 200 },
         { name: "location", label: "Location", kind: "text", maxLength: 160, width: "half" },
         { name: "institutionUrl", label: "Institution website", kind: "url", width: "half" },
@@ -546,9 +852,24 @@ const education: AdminResource = {
     {
       title: "Results",
       fields: [
-        { name: "gradeLabel", label: "Grade label", kind: "text", maxLength: 40, width: "half", placeholder: "e.g. CGPA" },
+        {
+          name: "gradeLabel",
+          label: "Grade label",
+          kind: "text",
+          maxLength: 40,
+          width: "half",
+          placeholder: "e.g. CGPA",
+        },
         { name: "gradeValue", label: "Grade", kind: "number", step: 0.01, min: 0, width: "half" },
-        { name: "gradeScale", label: "Out of", kind: "number", step: 0.01, min: 0, width: "half", placeholder: "e.g. 4.00" },
+        {
+          name: "gradeScale",
+          label: "Out of",
+          kind: "number",
+          step: 0.01,
+          min: 0,
+          width: "half",
+          placeholder: "e.g. 4.00",
+        },
         { name: "projectTitle", label: "Project or thesis title", kind: "text", maxLength: 300 },
         { name: "description", label: "Description", kind: "markdown", rows: 4, maxLength: 4000 },
         { name: "courses", label: "Selected courses", kind: "string-list" },
@@ -575,7 +896,13 @@ const education: AdminResource = {
   }),
 };
 
-const taxonomy = (path: string, label: string, plural: string, description: string, withDescription: boolean): AdminResource => ({
+const taxonomy = (
+  path: string,
+  label: string,
+  plural: string,
+  description: string,
+  withDescription: boolean,
+): AdminResource => ({
   path,
   label,
   plural,
@@ -587,12 +914,31 @@ const taxonomy = (path: string, label: string, plural: string, description: stri
       title: label,
       fields: [
         { name: "name", label: "Name", kind: "text", required: true, maxLength: 80 },
-        { name: "slug", label: "URL slug", kind: "slug", help: "Created from the name when left empty." },
-        ...(withDescription ? [{ name: "description", label: "Description", kind: "textarea", rows: 3, maxLength: 500 } as AdminField] : []),
+        {
+          name: "slug",
+          label: "URL slug",
+          kind: "slug",
+          help: "Created from the name when left empty.",
+        },
+        ...(withDescription
+          ? [
+              {
+                name: "description",
+                label: "Description",
+                kind: "textarea",
+                rows: 3,
+                maxLength: 500,
+              } as AdminField,
+            ]
+          : []),
       ],
     },
   ],
-  initial: () => ({ name: "", slug: "", ...(withDescription ? { description: "", displayOrder: 0 } : {}) }),
+  initial: () => ({
+    name: "",
+    slug: "",
+    ...(withDescription ? { description: "", displayOrder: 0 } : {}),
+  }),
 });
 
 const skillCategories: AdminResource = {
@@ -622,7 +968,14 @@ const skillCategories: AdminResource = {
       ],
     },
   ],
-  initial: () => ({ name: "", slug: "", parentId: null, description: "", displayOrder: 0, isVisible: true }),
+  initial: () => ({
+    name: "",
+    slug: "",
+    parentId: null,
+    description: "",
+    displayOrder: 0,
+    isVisible: true,
+  }),
 };
 
 const skills: AdminResource = {
@@ -641,14 +994,49 @@ const skills: AdminResource = {
       title: "Skill",
       fields: [
         { name: "name", label: "Name", kind: "text", required: true, maxLength: 80, width: "half" },
-        { name: "categoryId", label: "Category", kind: "relation", optionsType: "skill-categories", required: true, width: "half" },
+        {
+          name: "categoryId",
+          label: "Category",
+          kind: "relation",
+          optionsType: "skill-categories",
+          required: true,
+          width: "half",
+        },
         { name: "slug", label: "URL slug", kind: "slug" },
-        { name: "level", label: "Level", kind: "select", options: optionsFrom(SKILL_LEVELS, SKILL_LEVEL_LABELS), emptyLabel: "Not stated", width: "half", help: "Optional. Leave empty rather than guess." },
-        { name: "years", label: "Years of use", kind: "number", min: 0, max: 60, step: 0.5, width: "half" },
-        { name: "icon", label: "Icon", kind: "select", options: optionsFrom(SKILL_ICONS), emptyLabel: "None", width: "half" },
+        {
+          name: "level",
+          label: "Level",
+          kind: "select",
+          options: optionsFrom(SKILL_LEVELS, SKILL_LEVEL_LABELS),
+          emptyLabel: "Not stated",
+          width: "half",
+          help: "Optional. Leave empty rather than guess.",
+        },
+        {
+          name: "years",
+          label: "Years of use",
+          kind: "number",
+          min: 0,
+          max: 60,
+          step: 0.5,
+          width: "half",
+        },
+        {
+          name: "icon",
+          label: "Icon",
+          kind: "select",
+          options: optionsFrom(SKILL_ICONS),
+          emptyLabel: "None",
+          width: "half",
+        },
         { name: "description", label: "Description", kind: "textarea", rows: 3, maxLength: 1000 },
         { name: "technologies", label: "Related technologies", kind: "string-list" },
-        { name: "projectIds", label: "Used in projects", kind: "relations", optionsType: "projects" },
+        {
+          name: "projectIds",
+          label: "Used in projects",
+          kind: "relations",
+          optionsType: "projects",
+        },
       ],
     },
   ],
@@ -687,18 +1075,38 @@ const credentialProviders: AdminResource = {
       ],
     },
   ],
-  initial: () => ({ name: "", slug: "", websiteUrl: "", logoMediaId: null, description: "", displayOrder: 0, isVisible: true }),
+  initial: () => ({
+    name: "",
+    slug: "",
+    websiteUrl: "",
+    logoMediaId: null,
+    description: "",
+    displayOrder: 0,
+    isVisible: true,
+  }),
 };
 
 const credentialTypes = {
-  ...taxonomy("credential-types", "Credential type", "Credential types", "Programme, specialisation, track, course, certificate, workshop…", true),
+  ...taxonomy(
+    "credential-types",
+    "Credential type",
+    "Credential types",
+    "Programme, specialisation, track, course, certificate, workshop…",
+    true,
+  ),
   groups: [
     {
       title: "Credential type",
       fields: [
         { name: "name", label: "Name", kind: "text", required: true, maxLength: 60 } as AdminField,
         { name: "slug", label: "URL slug", kind: "slug" } as AdminField,
-        { name: "description", label: "Description", kind: "textarea", rows: 2, maxLength: 300 } as AdminField,
+        {
+          name: "description",
+          label: "Description",
+          kind: "textarea",
+          rows: 2,
+          maxLength: 300,
+        } as AdminField,
       ],
     },
   ],
@@ -713,7 +1121,8 @@ const credentials: AdminResource = {
   featurable: true,
   visibleToggle: true,
   orderable: true,
-  publicPath: (record) => (record.slug && record.isVisible !== false ? `/certifications/${str(record.slug)}` : null),
+  publicPath: (record) =>
+    record.slug && record.isVisible !== false ? `/certifications/${str(record.slug)}` : null,
   parentFilter: { label: "Provider", optionsType: "credential-providers" },
   tree: { parentKey: "parentId", groupKey: "providerId", groupOptionsType: "credential-providers" },
   groups: [
@@ -721,8 +1130,22 @@ const credentials: AdminResource = {
       title: "Place in the hierarchy",
       description: "Provider → programme → course → certificate. Nest items to any depth.",
       fields: [
-        { name: "providerId", label: "Provider", kind: "relation", optionsType: "credential-providers", required: true, width: "half" },
-        { name: "typeId", label: "Type", kind: "relation", optionsType: "credential-types", required: true, width: "half" },
+        {
+          name: "providerId",
+          label: "Provider",
+          kind: "relation",
+          optionsType: "credential-providers",
+          required: true,
+          width: "half",
+        },
+        {
+          name: "typeId",
+          label: "Type",
+          kind: "relation",
+          optionsType: "credential-types",
+          required: true,
+          width: "half",
+        },
         {
           name: "parentId",
           label: "Part of",
@@ -730,7 +1153,8 @@ const credentials: AdminResource = {
           optionsType: "credentials",
           emptyLabel: "Nothing (top level)",
           help: "Only items from the same provider can be chosen.",
-          filterOptions: (option, record) => option.id !== record.id && (option.hint ?? "").split("|")[1] === record.providerId,
+          filterOptions: (option, record) =>
+            option.id !== record.id && (option.hint ?? "").split("|")[1] === record.providerId,
         },
       ],
     },
@@ -739,7 +1163,14 @@ const credentials: AdminResource = {
       fields: [
         { name: "title", label: "Title", kind: "text", required: true, maxLength: 200 },
         slug("/certifications/"),
-        { name: "level", label: "Level", kind: "text", maxLength: 60, width: "half", placeholder: "e.g. Beginner" },
+        {
+          name: "level",
+          label: "Level",
+          kind: "text",
+          maxLength: 60,
+          width: "half",
+          placeholder: "e.g. Beginner",
+        },
         { name: "issuedOn", label: "Issued", kind: "month", width: "half" },
         { name: "expiresOn", label: "Expires", kind: "month", width: "half" },
         { name: "description", label: "Description", kind: "markdown", rows: 4, maxLength: 4000 },
@@ -760,7 +1191,13 @@ const credentials: AdminResource = {
       title: "Related",
       fields: [
         { name: "skillIds", label: "Skills", kind: "relations", optionsType: "skills" },
-        { name: "relatedProjectId", label: "Applied in project", kind: "relation", optionsType: "projects", emptyLabel: "None" },
+        {
+          name: "relatedProjectId",
+          label: "Applied in project",
+          kind: "relation",
+          optionsType: "projects",
+          emptyLabel: "None",
+        },
       ],
     },
   ],
@@ -812,10 +1249,28 @@ const socialLinks = simpleList(
   "Social links",
   "Profiles shown in the footer, on the contact page and in structured data.",
   [
-    { name: "platform", label: "Platform", kind: "select", options: optionsFrom(SOCIAL_PLATFORMS, SOCIAL_PLATFORM_LABELS), width: "half" },
+    {
+      name: "platform",
+      label: "Platform",
+      kind: "select",
+      options: optionsFrom(SOCIAL_PLATFORMS, SOCIAL_PLATFORM_LABELS),
+      width: "half",
+    },
     { name: "label", label: "Label", kind: "text", required: true, maxLength: 60, width: "half" },
-    { name: "url", label: "Link", kind: "text", required: true, placeholder: "https://… or mailto:…" },
-    { name: "handle", label: "Handle", kind: "text", maxLength: 100, placeholder: "e.g. IbrahimAllMamun" },
+    {
+      name: "url",
+      label: "Link",
+      kind: "text",
+      required: true,
+      placeholder: "https://… or mailto:…",
+    },
+    {
+      name: "handle",
+      label: "Handle",
+      kind: "text",
+      maxLength: 100,
+      placeholder: "e.g. IbrahimAllMamun",
+    },
   ],
   { platform: "github", label: "", url: "", handle: "" },
   { columns: [{ key: "platform", label: "Platform" }] },
@@ -828,8 +1283,22 @@ const focusAreas = simpleList(
   "The “What I work on” section of the home page.",
   [
     { name: "title", label: "Title", kind: "text", required: true, maxLength: 120 },
-    { name: "description", label: "Description", kind: "textarea", required: true, rows: 3, maxLength: 600 },
-    { name: "evidence", label: "Evidence", kind: "textarea", rows: 2, maxLength: 300, help: "Where this shows up in your work. Optional." },
+    {
+      name: "description",
+      label: "Description",
+      kind: "textarea",
+      required: true,
+      rows: 3,
+      maxLength: 600,
+    },
+    {
+      name: "evidence",
+      label: "Evidence",
+      kind: "textarea",
+      rows: 2,
+      maxLength: 300,
+      help: "Where this shows up in your work. Optional.",
+    },
   ],
   { title: "", description: "", evidence: "" },
   { publicPath: () => "/" },
@@ -842,7 +1311,14 @@ const approachSteps = simpleList(
   "Steps of the “How I work with data” pipeline on the home and about pages.",
   [
     { name: "title", label: "Title", kind: "text", required: true, maxLength: 80 },
-    { name: "description", label: "Description", kind: "textarea", required: true, rows: 2, maxLength: 400 },
+    {
+      name: "description",
+      label: "Description",
+      kind: "textarea",
+      required: true,
+      rows: 2,
+      maxLength: 400,
+    },
     { name: "evidence", label: "Evidence", kind: "textarea", rows: 2, maxLength: 300 },
   ],
   { title: "", description: "", evidence: "" },
@@ -855,9 +1331,21 @@ const navigation = simpleList(
   "Navigation",
   "Links in the site header and footer.",
   [
-    { name: "location", label: "Menu", kind: "select", options: optionsFrom(NAV_LOCATIONS), width: "half" },
+    {
+      name: "location",
+      label: "Menu",
+      kind: "select",
+      options: optionsFrom(NAV_LOCATIONS),
+      width: "half",
+    },
     { name: "label", label: "Label", kind: "text", required: true, maxLength: 40, width: "half" },
-    { name: "href", label: "Link", kind: "text", required: true, placeholder: "/projects or https://…" },
+    {
+      name: "href",
+      label: "Link",
+      kind: "text",
+      required: true,
+      placeholder: "/projects or https://…",
+    },
     { name: "openInNewTab", label: "Open in a new tab", kind: "boolean" },
   ],
   { location: "header", label: "", href: "", openInNewTab: false },
@@ -880,9 +1368,27 @@ export const RESOURCES: AdminResource[] = [
   credentials,
   credentialProviders,
   credentialTypes,
-  taxonomy("project-categories", "Project category", "Project categories", "Groups for filtering projects.", true),
-  taxonomy("tags", "Tag", "Tags", "Tags are created automatically when you add them to content.", false),
-  taxonomy("blog-categories", "Writing category", "Writing categories", "Groups for the writing index.", true),
+  taxonomy(
+    "project-categories",
+    "Project category",
+    "Project categories",
+    "Groups for filtering projects.",
+    true,
+  ),
+  taxonomy(
+    "tags",
+    "Tag",
+    "Tags",
+    "Tags are created automatically when you add them to content.",
+    false,
+  ),
+  taxonomy(
+    "blog-categories",
+    "Writing category",
+    "Writing categories",
+    "Groups for the writing index.",
+    true,
+  ),
   socialLinks,
   focusAreas,
   approachSteps,

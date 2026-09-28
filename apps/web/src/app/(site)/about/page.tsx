@@ -19,7 +19,13 @@ import { graph, pageMetadata, personSchema } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await publicApi.site();
-  return pageMetadata({ site: site.ok ? site.data : null, title: "About", path: "/about", routeKey: "about", type: "profile" });
+  return pageMetadata({
+    site: site.ok ? site.data : null,
+    title: "About",
+    path: "/about",
+    routeKey: "about",
+    type: "profile",
+  });
 }
 
 export default async function AboutPage() {
@@ -57,7 +63,10 @@ export default async function AboutPage() {
         <MetaTable
           className="mt-4"
           items={[
-            { label: "Currently", value: current ? `${current.position}, ${current.company}` : profile.headline },
+            {
+              label: "Currently",
+              value: current ? `${current.position}, ${current.company}` : profile.headline,
+            },
             { label: "Based in", value: profile.location },
             {
               label: "Email",
@@ -93,7 +102,12 @@ export default async function AboutPage() {
 
       {profile.bio ? (
         <section aria-labelledby="background-title" className="container-page section-space pt-4">
-          <SectionHeader index={index("background")} label="Profile" id="background-title" title="Background" />
+          <SectionHeader
+            index={index("background")}
+            label="Profile"
+            id="background-title"
+            title="Background"
+          />
           <div className="grid-editorial mt-8 gap-y-6">
             {profile.avatar && profile.avatar.width && profile.avatar.height ? (
               <div className="col-span-2 sm:col-span-3 lg:col-span-3">
@@ -151,8 +165,17 @@ export default async function AboutPage() {
       ) : null}
 
       {data.education.length || data.credentialSummary.total ? (
-        <section id="education" aria-labelledby="education-title" className="container-page section-space scroll-mt-(--sticky-offset) pt-0">
-          <SectionHeader index={index("education")} label="Evidence" id="education-title" title="Education and certifications" />
+        <section
+          id="education"
+          aria-labelledby="education-title"
+          className="container-page section-space scroll-mt-(--sticky-offset) pt-0"
+        >
+          <SectionHeader
+            index={index("education")}
+            label="Evidence"
+            id="education-title"
+            title="Education and certifications"
+          />
           <div className="mt-2">
             {data.education.map((item) => (
               <EducationEntry key={item.id} item={item} />
@@ -170,7 +193,9 @@ export default async function AboutPage() {
                   {data.credentialSummary.providers.map((provider) => (
                     <li key={provider.slug} className="text-ink-2">
                       <TextLink href={`/certifications#${provider.slug}`}>{provider.name}</TextLink>
-                      <span className="ml-1.5 font-mono text-xs text-ink-3 tabular-nums">{provider.count}</span>
+                      <span className="ml-1.5 font-mono text-xs text-ink-3 tabular-nums">
+                        {provider.count}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -187,7 +212,12 @@ export default async function AboutPage() {
 
       {profile.interests ? (
         <section aria-labelledby="beyond-title" className="container-page section-space pt-0">
-          <SectionHeader index={index("interests")} label="Elsewhere" id="beyond-title" title="Outside work" />
+          <SectionHeader
+            index={index("interests")}
+            label="Elsewhere"
+            id="beyond-title"
+            title="Outside work"
+          />
           <div className="grid-editorial mt-6">
             <Markdown
               source={profile.interests}

@@ -1,7 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  type ReactNode,
+} from "react";
 import { useConfirm } from "./dialog";
 
 interface UnsavedApi {
@@ -42,9 +50,18 @@ export function UnsavedChangesProvider({ children }: { children: ReactNode }) {
       if (dirty.current.size === 0 || event.defaultPrevented || event.button !== 0) return;
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const anchor = (event.target as Element | null)?.closest?.("a[href]");
-      if (!(anchor instanceof HTMLAnchorElement) || anchor.target === "_blank" || anchor.hasAttribute("download")) return;
+      if (
+        !(anchor instanceof HTMLAnchorElement) ||
+        anchor.target === "_blank" ||
+        anchor.hasAttribute("download")
+      )
+        return;
       const url = new URL(anchor.href, window.location.href);
-      if (url.origin !== window.location.origin || (url.pathname === window.location.pathname && url.hash)) return;
+      if (
+        url.origin !== window.location.origin ||
+        (url.pathname === window.location.pathname && url.hash)
+      )
+        return;
       event.preventDefault();
       event.stopPropagation();
       void confirmLeave().then((ok) => {

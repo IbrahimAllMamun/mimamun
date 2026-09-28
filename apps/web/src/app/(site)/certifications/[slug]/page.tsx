@@ -16,7 +16,9 @@ import { publicApi } from "@/lib/api/server";
 import { SITE_URL } from "@/lib/env";
 import { absoluteUrl, breadcrumbSchema, graph, pageMetadata } from "@/lib/seo";
 
-export async function generateMetadata({ params }: PageProps<"/certifications/[slug]">): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<"/certifications/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   const [site, credential] = await Promise.all([publicApi.site(), publicApi.credential(slug)]);
   if (!credential.ok) return { title: "Certification" };
@@ -33,7 +35,10 @@ export async function generateMetadata({ params }: PageProps<"/certifications/[s
 
 export default async function CredentialPage({ params }: PageProps<"/certifications/[slug]">) {
   const { slug } = await params;
-  const [credential, all] = await Promise.all([publicApi.credential(slug), publicApi.certifications()]);
+  const [credential, all] = await Promise.all([
+    publicApi.credential(slug),
+    publicApi.certifications(),
+  ]);
   if (!credential.ok) {
     if (credential.status === 404) notFound();
     return (
@@ -44,8 +49,14 @@ export default async function CredentialPage({ params }: PageProps<"/certificati
   }
   const data = credential.data;
   const provider = all.ok ? all.data.find((item) => item.slug === data.provider.slug) : undefined;
-  const excluded = new Set([data.slug, ...data.ancestors.map((item) => item.slug), ...flattenTree(data.children).map((item) => item.slug)]);
-  const others = provider ? flattenTree(provider.credentials).filter((node) => !excluded.has(node.slug)) : [];
+  const excluded = new Set([
+    data.slug,
+    ...data.ancestors.map((item) => item.slug),
+    ...flattenTree(data.children).map((item) => item.slug),
+  ]);
+  const others = provider
+    ? flattenTree(provider.credentials).filter((node) => !excluded.has(node.slug))
+    : [];
   const verifyUrl = data.verificationUrl ?? data.credentialUrl;
   const credentialId = `${absoluteUrl(`/certifications/${data.slug}`)}#credential`;
 
@@ -60,13 +71,21 @@ export default async function CredentialPage({ params }: PageProps<"/certificati
             description: data.description ?? undefined,
             credentialCategory: data.type.name,
             educationalLevel: data.level ?? undefined,
-            recognizedBy: { "@type": "Organization", name: data.provider.name, url: data.provider.websiteUrl ?? undefined },
+            recognizedBy: {
+              "@type": "Organization",
+              name: data.provider.name,
+              url: data.provider.websiteUrl ?? undefined,
+            },
             dateCreated: data.issuedOn ?? undefined,
             expires: data.expiresOn ?? undefined,
             url: verifyUrl ?? absoluteUrl(`/certifications/${data.slug}`),
             about: data.skills.length ? data.skills.map((skill) => skill.name) : undefined,
           },
-          { "@type": "Person", "@id": `${SITE_URL}/#person`, hasCredential: { "@id": credentialId } },
+          {
+            "@type": "Person",
+            "@id": `${SITE_URL}/#person`,
+            hasCredential: { "@id": credentialId },
+          },
           breadcrumbSchema([
             { name: "Certifications", path: "/certifications" },
             { name: data.title, path: `/certifications/${data.slug}` },
@@ -78,7 +97,10 @@ export default async function CredentialPage({ params }: PageProps<"/certificati
           breadcrumbs={[
             { name: "Certifications", href: "/certifications" },
             { name: data.provider.name, href: `/certifications#${data.provider.slug}` },
-            ...data.ancestors.map((item) => ({ name: item.title, href: `/certifications/${item.slug}` })),
+            ...data.ancestors.map((item) => ({
+              name: item.title,
+              href: `/certifications/${item.slug}`,
+            })),
             { name: data.title },
           ]}
           eyebrow={[data.type.name, data.provider.name].join(" · ")}
@@ -90,7 +112,11 @@ export default async function CredentialPage({ params }: PageProps<"/certificati
             items={[
               {
                 label: "Provider",
-                value: data.provider.websiteUrl ? <TextLink href={data.provider.websiteUrl}>{data.provider.name}</TextLink> : data.provider.name,
+                value: data.provider.websiteUrl ? (
+                  <TextLink href={data.provider.websiteUrl}>{data.provider.name}</TextLink>
+                ) : (
+                  data.provider.name
+                ),
               },
               { label: "Type", value: data.type.name },
               { label: "Level", value: data.level },
@@ -98,13 +124,20 @@ export default async function CredentialPage({ params }: PageProps<"/certificati
               { label: "Expires", value: data.expiresOn ? formatMonth(data.expiresOn) : null },
               {
                 label: "Credential ID",
-                value: data.credentialCode ? <span className="font-mono text-sm break-all">{data.credentialCode}</span> : null,
+                value: data.credentialCode ? (
+                  <span className="font-mono text-sm break-all">{data.credentialCode}</span>
+                ) : null,
               },
-              { label: "Verification", value: verifyUrl ? <TextLink href={verifyUrl}>Verify credential</TextLink> : null },
+              {
+                label: "Verification",
+                value: verifyUrl ? <TextLink href={verifyUrl}>Verify credential</TextLink> : null,
+              },
               {
                 label: "Part of",
                 value: data.ancestors.length ? (
-                  <TextLink href={`/certifications/${data.ancestors[data.ancestors.length - 1]?.slug}`}>
+                  <TextLink
+                    href={`/certifications/${data.ancestors[data.ancestors.length - 1]?.slug}`}
+                  >
                     {data.ancestors[data.ancestors.length - 1]?.title}
                   </TextLink>
                 ) : null,
@@ -132,7 +165,11 @@ export default async function CredentialPage({ params }: PageProps<"/certificati
                     sizes="(min-width: 1024px) 60vw, 100vw"
                     className="h-auto w-full max-w-3xl rounded-xs border border-rule bg-muted"
                   />
-                  {data.image.caption ? <figcaption className="mt-2 text-sm text-ink-3">{data.image.caption}</figcaption> : null}
+                  {data.image.caption ? (
+                    <figcaption className="mt-2 text-sm text-ink-3">
+                      {data.image.caption}
+                    </figcaption>
+                  ) : null}
                 </figure>
               ) : null}
 
@@ -162,7 +199,9 @@ export default async function CredentialPage({ params }: PageProps<"/certificati
                     <TextLink href={`/projects/${data.relatedProject.slug}`} arrow>
                       {data.relatedProject.title}
                     </TextLink>
-                    <span className="font-mono text-xs text-ink-3">{PROJECT_TYPE_LABELS[data.relatedProject.type]}</span>
+                    <span className="font-mono text-xs text-ink-3">
+                      {PROJECT_TYPE_LABELS[data.relatedProject.type]}
+                    </span>
                   </p>
                 </section>
               ) : null}
@@ -174,7 +213,10 @@ export default async function CredentialPage({ params }: PageProps<"/certificati
                   </h2>
                   <ul className="divide-y divide-rule">
                     {others.map((node) => (
-                      <li key={node.id} className="flex flex-wrap items-baseline justify-between gap-x-6 py-3">
+                      <li
+                        key={node.id}
+                        className="flex flex-wrap items-baseline justify-between gap-x-6 py-3"
+                      >
                         <Link href={`/certifications/${node.slug}`} className="link">
                           {node.title}
                         </Link>

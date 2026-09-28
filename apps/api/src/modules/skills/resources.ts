@@ -16,7 +16,10 @@ import { defineResource, listItem, UUID_PATTERN } from "../../lib/resource";
 /** Rejects a parent that is the category itself or one of its descendants. */
 async function assertNoCategoryCycle(db: DbExecutor, id: string, parentId: string | null) {
   if (!parentId) return;
-  if (parentId === id) throw badRequest("A category cannot be its own parent", [{ path: "parentId", message: "Choose another parent" }]);
+  if (parentId === id)
+    throw badRequest("A category cannot be its own parent", [
+      { path: "parentId", message: "Choose another parent" },
+    ]);
   const result = await db.execute<{ id: string }>(sql`
     WITH RECURSIVE ancestors AS (
       SELECT id, parent_id FROM skill_categories WHERE id = ${parentId}
@@ -41,14 +44,28 @@ export const skillCategoryResource = defineResource<SkillCategoryInput>({
   searchColumns: ["name", "description"],
   defaultSort: [asc(skillCategories.displayOrder), asc(skillCategories.name)],
   filters: (query) => (query.parent === "root" ? [sql`${skillCategories.parentId} IS NULL`] : []),
-  listItem: (row) => listItem(row, { title: String(row.name), subtitle: (row.description as string | null) ?? null, extra: { parentId: (row.parentId as string | null) ?? null } }),
+  listItem: (row) =>
+    listItem(row, {
+      title: String(row.name),
+      subtitle: (row.description as string | null) ?? null,
+      extra: { parentId: (row.parentId as string | null) ?? null },
+    }),
   validate: async (db, input, existing) => {
     if (existing) await assertNoCategoryCycle(db, existing.id, input.parentId);
   },
   beforeDelete: async (db, row) => {
-    const [child] = await db.select({ id: skillCategories.id }).from(skillCategories).where(eq(skillCategories.parentId, row.id)).limit(1);
-    const [skill] = await db.select({ id: skills.id }).from(skills).where(eq(skills.categoryId, row.id)).limit(1);
-    if (child || skill) throw conflict("Move or delete this category's sub-categories and skills first");
+    const [child] = await db
+      .select({ id: skillCategories.id })
+      .from(skillCategories)
+      .where(eq(skillCategories.parentId, row.id))
+      .limit(1);
+    const [skill] = await db
+      .select({ id: skills.id })
+      .from(skills)
+      .where(eq(skills.categoryId, row.id))
+      .limit(1);
+    if (child || skill)
+      throw conflict("Move or delete this category's sub-categories and skills first");
   },
 });
 
@@ -62,7 +79,8 @@ export const skillResource = defineResource<SkillInput>({
   slugScope: (input) => eq(skills.categoryId, input.categoryId),
   searchColumns: ["name", "description"],
   defaultSort: [asc(skills.categoryId), asc(skills.displayOrder), asc(skills.name)],
-  filters: (query) => (query.parent && UUID_PATTERN.test(query.parent) ? [eq(skills.categoryId, query.parent)] : []),
+  filters: (query) =>
+    query.parent && UUID_PATTERN.test(query.parent) ? [eq(skills.categoryId, query.parent)] : [],
   relationKeys: ["projectIds"],
   listItem: (row) =>
     listItem(row, {
@@ -74,6 +92,6 @@ export const skillResource = defineResource<SkillInput>({
     const links = await loadLinks(db, skillProjects, "skillId", ids, "projectId");
     return new Map(ids.map((id) => [id, { projectIds: links.get(id) ?? [] }]));
   },
-  saveRelations: (tx, id, input) => syncLinks(tx, skillProjects, "skillId", id, "projectId", input.projectIds),
+  saveRelations: (tx, id, input) =>
+    syncLinks(tx, skillProjects, "skillId", id, "projectId", input.projectIds),
 });
-

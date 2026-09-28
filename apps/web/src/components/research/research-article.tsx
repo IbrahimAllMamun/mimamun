@@ -1,6 +1,11 @@
 import Image from "next/image";
 import { FileDown } from "lucide-react";
-import { formatPeriod, PROJECT_TYPE_LABELS, RESEARCH_KIND_LABELS, type ResearchDetailDTO } from "@portfolio/shared";
+import {
+  formatPeriod,
+  PROJECT_TYPE_LABELS,
+  RESEARCH_KIND_LABELS,
+  type ResearchDetailDTO,
+} from "@portfolio/shared";
 import { Blocks, numberFigures } from "@/components/content/blocks";
 import { PublicationEntry } from "@/components/research/publication-entry";
 import { PresentationLine, PresentationLinks } from "@/components/research/research-entry";
@@ -38,14 +43,20 @@ export function ResearchArticle({
   const figureNumbers = numberFigures(research.sections.map((section) => section.blocks));
   const kind = RESEARCH_KIND_LABELS[research.kind];
   const degree = research.education?.degree ?? research.degree?.split(/\s+in\s+/i)[0] ?? null;
-  const eyebrow = [degree ? `${degree} ${kind.toLowerCase()}` : kind, research.year].filter(Boolean).join(" · ");
+  const eyebrow = [degree ? `${degree} ${kind.toLowerCase()}` : kind, research.year]
+    .filter(Boolean)
+    .join(" · ");
   const period = formatPeriod(research.startedOn, research.completedOn);
   const downloads = [
     research.pdf ? { label: "Full text (PDF)", href: research.pdf.url } : null,
     research.poster ? { label: "Poster", href: research.poster.url } : null,
     research.slides ? { label: "Slides", href: research.slides.url } : null,
   ].filter((item): item is { label: string; href: string } => Boolean(item));
-  const hasMargin = research.keywords.length > 0 || research.methods.length > 0 || downloads.length > 0 || Boolean(research.externalUrl);
+  const hasMargin =
+    research.keywords.length > 0 ||
+    research.methods.length > 0 ||
+    downloads.length > 0 ||
+    Boolean(research.externalUrl);
 
   return (
     <article>
@@ -58,11 +69,17 @@ export function ResearchArticle({
         <MetaTable
           className="mt-4"
           items={[
-            { label: research.authors.length > 1 ? "Authors" : "Author", value: research.authors.join(", ") },
+            {
+              label: research.authors.length > 1 ? "Authors" : "Author",
+              value: research.authors.join(", "),
+            },
             { label: "Programme", value: research.degree },
             { label: "Institution", value: research.institution },
             { label: "Supervisor", value: research.supervisor },
-            { label: period ? "Period" : "Year", value: period || (research.year ? String(research.year) : null) },
+            {
+              label: period ? "Period" : "Year",
+              value: period || (research.year ? String(research.year) : null),
+            },
           ]}
         />
       </PageHeader>
@@ -78,14 +95,19 @@ export function ResearchArticle({
             preload
             className="h-auto w-full rounded-xs border border-rule bg-muted"
           />
-          {research.cover.caption ? <figcaption className="mt-2 text-sm text-ink-3">{research.cover.caption}</figcaption> : null}
+          {research.cover.caption ? (
+            <figcaption className="mt-2 text-sm text-ink-3">{research.cover.caption}</figcaption>
+          ) : null}
         </figure>
       ) : null}
 
       <div className="container-page">
         <div className="grid-editorial gap-y-10">
           {hasMargin ? (
-            <aside aria-label="Keywords and files" className="col-span-4 space-y-6 sm:col-span-8 lg:col-span-3">
+            <aside
+              aria-label="Keywords and files"
+              className="col-span-4 space-y-6 sm:col-span-8 lg:col-span-3"
+            >
               {research.keywords.length ? (
                 <div className="space-y-2">
                   <h2 className="label">Keywords</h2>
@@ -104,7 +126,10 @@ export function ResearchArticle({
                   <ul>
                     {downloads.map((item) => (
                       <li key={item.href}>
-                        <a href={item.href} className="link inline-flex min-h-11 items-center gap-1.5">
+                        <a
+                          href={item.href}
+                          className="link inline-flex min-h-11 items-center gap-1.5"
+                        >
                           <Icon icon={FileDown} size={15} /> {item.label}
                         </a>
                       </li>
@@ -120,7 +145,12 @@ export function ResearchArticle({
             </aside>
           ) : null}
 
-          <div className={cn("col-span-4 space-y-16 sm:col-span-8 lg:col-span-9", !hasMargin && "lg:col-start-4")}>
+          <div
+            className={cn(
+              "col-span-4 space-y-16 sm:col-span-8 lg:col-span-9",
+              !hasMargin && "lg:col-start-4",
+            )}
+          >
             {research.abstract ? (
               <section aria-labelledby="abstract-title" className="max-w-measure">
                 <h2 id="abstract-title" className="label">
@@ -146,12 +176,27 @@ export function ResearchArticle({
             ) : null}
 
             {research.sections.map((section, index) => (
-              <section key={section.key} id={section.key} aria-labelledby={`${section.key}-title`} className="scroll-mt-(--sticky-offset)">
-                <h2 id={`${section.key}-title`} className="mb-6 flex items-baseline gap-4 text-3xl text-ink">
-                  <span className="font-mono text-sm text-ink-3 tabular-nums">{String(index + 1).padStart(2, "0")}</span>
+              <section
+                key={section.key}
+                id={section.key}
+                aria-labelledby={`${section.key}-title`}
+                className="scroll-mt-(--sticky-offset)"
+              >
+                <h2
+                  id={`${section.key}-title`}
+                  className="mb-6 flex items-baseline gap-4 text-3xl text-ink"
+                >
+                  <span className="font-mono text-sm text-ink-3 tabular-nums">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
                   {section.label}
                 </h2>
-                <Blocks blocks={section.blocks} media={research.media} figureNumbers={figureNumbers} headingBase={3} />
+                <Blocks
+                  blocks={section.blocks}
+                  media={research.media}
+                  figureNumbers={figureNumbers}
+                  headingBase={3}
+                />
               </section>
             ))}
 
@@ -202,21 +247,28 @@ export function ResearchArticle({
                         <TextLink href={`/projects/${project.slug}`} arrow>
                           {project.title}
                         </TextLink>
-                        <span className="font-mono text-xs text-ink-3">{PROJECT_TYPE_LABELS[project.type]}</span>
+                        <span className="font-mono text-xs text-ink-3">
+                          {PROJECT_TYPE_LABELS[project.type]}
+                        </span>
                       </li>
                     ))}
                   </ul>
                 </section>
               ) : null}
 
-              <section aria-labelledby="cite-title" className="max-w-measure border-t-2 border-ink pt-6">
+              <section
+                aria-labelledby="cite-title"
+                className="max-w-measure border-t-2 border-ink pt-6"
+              >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h2 id="cite-title" className="label">
                     How to cite
                   </h2>
                   <CopyButton text={research.citation} label="Copy citation" />
                 </div>
-                <p className="mt-2 bg-surface p-4 font-serif text-lg leading-relaxed text-ink-2">{research.citation}</p>
+                <p className="mt-2 bg-surface p-4 font-serif text-lg leading-relaxed text-ink-2">
+                  {research.citation}
+                </p>
               </section>
             </div>
           </div>

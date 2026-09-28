@@ -3,8 +3,7 @@
 import type { ApiErrorBody, FieldError } from "@portfolio/shared";
 
 export type ClientResult<T, M = unknown> =
-  | { ok: true; data: T; meta: M }
-  | { ok: false; status: number; error: ApiErrorBody };
+  { ok: true; data: T; meta: M } | { ok: false; status: number; error: ApiErrorBody };
 
 let csrfToken: string | null = null;
 
@@ -35,9 +34,7 @@ export async function apiRequest<T, M = unknown>(
     });
     if (response.status === 204) return { ok: true, data: undefined as T, meta: undefined as M };
     const payload = (await response.json().catch(() => null)) as
-      | { success: true; data: T; meta?: M }
-      | { success: false; error: ApiErrorBody }
-      | null;
+      { success: true; data: T; meta?: M } | { success: false; error: ApiErrorBody } | null;
     if (!response.ok || !payload || !payload.success) {
       return {
         ok: false,
@@ -45,7 +42,10 @@ export async function apiRequest<T, M = unknown>(
         error:
           payload && !payload.success
             ? payload.error
-            : { code: "INTERNAL_ERROR", message: `The request failed (${response.status}). Please try again.` },
+            : {
+                code: "INTERNAL_ERROR",
+                message: `The request failed (${response.status}). Please try again.`,
+              },
       };
     }
     return { ok: true, data: payload.data, meta: payload.meta as M };
@@ -53,7 +53,10 @@ export async function apiRequest<T, M = unknown>(
     return {
       ok: false,
       status: 0,
-      error: { code: "SERVICE_UNAVAILABLE", message: "You appear to be offline, or the server is unreachable." },
+      error: {
+        code: "SERVICE_UNAVAILABLE",
+        message: "You appear to be offline, or the server is unreachable.",
+      },
     };
   }
 }

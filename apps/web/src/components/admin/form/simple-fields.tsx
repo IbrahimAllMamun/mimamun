@@ -9,15 +9,27 @@ import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/cn";
 import type { AdminField, FormRecord } from "../resources/types";
 
-export type ControlProps = { id: string; "aria-describedby"?: string; "aria-invalid"?: boolean; required?: boolean };
+export type ControlProps = {
+  id: string;
+  "aria-describedby"?: string;
+  "aria-invalid"?: boolean;
+  required?: boolean;
+};
 
-export const asText = (value: unknown): string => (value === null || value === undefined ? "" : String(value));
+export const asText = (value: unknown): string =>
+  value === null || value === undefined ? "" : String(value);
 
 export function CharCount({ value, max }: { value: string; max?: number }) {
   if (!max) return null;
   const near = value.length > max * 0.9;
   return (
-    <p aria-hidden className={cn("text-right font-mono text-xs tabular-nums", near ? "text-accent" : "text-ink-3")}>
+    <p
+      aria-hidden
+      className={cn(
+        "text-right font-mono text-xs tabular-nums",
+        near ? "text-accent" : "text-ink-3",
+      )}
+    >
       {value.length} / {max}
     </p>
   );
@@ -56,13 +68,26 @@ export function MarkdownInput({
             {item === "write" ? "Write" : "Preview"}
           </button>
         ))}
-        <span className="ml-auto self-center text-xs text-ink-3">Markdown: **bold**, _italic_, [link](https://…), - list</span>
+        <span className="ml-auto self-center text-xs text-ink-3">
+          Markdown: **bold**, _italic_, [link](https://…), - list
+        </span>
       </div>
       {mode === "write" ? (
-        <Textarea {...control} rows={rows} maxLength={maxLength} value={value} onChange={(event) => onChange(event.target.value)} className="font-mono text-sm" />
+        <Textarea
+          {...control}
+          rows={rows}
+          maxLength={maxLength}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className="font-mono text-sm"
+        />
       ) : (
         <div className="min-h-32 rounded-xs border border-rule bg-surface px-4 py-3">
-          {value.trim() ? <Markdown source={value} className="prose-ui" /> : <p className="text-sm text-ink-3">Nothing to preview.</p>}
+          {value.trim() ? (
+            <Markdown source={value} className="prose-ui" />
+          ) : (
+            <p className="text-sm text-ink-3">Nothing to preview.</p>
+          )}
         </div>
       )}
       <CharCount value={value} max={maxLength} />
@@ -95,7 +120,9 @@ export function SlugInput({
         <Input
           {...control}
           value={value}
-          onChange={(event) => onChange(event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))}
+          onChange={(event) =>
+            onChange(event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))
+          }
           placeholder={source ? slugify(source) : "created-from-the-title"}
           className={cn("font-mono text-sm", base && "rounded-l-none")}
         />
@@ -113,7 +140,17 @@ export function SlugInput({
 }
 
 /** Chips for short values (technologies, tags): Enter or comma adds, Backspace removes the last. */
-export function StringListInput({ control, value, onChange, placeholder }: { control: ControlProps; value: string[]; onChange: (value: string[]) => void; placeholder?: string }) {
+export function StringListInput({
+  control,
+  value,
+  onChange,
+  placeholder,
+}: {
+  control: ControlProps;
+  value: string[];
+  onChange: (value: string[]) => void;
+  placeholder?: string;
+}) {
   const [draft, setDraft] = useState("");
   const add = (raw: string) => {
     const items = raw
@@ -122,7 +159,8 @@ export function StringListInput({ control, value, onChange, placeholder }: { con
       .filter(Boolean);
     if (items.length === 0) return;
     const next = [...value];
-    for (const item of items) if (!next.some((existing) => existing.toLowerCase() === item.toLowerCase())) next.push(item);
+    for (const item of items)
+      if (!next.some((existing) => existing.toLowerCase() === item.toLowerCase())) next.push(item);
     onChange(next);
     setDraft("");
   };
@@ -137,9 +175,17 @@ export function StringListInput({ control, value, onChange, placeholder }: { con
   return (
     <div className="flex flex-wrap items-center gap-1.5 rounded-xs border border-rule-strong bg-elevated px-2 py-1.5 focus-within:border-ink">
       {value.map((item, index) => (
-        <span key={`${item}-${index}`} className="inline-flex items-center gap-1 rounded-xs bg-muted py-0.5 pr-1 pl-2 text-sm text-ink">
+        <span
+          key={`${item}-${index}`}
+          className="inline-flex items-center gap-1 rounded-xs bg-muted py-0.5 pr-1 pl-2 text-sm text-ink"
+        >
           {item}
-          <button type="button" onClick={() => onChange(value.filter((_, i) => i !== index))} className="rounded-xs p-0.5 text-ink-3 hover:bg-rule hover:text-ink" aria-label={`Remove ${item}`}>
+          <button
+            type="button"
+            onClick={() => onChange(value.filter((_, i) => i !== index))}
+            className="rounded-xs p-0.5 text-ink-3 hover:bg-rule hover:text-ink"
+            aria-label={`Remove ${item}`}
+          >
             <Icon icon={X} size={12} />
           </button>
         </span>
@@ -165,8 +211,25 @@ export function StringListInput({ control, value, onChange, placeholder }: { con
 }
 
 /** One item per line, for longer entries such as responsibilities. */
-export function LinesInput({ control, value, onChange, rows = 5 }: { control: ControlProps; value: string[]; onChange: (value: string[]) => void; rows?: number }) {
-  return <Textarea {...control} rows={rows} value={value.join("\n")} onChange={(event) => onChange(event.target.value.split("\n"))} />;
+export function LinesInput({
+  control,
+  value,
+  onChange,
+  rows = 5,
+}: {
+  control: ControlProps;
+  value: string[];
+  onChange: (value: string[]) => void;
+  rows?: number;
+}) {
+  return (
+    <Textarea
+      {...control}
+      rows={rows}
+      value={value.join("\n")}
+      onChange={(event) => onChange(event.target.value.split("\n"))}
+    />
+  );
 }
 
 export function RelationSelect({
@@ -186,13 +249,23 @@ export function RelationSelect({
 }) {
   const known = value === null || options.some((option) => option.id === value);
   return (
-    <Select {...control} value={value ?? ""} onChange={(event) => onChange(event.target.value || null)}>
-      {required && value ? null : <option value="">{emptyLabel ?? (required ? "Choose…" : "None")}</option>}
+    <Select
+      {...control}
+      value={value ?? ""}
+      onChange={(event) => onChange(event.target.value || null)}
+    >
+      {required && value ? null : (
+        <option value="">{emptyLabel ?? (required ? "Choose…" : "None")}</option>
+      )}
       {!known ? <option value={value ?? ""}>(unavailable item)</option> : null}
       {options.map((option) => (
         <option key={option.id} value={option.id}>
           {option.label}
-          {option.hint && !option.hint.includes("|") && !["draft", "published", "archived"].includes(option.hint) ? ` — ${option.hint}` : ""}
+          {option.hint &&
+          !option.hint.includes("|") &&
+          !["draft", "published", "archived"].includes(option.hint)
+            ? ` — ${option.hint}`
+            : ""}
           {option.hint === "draft" ? " (draft)" : option.hint === "archived" ? " (archived)" : ""}
         </option>
       ))}
@@ -201,21 +274,44 @@ export function RelationSelect({
 }
 
 /** Checkbox list with a filter box; selected items are listed first as removable chips. */
-export function RelationsInput({ value, onChange, options, label }: { value: string[]; onChange: (value: string[]) => void; options: OptionDTO[]; label: string }) {
+export function RelationsInput({
+  value,
+  onChange,
+  options,
+  label,
+}: {
+  value: string[];
+  onChange: (value: string[]) => void;
+  options: OptionDTO[];
+  label: string;
+}) {
   const [filter, setFilter] = useState("");
   const id = useId();
   const byId = useMemo(() => new Map(options.map((option) => [option.id, option])), [options]);
-  const visible = options.filter((option) => option.label.toLowerCase().includes(filter.trim().toLowerCase()));
-  const toggle = (optionId: string) => onChange(value.includes(optionId) ? value.filter((item) => item !== optionId) : [...value, optionId]);
+  const visible = options.filter((option) =>
+    option.label.toLowerCase().includes(filter.trim().toLowerCase()),
+  );
+  const toggle = (optionId: string) =>
+    onChange(
+      value.includes(optionId) ? value.filter((item) => item !== optionId) : [...value, optionId],
+    );
   return (
     <div className="space-y-2">
       {value.length ? (
         <ul className="flex flex-wrap gap-1.5" aria-label={`Selected ${label.toLowerCase()}`}>
           {value.map((optionId) => (
-            <li key={optionId} className="inline-flex items-center gap-1 rounded-xs bg-primary-tint py-0.5 pr-1 pl-2 text-sm text-ink">
+            <li
+              key={optionId}
+              className="inline-flex items-center gap-1 rounded-xs bg-primary-tint py-0.5 pr-1 pl-2 text-sm text-ink"
+            >
               <Icon icon={Link2} size={12} className="text-primary" />
               {byId.get(optionId)?.label ?? "(unavailable item)"}
-              <button type="button" onClick={() => toggle(optionId)} className="rounded-xs p-0.5 text-ink-3 hover:text-ink" aria-label={`Remove ${byId.get(optionId)?.label ?? "item"}`}>
+              <button
+                type="button"
+                onClick={() => toggle(optionId)}
+                className="rounded-xs p-0.5 text-ink-3 hover:text-ink"
+                aria-label={`Remove ${byId.get(optionId)?.label ?? "item"}`}
+              >
                 <Icon icon={X} size={12} />
               </button>
             </li>
@@ -241,13 +337,22 @@ export function RelationsInput({ value, onChange, options, label }: { value: str
             {visible.map((option) => (
               <li key={option.id}>
                 <label className="flex min-h-9 cursor-pointer items-center gap-2.5 px-3 text-sm hover:bg-muted">
-                  <input type="checkbox" checked={value.includes(option.id)} onChange={() => toggle(option.id)} className="size-4 accent-primary" />
+                  <input
+                    type="checkbox"
+                    checked={value.includes(option.id)}
+                    onChange={() => toggle(option.id)}
+                    className="size-4 accent-primary"
+                  />
                   <span className="flex-1">{option.label}</span>
-                  {option.hint && !option.hint.includes("|") ? <span className="text-xs text-ink-3">{option.hint}</span> : null}
+                  {option.hint && !option.hint.includes("|") ? (
+                    <span className="text-xs text-ink-3">{option.hint}</span>
+                  ) : null}
                 </label>
               </li>
             ))}
-            {visible.length === 0 ? <li className="px-3 py-2 text-sm text-ink-3">No matches.</li> : null}
+            {visible.length === 0 ? (
+              <li className="px-3 py-2 text-sm text-ink-3">No matches.</li>
+            ) : null}
           </ul>
         </div>
       )}

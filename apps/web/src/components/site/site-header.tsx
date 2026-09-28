@@ -21,7 +21,11 @@ export function SiteHeader({ site }: { site: SiteDTO | null }) {
   return (
     <header className="sticky top-0 z-40 border-b border-rule bg-paper">
       <div className="container-page flex h-(--header-height) items-center justify-between gap-4">
-        <Link href="/" className="group flex min-h-11 items-baseline gap-3" aria-label={`${name} — home`}>
+        <Link
+          href="/"
+          className="group flex min-h-11 items-baseline gap-3"
+          aria-label={`${name} — home`}
+        >
           <span className="font-serif text-lg font-medium text-ink">{name}</span>
           <span className="label hidden transition-colors group-hover:text-ink-2 lg:inline">
             {site?.profile.headline ?? "Data Scientist"}

@@ -1,7 +1,7 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/cn";
 
@@ -13,22 +13,35 @@ function resolvedTheme(): Theme {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
+function subscribe(onChange: () => void): () => void {
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  const observer = new MutationObserver(onChange);
+  media.addEventListener("change", onChange);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  return () => {
+    media.removeEventListener("change", onChange);
+    observer.disconnect();
+  };
+}
+
 /**
  * Switches between light and dark. The choice is stored in a cookie so the
  * server renders the right theme on the next request (no flash).
  */
-export function ThemeToggle({ className, withLabel = false }: { className?: string; withLabel?: boolean }) {
-  const [theme, setTheme] = useState<Theme | null>(null);
-
-  useEffect(() => {
-    setTheme(resolvedTheme());
-  }, []);
+export function ThemeToggle({
+  className,
+  withLabel = false,
+}: {
+  className?: string;
+  withLabel?: boolean;
+}) {
+  // The server cannot know the system theme, so it renders the neutral state.
+  const theme = useSyncExternalStore<Theme | null>(subscribe, resolvedTheme, () => null);
 
   const toggle = () => {
     const next: Theme = resolvedTheme() === "dark" ? "light" : "dark";
     document.documentElement.dataset.theme = next;
     document.cookie = `theme=${next}; path=/; max-age=31536000; samesite=lax`;
-    setTheme(next);
   };
 
   const label = theme === "dark" ? "Switch to light theme" : "Switch to dark theme";
@@ -44,7 +57,9 @@ export function ThemeToggle({ className, withLabel = false }: { className?: stri
       )}
     >
       <Icon icon={theme === "dark" ? Sun : Moon} size={18} />
-      {withLabel ? <span className="text-sm">{theme === "dark" ? "Light theme" : "Dark theme"}</span> : null}
+      {withLabel ? (
+        <span className="text-sm">{theme === "dark" ? "Light theme" : "Dark theme"}</span>
+      ) : null}
     </button>
   );
 }

@@ -16,7 +16,10 @@ export function listed(table: EditorialColumns): SQL {
 }
 
 export function viewable(table: EditorialColumns): SQL {
-  return and(eq(table.status, "published"), inArray(table.visibility, ["public", "unlisted"])) as SQL;
+  return and(
+    eq(table.status, "published"),
+    inArray(table.visibility, ["public", "unlisted"]),
+  ) as SQL;
 }
 
 /** `preview` bypasses publication rules (admin preview only). */

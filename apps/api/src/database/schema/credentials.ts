@@ -30,7 +30,9 @@ export const credentialProviders = pgTable(
     isVisible: boolean().notNull().default(true),
     ...timestamps(),
   },
-  (t) => [check("credential_providers_slug_format", sql`${t.slug} ~ ${sql.raw(`'${SLUG_CHECK}'`)}`)],
+  (t) => [
+    check("credential_providers_slug_format", sql`${t.slug} ~ ${sql.raw(`'${SLUG_CHECK}'`)}`),
+  ],
 );
 
 /**

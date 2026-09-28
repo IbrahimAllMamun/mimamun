@@ -13,12 +13,7 @@ import {
 import type { ProjectSections } from "@portfolio/shared";
 import { id, SLUG_CHECK, timestamps, timestamptz, tsvector } from "./_helpers";
 import { users } from "./auth";
-import {
-  contentStatusEnum,
-  projectMediaKindEnum,
-  projectTypeEnum,
-  visibilityEnum,
-} from "./enums";
+import { contentStatusEnum, projectMediaKindEnum, projectTypeEnum, visibilityEnum } from "./enums";
 import { media } from "./media";
 import { seoMetadata } from "./site";
 import { projectCategories } from "./taxonomy";
@@ -36,13 +31,19 @@ export const projects = pgTable(
     organization: text(),
     startedOn: date({ mode: "string" }),
     completedOn: date({ mode: "string" }),
-    technologies: text().array().notNull().default(sql`'{}'::text[]`),
+    technologies: text()
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     githubUrl: text(),
     demoUrl: text(),
     docsUrl: text(),
     coverMediaId: uuid().references(() => media.id, { onDelete: "restrict" }),
     /** Case-study sections → content blocks. Validated by @portfolio/shared on write. */
-    sections: jsonb().$type<Partial<ProjectSections>>().notNull().default(sql`'{}'::jsonb`),
+    sections: jsonb()
+      .$type<Partial<ProjectSections>>()
+      .notNull()
+      .default(sql`'{}'::jsonb`),
     status: contentStatusEnum().notNull().default("draft"),
     visibility: visibilityEnum().notNull().default("public"),
     featured: boolean().notNull().default(false),

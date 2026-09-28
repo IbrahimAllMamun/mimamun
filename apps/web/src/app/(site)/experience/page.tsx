@@ -15,7 +15,12 @@ import { pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await publicApi.site();
-  return pageMetadata({ site: site.ok ? site.data : null, title: "Experience", path: "/experience", routeKey: "experience" });
+  return pageMetadata({
+    site: site.ok ? site.data : null,
+    title: "Experience",
+    path: "/experience",
+    routeKey: "experience",
+  });
 }
 
 export default async function ExperiencePage() {

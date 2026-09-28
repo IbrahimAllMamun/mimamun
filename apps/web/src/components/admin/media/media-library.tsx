@@ -2,7 +2,12 @@
 
 import { Search, Upload } from "lucide-react";
 import { useRef, useState } from "react";
-import { MEDIA_KINDS, type AdminMediaDTO, type MediaAccept, type PageMeta } from "@portfolio/shared";
+import {
+  MEDIA_KINDS,
+  type AdminMediaDTO,
+  type MediaAccept,
+  type PageMeta,
+} from "@portfolio/shared";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/cn";
@@ -53,8 +58,15 @@ export function UploadButton({
         aria-hidden
         onChange={(event) => void onFiles(event.currentTarget.files)}
       />
-      <Button type="button" variant={variant} pending={pending} onClick={() => input.current?.click()}>
-        {pending ? "Uploading…" : (
+      <Button
+        type="button"
+        variant={variant}
+        pending={pending}
+        onClick={() => input.current?.click()}
+      >
+        {pending ? (
+          "Uploading…"
+        ) : (
           <>
             <Icon icon={Upload} size={16} /> {label}
           </>
@@ -84,7 +96,9 @@ export function MediaLibraryDialog({
   const [kind, setKind] = useState<string>(fixedKind ?? "");
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<AdminMediaDTO | null>(null);
-  const query = useApiQuery<AdminMediaDTO[], PageMeta>(open ? withQuery("/api/admin/media", { q, kind, page, pageSize: 24 }) : null);
+  const query = useApiQuery<AdminMediaDTO[], PageMeta>(
+    open ? withQuery("/api/admin/media", { q, kind, page, pageSize: 24 }) : null,
+  );
 
   const choose = (media: AdminMediaDTO) => {
     onSelect(media);
@@ -113,7 +127,11 @@ export function MediaLibraryDialog({
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative min-w-48 flex-1">
-            <Icon icon={Search} size={16} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ink-3" />
+            <Icon
+              icon={Search}
+              size={16}
+              className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ink-3"
+            />
             <input
               type="search"
               value={q}
@@ -150,10 +168,17 @@ export function MediaLibraryDialog({
         {query.error ? <ErrorPanel error={query.error} onRetry={query.reload} /> : null}
         {!query.data && query.loading ? <LoadingRows rows={4} /> : null}
         {query.data && query.data.length === 0 ? (
-          <p className="py-10 text-center text-sm text-ink-3">No files found. Upload one to use it here.</p>
+          <p className="py-10 text-center text-sm text-ink-3">
+            No files found. Upload one to use it here.
+          </p>
         ) : null}
         {query.data?.length ? (
-          <ul className={cn("grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6", query.loading && "opacity-60")}>
+          <ul
+            className={cn(
+              "grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6",
+              query.loading && "opacity-60",
+            )}
+          >
             {query.data.map((media) => {
               const active = selected?.id === media.id;
               return (
@@ -169,7 +194,9 @@ export function MediaLibraryDialog({
                     )}
                   >
                     <MediaThumb media={media} />
-                    <span className="block truncate text-xs text-ink">{media.title ?? media.originalName}</span>
+                    <span className="block truncate text-xs text-ink">
+                      {media.title ?? media.originalName}
+                    </span>
                     <span className="block text-xs text-ink-3">{formatBytes(media.sizeBytes)}</span>
                   </button>
                 </li>
@@ -180,13 +207,23 @@ export function MediaLibraryDialog({
 
         {query.meta && query.meta.totalPages > 1 ? (
           <div className="flex items-center justify-between text-sm">
-            <Button variant="ghost" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={page <= 1}
+              onClick={() => setPage(page - 1)}
+            >
               Previous
             </Button>
             <span className="text-ink-3">
               Page {query.meta.page} of {query.meta.totalPages}
             </span>
-            <Button variant="ghost" size="sm" disabled={page >= query.meta.totalPages} onClick={() => setPage(page + 1)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={page >= query.meta.totalPages}
+              onClick={() => setPage(page + 1)}
+            >
               Next
             </Button>
           </div>

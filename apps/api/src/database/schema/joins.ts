@@ -35,7 +35,10 @@ export const projectTags = pgTable(
       .notNull()
       .references(() => tags.id, { onDelete: "cascade" }),
   },
-  (t) => [primaryKey({ columns: [t.projectId, t.tagId] }), index("project_tags_tag_idx").on(t.tagId)],
+  (t) => [
+    primaryKey({ columns: [t.projectId, t.tagId] }),
+    index("project_tags_tag_idx").on(t.tagId),
+  ],
 );
 
 export const projectResearch = pgTable(
@@ -129,7 +132,10 @@ export const blogPostTags = pgTable(
       .notNull()
       .references(() => tags.id, { onDelete: "cascade" }),
   },
-  (t) => [primaryKey({ columns: [t.postId, t.tagId] }), index("blog_post_tags_tag_idx").on(t.tagId)],
+  (t) => [
+    primaryKey({ columns: [t.postId, t.tagId] }),
+    index("blog_post_tags_tag_idx").on(t.tagId),
+  ],
 );
 
 export const blogPostProjects = pgTable(

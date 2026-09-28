@@ -33,7 +33,11 @@ export const projectCategoryResource = defineResource({
   slugSource: "name",
   searchColumns: ["name", "slug"],
   defaultSort: [asc(projectCategories.displayOrder), asc(projectCategories.name)],
-  listItem: (row) => listItem(row, { title: String(row.name), subtitle: (row.description as string | null) ?? null }),
+  listItem: (row) =>
+    listItem(row, {
+      title: String(row.name),
+      subtitle: (row.description as string | null) ?? null,
+    }),
 });
 
 export const tagResource = defineResource({
@@ -56,7 +60,10 @@ export async function ensureTags(tx: DbExecutor, names: readonly string[]): Prom
     .insert(tags)
     .values([...bySlug].map(([slug, name]) => ({ slug, name })))
     .onConflictDoNothing({ target: tags.slug });
-  const rows = await tx.select({ id: tags.id, slug: tags.slug }).from(tags).where(inArray(tags.slug, [...bySlug.keys()]));
+  const rows = await tx
+    .select({ id: tags.id, slug: tags.slug })
+    .from(tags)
+    .where(inArray(tags.slug, [...bySlug.keys()]));
   const ids = new Map(rows.map((row) => [row.slug, row.id]));
   return [...bySlug.keys()].map((slug) => ids.get(slug)).filter((id): id is string => Boolean(id));
 }
@@ -70,7 +77,8 @@ async function tagNamesFor(db: DbExecutor, projectIds: string[]) {
         .where(inArray(projectTags.projectId, projectIds))
     : [];
   const result = new Map<string, string[]>();
-  for (const row of rows) result.set(row.projectId, [...(result.get(row.projectId) ?? []), row.name]);
+  for (const row of rows)
+    result.set(row.projectId, [...(result.get(row.projectId) ?? []), row.name]);
   return result;
 }
 
@@ -86,7 +94,9 @@ export const projectResource = defineResource<ProjectInput>({
   defaultSort: [desc(projects.featured), asc(projects.displayOrder), desc(projects.updatedAt)],
   sorts: { title: [asc(projects.title)] },
   filters: (query) =>
-    query.type && query.type in PROJECT_TYPE_LABELS ? [eq(projects.type, query.type as ProjectType)] : [],
+    query.type && query.type in PROJECT_TYPE_LABELS
+      ? [eq(projects.type, query.type as ProjectType)]
+      : [],
   relationKeys: ["tags", "metrics", "gallery", "researchIds", "publicationIds"],
   listItem: (row) =>
     listItem(row, {
@@ -105,7 +115,13 @@ export const projectResource = defineResource<ProjectInput>({
     // Sequential on purpose: `db` may be a transaction, which runs one query at a time.
     const tagNames = await tagNamesFor(db, ids);
     const research = await loadLinks(db, projectResearch, "projectId", ids, "researchId");
-    const publications = await loadLinks(db, projectPublications, "projectId", ids, "publicationId");
+    const publications = await loadLinks(
+      db,
+      projectPublications,
+      "projectId",
+      ids,
+      "publicationId",
+    );
     const metricRows = await db
       .select()
       .from(projectMetrics)
@@ -137,14 +153,29 @@ export const projectResource = defineResource<ProjectInput>({
     const tagIds = await ensureTags(tx, input.tags);
     await syncLinks(tx, projectTags, "projectId", id, "tagId", tagIds);
     await syncLinks(tx, projectResearch, "projectId", id, "researchId", input.researchIds);
-    await syncLinks(tx, projectPublications, "projectId", id, "publicationId", input.publicationIds);
+    await syncLinks(
+      tx,
+      projectPublications,
+      "projectId",
+      id,
+      "publicationId",
+      input.publicationIds,
+    );
     await tx.delete(projectMetrics).where(eq(projectMetrics.projectId, id));
     if (input.metrics.length) {
-      await tx.insert(projectMetrics).values(input.metrics.map((metric, index) => ({ ...metric, projectId: id, displayOrder: index })));
+      await tx
+        .insert(projectMetrics)
+        .values(
+          input.metrics.map((metric, index) => ({ ...metric, projectId: id, displayOrder: index })),
+        );
     }
     await tx.delete(projectMedia).where(eq(projectMedia.projectId, id));
     if (input.gallery.length) {
-      await tx.insert(projectMedia).values(input.gallery.map((item, index) => ({ ...item, projectId: id, displayOrder: index })));
+      await tx
+        .insert(projectMedia)
+        .values(
+          input.gallery.map((item, index) => ({ ...item, projectId: id, displayOrder: index })),
+        );
     }
   },
   validate: async (db, input) => {

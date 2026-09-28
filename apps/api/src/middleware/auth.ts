@@ -21,7 +21,8 @@ export function requirePermission(...permissions: Permission[]): RequestHandler 
 export function requireAnyPermission(...permissions: Permission[]): RequestHandler {
   return (req, _res, next) => {
     if (!req.auth) return next(unauthenticated());
-    if (!permissions.some((permission) => req.auth?.permissions.includes(permission))) return next(forbidden());
+    if (!permissions.some((permission) => req.auth?.permissions.includes(permission)))
+      return next(forbidden());
     next();
   };
 }

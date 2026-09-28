@@ -9,6 +9,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/admin/logi
   const params = await searchParams;
   const next = safeNext(params.next);
   if (await getSession()) redirect(next);
-  const notice = params.reason === "expired" ? "Your session has expired. Please sign in again." : null;
+  const notice =
+    params.reason === "expired" ? "Your session has expired. Please sign in again." : null;
   return <LoginForm next={next} notice={notice} />;
 }

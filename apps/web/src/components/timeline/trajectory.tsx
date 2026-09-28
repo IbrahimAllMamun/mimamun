@@ -29,7 +29,9 @@ export function Trajectory({
 }) {
   const dated = items.filter((item) => item.start || item.end);
   if (dated.length === 0) return null;
-  const allDates = dated.flatMap((item) => [parseDate(item.start), parseDate(item.end)]).filter((date): date is Date => Boolean(date));
+  const allDates = dated
+    .flatMap((item) => [parseDate(item.start), parseDate(item.end)])
+    .filter((date): date is Date => Boolean(date));
   const firstYear = Math.min(...allDates.map((date) => date.getUTCFullYear()));
   const lastYear = Math.max(now.getUTCFullYear(), ...allDates.map((date) => date.getUTCFullYear()));
   const axisStart = firstYear * 12;
@@ -46,7 +48,9 @@ export function Trajectory({
         <span className="font-serif text-lg text-ink">
           Trajectory, {firstYear}–{lastYear}
         </span>
-        <span className="text-sm text-ink-3">Education, roles and presentations on one time axis.</span>
+        <span className="text-sm text-ink-3">
+          Education, roles and presentations on one time axis.
+        </span>
       </figcaption>
 
       <div className="relative">
@@ -57,7 +61,10 @@ export function Trajectory({
               {years.map((year, index) => (
                 <span
                   key={year}
-                  className={cn("absolute bottom-1 -translate-x-1/2 font-mono text-xs text-ink-3", index % 2 === 1 && "hidden sm:inline")}
+                  className={cn(
+                    "absolute bottom-1 -translate-x-1/2 font-mono text-xs text-ink-3",
+                    index % 2 === 1 && "hidden sm:inline",
+                  )}
                   style={{ left: `${((year * 12 - axisStart + 6) / span) * 100}%` }}
                 >
                   {year}
@@ -82,7 +89,11 @@ export function Trajectory({
             const period = formatPeriod(item.start, item.end, item.isCurrent);
             let bar: { left: number; width: number; dashed: boolean } | null = null;
             if (start && end && !isPoint) {
-              bar = { left: position(start), width: Math.max(0.8, position(end) - position(start) + 100 / span), dashed: false };
+              bar = {
+                left: position(start),
+                width: Math.max(0.8, position(end) - position(start) + 100 / span),
+                dashed: false,
+              };
             } else if (!start && end) {
               const width = 6;
               bar = { left: Math.max(0, position(end) - width), width, dashed: true };
@@ -95,14 +106,19 @@ export function Trajectory({
                   {!start && end ? " · start date not recorded" : ""}
                 </span>
                 <span className="block text-sm font-medium text-ink">{item.label}</span>
-                {item.sublabel ? <span className="block text-sm text-ink-2">{item.sublabel}</span> : null}
+                {item.sublabel ? (
+                  <span className="block text-sm text-ink-2">{item.sublabel}</span>
+                ) : null}
               </>
             );
             return (
               <li key={item.id} className="grid-editorial items-center gap-y-2 py-3">
                 <div className="col-span-4 sm:col-span-8 lg:col-span-4">
                   {item.href ? (
-                    <Link href={item.href} className="group block hover:[&_span.font-medium]:underline">
+                    <Link
+                      href={item.href}
+                      className="group block hover:[&_span.font-medium]:underline"
+                    >
                       {label}
                     </Link>
                   ) : (
@@ -126,10 +142,16 @@ export function Trajectory({
                       <span
                         className={cn(
                           "reveal-bar absolute inset-y-1 rounded-xs",
-                          bar.dashed ? "border border-dashed border-rule-strong bg-transparent" : style.bar,
+                          bar.dashed
+                            ? "border border-dashed border-rule-strong bg-transparent"
+                            : style.bar,
                           item.isCurrent && "rounded-r-none",
                         )}
-                        style={{ left: `${bar.left}%`, width: `${bar.width}%`, animationDelay: `${Math.min(index, 6) * 60}ms` }}
+                        style={{
+                          left: `${bar.left}%`,
+                          width: `${bar.width}%`,
+                          animationDelay: `${Math.min(index, 6) * 60}ms`,
+                        }}
                       />
                     ) : null}
                     {item.isCurrent && bar ? (
@@ -140,7 +162,10 @@ export function Trajectory({
                     ) : null}
                     {pointAt !== null ? (
                       <span
-                        className={cn("absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rotate-45", style.bar)}
+                        className={cn(
+                          "absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rotate-45",
+                          style.bar,
+                        )}
                         style={{ left: `${pointAt + 100 / span / 2}%` }}
                       />
                     ) : null}
@@ -152,7 +177,8 @@ export function Trajectory({
         </ol>
       </div>
       <p className="text-sm text-ink-3">
-        Bars show periods; diamonds mark single events; dashed stubs mark roles whose start date is not recorded.
+        Bars show periods; diamonds mark single events; dashed stubs mark roles whose start date is
+        not recorded.
       </p>
     </figure>
   );

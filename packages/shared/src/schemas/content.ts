@@ -114,7 +114,9 @@ export const publicProjectQuery = z.object({
   q: z.preprocess(emptyToNull, z.string().max(120).nullable()).optional(),
   category: z.preprocess(emptyToNull, z.string().max(120).nullable()).optional(),
   tech: z.preprocess(emptyToNull, z.string().max(60).nullable()).optional(),
-  year: z.preprocess(emptyToNull, z.coerce.number().int().min(1990).max(2100).nullable()).optional(),
+  year: z
+    .preprocess(emptyToNull, z.coerce.number().int().min(1990).max(2100).nullable())
+    .optional(),
   type: z.preprocess(emptyToNull, z.enum(PROJECT_TYPES).nullable()).optional(),
   featured: z.preprocess(emptyToNull, z.enum(["true", "false"]).nullable()).optional(),
   sort: z.preprocess(emptyToNull, z.enum(PROJECT_SORTS).nullable()).optional(),

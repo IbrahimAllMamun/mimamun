@@ -114,7 +114,10 @@ const chartData = z
     referenceLine: z.enum(["none", "diagonal"]).default("none"),
     source: optional(300, "Source"),
     data: z.object({
-      x: z.array(z.union([z.string().max(60), z.number().finite()])).min(1).max(500),
+      x: z
+        .array(z.union([z.string().max(60), z.number().finite()]))
+        .min(1)
+        .max(500),
       series: z
         .array(
           z.object({

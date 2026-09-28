@@ -7,8 +7,22 @@ export interface MetaItem {
 }
 
 /** Definition table for page metadata (role, period, institution…). Empty values are skipped. */
-export function MetaTable({ items, className, columns = 4 }: { items: MetaItem[]; className?: string; columns?: 2 | 3 | 4 }) {
-  const visible = items.filter((item) => item.value !== null && item.value !== undefined && item.value !== "" && !(Array.isArray(item.value) && item.value.length === 0));
+export function MetaTable({
+  items,
+  className,
+  columns = 4,
+}: {
+  items: MetaItem[];
+  className?: string;
+  columns?: 2 | 3 | 4;
+}) {
+  const visible = items.filter(
+    (item) =>
+      item.value !== null &&
+      item.value !== undefined &&
+      item.value !== "" &&
+      !(Array.isArray(item.value) && item.value.length === 0),
+  );
   if (visible.length === 0) return null;
   return (
     <dl

@@ -9,11 +9,20 @@ import {
 } from "@portfolio/shared";
 import type { AppConfig } from "../../config/env";
 import type { Database, DbExecutor } from "../../database/client";
-import { analyticsEvents, analyticsSalts, blogPosts, credentials, projects, research } from "../../database/schema";
+import {
+  analyticsEvents,
+  analyticsSalts,
+  blogPosts,
+  credentials,
+  projects,
+  research,
+} from "../../database/schema";
 import { classifyUserAgent } from "../../lib/user-agent";
 
 /** Derives the content entity from a public path, e.g. /projects/foo → project "foo". */
-export function entityFromPath(path: string): { entityType: EntityType; entitySlug: string } | null {
+export function entityFromPath(
+  path: string,
+): { entityType: EntityType; entitySlug: string } | null {
   const match = /^\/(projects|research|blog|certifications)\/([a-z0-9-]{1,160})\/?$/.exec(path);
   if (!match) return null;
   const map: Record<string, EntityType> = {
@@ -40,7 +49,10 @@ async function dailySalt(db: DbExecutor, day: string): Promise<string> {
     .insert(analyticsSalts)
     .values({ day, salt: randomBytes(24).toString("base64url") })
     .onConflictDoNothing({ target: analyticsSalts.day });
-  const [row] = await db.select({ salt: analyticsSalts.salt }).from(analyticsSalts).where(eq(analyticsSalts.day, day));
+  const [row] = await db
+    .select({ salt: analyticsSalts.salt })
+    .from(analyticsSalts)
+    .where(eq(analyticsSalts.day, day));
   return row?.salt ?? "";
 }
 
@@ -93,14 +105,23 @@ export async function recordEvent(
 /** Deletes events older than the retention window and salts older than two days. */
 export async function purgeAnalytics(db: DbExecutor, retentionDays: number): Promise<number> {
   const cutoff = new Date(Date.now() - retentionDays * 86_400_000);
-  const deleted = await db.delete(analyticsEvents).where(lt(analyticsEvents.occurredAt, cutoff)).returning({ id: analyticsEvents.id });
-  await db.delete(analyticsSalts).where(lt(analyticsSalts.day, isoDay(new Date(Date.now() - 2 * 86_400_000))));
+  const deleted = await db
+    .delete(analyticsEvents)
+    .where(lt(analyticsEvents.occurredAt, cutoff))
+    .returning({ id: analyticsEvents.id });
+  await db
+    .delete(analyticsSalts)
+    .where(lt(analyticsSalts.day, isoDay(new Date(Date.now() - 2 * 86_400_000))));
   return deleted.length;
 }
 
 type CountRow = { name: string | null; value: number };
 
-export async function analyticsSummary(db: DbExecutor, days: number, enabled: boolean): Promise<AnalyticsSummaryDTO> {
+export async function analyticsSummary(
+  db: DbExecutor,
+  days: number,
+  enabled: boolean,
+): Promise<AnalyticsSummaryDTO> {
   const end = new Date();
   const start = new Date(end.getTime() - days * 86_400_000);
   const previousStart = new Date(start.getTime() - days * 86_400_000);
@@ -120,7 +141,11 @@ export async function analyticsSummary(db: DbExecutor, days: number, enabled: bo
     return row ?? { pageViews: 0, visitors: 0, downloads: 0, outboundClicks: 0 };
   };
 
-  const top = async (columnSql: ReturnType<typeof sql>, where = pageViews, limit = 8): Promise<CountRow[]> => {
+  const top = async (
+    columnSql: ReturnType<typeof sql>,
+    where = pageViews,
+    limit = 8,
+  ): Promise<CountRow[]> => {
     const result = await db.execute<CountRow>(
       sql`SELECT ${columnSql} AS name, count(*)::int AS value FROM ${analyticsEvents} WHERE ${where} AND ${columnSql} IS NOT NULL GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT ${limit}`,
     );
@@ -143,7 +168,17 @@ export async function analyticsSummary(db: DbExecutor, days: number, enabled: bo
     GROUP BY 1, 2 ORDER BY 3 DESC LIMIT 10`);
   const titles = await titlesFor(db, popularRows.rows);
 
-  const [current, previous, topPages, referrers, devices, browsers, countries, downloads, outbound] = await Promise.all([
+  const [
+    current,
+    previous,
+    topPages,
+    referrers,
+    devices,
+    browsers,
+    countries,
+    downloads,
+    outbound,
+  ] = await Promise.all([
     totals(start, end),
     totals(previousStart, start),
     top(sql`path`),
@@ -155,13 +190,18 @@ export async function analyticsSummary(db: DbExecutor, days: number, enabled: bo
     top(sql`target`, and(inRange, eq(analyticsEvents.type, "outbound_click"))),
   ]);
 
-  const named = (rows: CountRow[]) => rows.map((row) => ({ name: row.name ?? "Unknown", count: row.value }));
+  const named = (rows: CountRow[]) =>
+    rows.map((row) => ({ name: row.name ?? "Unknown", count: row.value }));
   return {
     days,
     enabled,
     totals: current,
     previousTotals: { pageViews: previous.pageViews, visitors: previous.visitors },
-    daily: dailyResult.rows.map((row) => ({ date: row.date, pageViews: row.page_views, visitors: row.visitors })),
+    daily: dailyResult.rows.map((row) => ({
+      date: row.date,
+      pageViews: row.page_views,
+      visitors: row.visitors,
+    })),
     topPages: topPages.map((row) => ({ path: row.name ?? "/", views: row.value })),
     referrers: referrers.map((row) => ({ host: row.name ?? "", views: row.value })),
     devices: named(devices),
@@ -178,16 +218,29 @@ export async function analyticsSummary(db: DbExecutor, days: number, enabled: bo
   };
 }
 
-async function titlesFor(db: DbExecutor, rows: { type: EntityType; slug: string }[]): Promise<Map<string, string>> {
+async function titlesFor(
+  db: DbExecutor,
+  rows: { type: EntityType; slug: string }[],
+): Promise<Map<string, string>> {
   const titles = new Map<string, string>();
-  const tables = { project: projects, research, blog_post: blogPosts, credential: credentials } as const;
+  const tables = {
+    project: projects,
+    research,
+    blog_post: blogPosts,
+    credential: credentials,
+  } as const;
   for (const [type, table] of Object.entries(tables)) {
     const slugs = rows.filter((row) => row.type === type).map((row) => row.slug);
     if (slugs.length === 0) continue;
     const found = await db
       .select({ slug: table.slug, title: table.title })
       .from(table)
-      .where(sql`${table.slug} IN (${sql.join(slugs.map((slug) => sql`${slug}`), sql`, `)})`);
+      .where(
+        sql`${table.slug} IN (${sql.join(
+          slugs.map((slug) => sql`${slug}`),
+          sql`, `,
+        )})`,
+      );
     for (const row of found) titles.set(`${type}:${row.slug}`, row.title);
   }
   return titles;

@@ -21,7 +21,9 @@ import { createSession, loadSession, revokeSession, revokeUserSessions } from ".
 
 function emailKey(req: Request): string | null {
   const email = (req.body as { email?: unknown } | undefined)?.email;
-  return typeof email === "string" && email.length < 300 ? `email:${email.trim().toLowerCase()}` : null;
+  return typeof email === "string" && email.length < 300
+    ? `email:${email.trim().toLowerCase()}`
+    : null;
 }
 
 export function authRouter(deps: AppDeps): Router {

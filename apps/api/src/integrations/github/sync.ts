@@ -13,7 +13,10 @@ async function markStatus(db: Database, patch: Partial<typeof integrationStatus.
   await db
     .insert(integrationStatus)
     .values({ key: "github", ...patch, updatedAt: new Date() })
-    .onConflictDoUpdate({ target: integrationStatus.key, set: { ...patch, updatedAt: new Date() } });
+    .onConflictDoUpdate({
+      target: integrationStatus.key,
+      set: { ...patch, updatedAt: new Date() },
+    });
 }
 
 /**
@@ -26,7 +29,10 @@ export async function syncGithubRepositories(
   client: GithubClient,
   logger: Logger,
 ): Promise<SyncResult> {
-  const [settings] = await db.select({ username: siteSettings.githubUsername }).from(siteSettings).where(eq(siteSettings.id, 1));
+  const [settings] = await db
+    .select({ username: siteSettings.githubUsername })
+    .from(siteSettings)
+    .where(eq(siteSettings.id, 1));
   const username = settings?.username;
   if (!username) throw new Error("Set a GitHub username in Site settings before syncing.");
   const startedAt = new Date();
@@ -70,11 +76,17 @@ export async function syncGithubRepositories(
       );
 
     let languagesUpdated = 0;
-    const selected = await db.select().from(githubRepositories).where(eq(githubRepositories.isSelected, true));
+    const selected = await db
+      .select()
+      .from(githubRepositories)
+      .where(eq(githubRepositories.isSelected, true));
     for (const repo of selected) {
       try {
         const languages = await client.getLanguages(repo.fullName);
-        await db.update(githubRepositories).set({ languages }).where(eq(githubRepositories.id, repo.id));
+        await db
+          .update(githubRepositories)
+          .set({ languages })
+          .where(eq(githubRepositories.id, repo.id));
         languagesUpdated += 1;
       } catch (error) {
         logger.warn({ err: error, repo: repo.fullName }, "github languages fetch failed");
@@ -93,4 +105,3 @@ export async function syncGithubRepositories(
     throw error;
   }
 }
-

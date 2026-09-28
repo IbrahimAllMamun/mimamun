@@ -56,7 +56,12 @@ export const SOCIAL_LINKS = [
     url: "https://www.linkedin.com/in/mimamun",
     handle: "mimamun",
   },
-  { platform: "email", label: "Email", url: "mailto:mimamun@isrt.ac.bd", handle: "mimamun@isrt.ac.bd" },
+  {
+    platform: "email",
+    label: "Email",
+    url: "mailto:mimamun@isrt.ac.bd",
+    handle: "mimamun@isrt.ac.bd",
+  },
 ] as const;
 
 export const SITE_SETTINGS = {
@@ -109,12 +114,14 @@ export const ROUTE_SEO: Record<string, { title: string | null; description: stri
   publications: { title: "Publications", description: "Publications by Ibrahim All-Mamun." },
   certifications: {
     title: "Certifications",
-    description: "Certificates and courses completed by Ibrahim All-Mamun, grouped by provider and programme.",
+    description:
+      "Certificates and courses completed by Ibrahim All-Mamun, grouped by provider and programme.",
   },
   blog: { title: "Writing", description: "Notes on statistics, data science and analytics." },
   contact: {
     title: "Contact",
-    description: "Get in touch with Ibrahim All-Mamun about data science roles, research or collaboration.",
+    description:
+      "Get in touch with Ibrahim All-Mamun about data science roles, research or collaboration.",
   },
   search: { title: "Search", description: "Search projects, research, publications and writing." },
 };
@@ -131,7 +138,8 @@ export const FOCUS_AREAS = [
     title: "Statistical modeling",
     description:
       "Choosing a model that matches how the data were generated, then checking it before trusting it.",
-    evidence: "B.S. project: a covariate-dependent Markov model of internal migration in Bangladesh.",
+    evidence:
+      "B.S. project: a covariate-dependent Markov model of internal migration in Bangladesh.",
   },
   {
     title: "Machine learning for sequential data",
@@ -151,7 +159,8 @@ export const APPROACH_STEPS = [
   {
     title: "Statistics",
     description: "Start from the question and the uncertainty around it.",
-    evidence: "B.S. Applied Statistics and M.S. Applied Statistics and Data Science, University of Dhaka.",
+    evidence:
+      "B.S. Applied Statistics and M.S. Applied Statistics and Data Science, University of Dhaka.",
   },
   {
     title: "Data",
@@ -251,7 +260,8 @@ export const EDUCATION = [
     gradeLabel: "CGPA",
     gradeValue: 3.59,
     gradeScale: 4,
-    projectTitle: "A Covariate-Dependent Markov Model for Internal Migration to Urban Areas in Bangladesh",
+    projectTitle:
+      "A Covariate-Dependent Markov Model for Internal Migration to Urban Areas in Bangladesh",
     displayOrder: 1,
   },
 ] as const;
@@ -372,9 +382,21 @@ export const SKILL_TREE: { name: string; slug: string; skills: string[] }[] = [
     slug: "visualization-and-bi",
     skills: ["Power BI", "Tableau", "ggplot2", "Plotly", "Shiny"],
   },
-  { name: "Databases", slug: "databases", skills: ["PostgreSQL", "MySQL", "BigQuery", "Azure SQL"] },
-  { name: "Web Development", slug: "web-development", skills: ["Django", "Shiny", "Web technologies"] },
-  { name: "DevOps / Tools", slug: "devops-and-tools", skills: ["Docker", "Git", "VS Code", "Jupyter"] },
+  {
+    name: "Databases",
+    slug: "databases",
+    skills: ["PostgreSQL", "MySQL", "BigQuery", "Azure SQL"],
+  },
+  {
+    name: "Web Development",
+    slug: "web-development",
+    skills: ["Django", "Shiny", "Web technologies"],
+  },
+  {
+    name: "DevOps / Tools",
+    slug: "devops-and-tools",
+    skills: ["Docker", "Git", "VS Code", "Jupyter"],
+  },
 ];
 
 export const SKILL_ICONS: Record<string, string> = {
@@ -411,9 +433,21 @@ export const SKILL_ICONS: Record<string, string> = {
 
 /** Skill ↔ project links that follow directly from the project titles. */
 export const SKILL_PROJECT_LINKS: { category: string; skill: string; project: string }[] = [
-  { category: "machine-learning", skill: "deep-learning", project: "flood-event-prediction-bangladesh" },
-  { category: "data-science", skill: "machine-learning", project: "flood-event-prediction-bangladesh" },
-  { category: "statistics", skill: "statistical-analysis", project: "internal-migration-markov-model" },
+  {
+    category: "machine-learning",
+    skill: "deep-learning",
+    project: "flood-event-prediction-bangladesh",
+  },
+  {
+    category: "data-science",
+    skill: "machine-learning",
+    project: "flood-event-prediction-bangladesh",
+  },
+  {
+    category: "statistics",
+    skill: "statistical-analysis",
+    project: "internal-migration-markov-model",
+  },
 ];
 
 export const CREDENTIAL_TYPES = [
@@ -437,11 +471,36 @@ export const CREDENTIAL_PROVIDERS = [
 
 /** Certificates listed in the CV. No IDs, dates or verification URLs are known. */
 export const CREDENTIALS = [
-  { provider: "coursera", type: "Certificate", title: "Google Data Analytics", skill: ["data-science", "data-analysis"] },
-  { provider: "datacamp", type: "Certificate", title: "Shiny Fundamentals in R", skill: ["visualization-and-bi", "shiny"] },
-  { provider: "datacamp", type: "Certificate", title: "SQL Fundamentals", skill: ["programming", "sql"] },
-  { provider: "datacamp", type: "Certificate", title: "Python Data Fundamentals", skill: ["programming", "python"] },
-  { provider: "datacamp", type: "Certificate", title: "R Programming Fundamentals", skill: ["programming", "r"] },
+  {
+    provider: "coursera",
+    type: "Certificate",
+    title: "Google Data Analytics",
+    skill: ["data-science", "data-analysis"],
+  },
+  {
+    provider: "datacamp",
+    type: "Certificate",
+    title: "Shiny Fundamentals in R",
+    skill: ["visualization-and-bi", "shiny"],
+  },
+  {
+    provider: "datacamp",
+    type: "Certificate",
+    title: "SQL Fundamentals",
+    skill: ["programming", "sql"],
+  },
+  {
+    provider: "datacamp",
+    type: "Certificate",
+    title: "Python Data Fundamentals",
+    skill: ["programming", "python"],
+  },
+  {
+    provider: "datacamp",
+    type: "Certificate",
+    title: "R Programming Fundamentals",
+    skill: ["programming", "r"],
+  },
   {
     provider: "ieee-cs-sbc-du",
     type: "Workshop",

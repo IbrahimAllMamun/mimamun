@@ -25,10 +25,22 @@ import { listed, viewable } from "./visibility";
 /** Visible skill categories as a tree. A hidden category hides its subtree. */
 export async function getSkillTree(db: DbExecutor): Promise<SkillCategoryDTO[]> {
   const [categoryRows, skillRows, links] = await Promise.all([
-    db.select().from(skillCategories).orderBy(asc(skillCategories.displayOrder), asc(skillCategories.name)),
-    db.select().from(skills).where(eq(skills.isVisible, true)).orderBy(asc(skills.displayOrder), asc(skills.name)),
     db
-      .select({ skillId: skillProjects.skillId, slug: projects.slug, title: projects.title, type: projects.type })
+      .select()
+      .from(skillCategories)
+      .orderBy(asc(skillCategories.displayOrder), asc(skillCategories.name)),
+    db
+      .select()
+      .from(skills)
+      .where(eq(skills.isVisible, true))
+      .orderBy(asc(skills.displayOrder), asc(skills.name)),
+    db
+      .select({
+        skillId: skillProjects.skillId,
+        slug: projects.slug,
+        title: projects.title,
+        type: projects.type,
+      })
       .from(skillProjects)
       .innerJoin(projects, eq(projects.id, skillProjects.projectId))
       .where(listed(projects)),
@@ -72,7 +84,10 @@ async function credentialContext(db: DbExecutor) {
     db.select().from(credentialTypes),
   ]);
   const types = new Map(typeRows.map((row) => [row.id, { name: row.name, slug: row.slug }]));
-  const mediaMap = await loadMediaMap(db, rows.map((row) => row.imageMediaId));
+  const mediaMap = await loadMediaMap(
+    db,
+    rows.map((row) => row.imageMediaId),
+  );
   const toNode = (row: CredentialRow): CredentialNodeDTO => ({
     id: row.id,
     slug: row.slug,
@@ -98,7 +113,10 @@ export async function getCredentialTree(db: DbExecutor): Promise<CredentialProvi
       .orderBy(asc(credentialProviders.displayOrder), asc(credentialProviders.name)),
     credentialContext(db),
   ]);
-  const logos = await loadMediaMap(db, providers.map((provider) => provider.logoMediaId));
+  const logos = await loadMediaMap(
+    db,
+    providers.map((provider) => provider.logoMediaId),
+  );
   const countNodes = (nodes: CredentialNodeDTO[]): number =>
     nodes.reduce((sum, node) => sum + 1 + countNodes(node.children), 0);
   return providers
@@ -120,7 +138,10 @@ export async function getCredentialTree(db: DbExecutor): Promise<CredentialProvi
     .filter((provider) => provider.count > 0);
 }
 
-export async function getCredentialDetail(db: DbExecutor, slug: string): Promise<CredentialDetailDTO | null> {
+export async function getCredentialDetail(
+  db: DbExecutor,
+  slug: string,
+): Promise<CredentialDetailDTO | null> {
   const context = await credentialContext(db);
   const row = context.rows.find((item) => item.slug === slug);
   if (!row) return null;
@@ -137,19 +158,25 @@ export async function getCredentialDetail(db: DbExecutor, slug: string): Promise
     db
       .select()
       .from(credentialProviders)
-      .where(and(eq(credentialProviders.id, row.providerId), eq(credentialProviders.isVisible, true))),
+      .where(
+        and(eq(credentialProviders.id, row.providerId), eq(credentialProviders.isVisible, true)),
+      ),
     db
       .select({ name: skills.name, slug: skills.slug })
       .from(credentialSkills)
       .innerJoin(skills, eq(skills.id, credentialSkills.skillId))
       .where(and(eq(credentialSkills.credentialId, row.id), eq(skills.isVisible, true))),
     row.relatedProjectId
-      ? db.select().from(projects).where(and(eq(projects.id, row.relatedProjectId), viewable(projects)))
+      ? db
+          .select()
+          .from(projects)
+          .where(and(eq(projects.id, row.relatedProjectId), viewable(projects)))
       : Promise.resolve([]),
     loadMediaMap(db, [row.imageMediaId, row.pdfMediaId]),
   ]);
   if (!provider) return null;
-  const logo = (await loadMediaMap(db, [provider.logoMediaId])).get(provider.logoMediaId ?? "") ?? null;
+  const logo =
+    (await loadMediaMap(db, [provider.logoMediaId])).get(provider.logoMediaId ?? "") ?? null;
   const node = context.toNode(row);
   return {
     id: row.id,
@@ -177,7 +204,10 @@ export async function credentialSummary(db: DbExecutor) {
   const tree = await getCredentialTree(db);
   return {
     total: tree.reduce((sum, provider) => sum + provider.count, 0),
-    providers: tree.map((provider) => ({ name: provider.name, slug: provider.slug, count: provider.count })),
+    providers: tree.map((provider) => ({
+      name: provider.name,
+      slug: provider.slug,
+      count: provider.count,
+    })),
   };
 }
-

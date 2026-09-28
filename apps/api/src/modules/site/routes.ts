@@ -71,7 +71,9 @@ export function siteAdminRouter(deps: AppDeps): Router {
 
   router.put("/settings", requirePermission(PERMISSIONS.SETTINGS_MANAGE), async (req, res) => {
     const input = parse(siteSettingsInput, req.body);
-    await assertMediaExists(db, [{ id: input.defaultOgImageId, kind: "image", path: "defaultOgImageId" }]);
+    await assertMediaExists(db, [
+      { id: input.defaultOgImageId, kind: "image", path: "defaultOgImageId" },
+    ]);
     const updated = await db.transaction(async (tx) => {
       const [before] = await tx.select().from(siteSettings).where(eq(siteSettings.id, 1));
       const [row] = await tx
@@ -119,7 +121,10 @@ export function siteAdminRouter(deps: AppDeps): Router {
     const input = parse(seoFieldsInput, req.body);
     await assertMediaExists(db, [{ id: input.ogImageId, kind: "image", path: "ogImageId" }]);
     const row = await db.transaction(async (tx) => {
-      const [before] = await tx.select().from(seoMetadata).where(eq(seoMetadata.routeKey, routeKey));
+      const [before] = await tx
+        .select()
+        .from(seoMetadata)
+        .where(eq(seoMetadata.routeKey, routeKey));
       const [saved] = await tx
         .insert(seoMetadata)
         .values({ routeKey, ...input })

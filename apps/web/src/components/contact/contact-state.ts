@@ -8,4 +8,9 @@ export interface ContactFormState {
   values: Record<ContactField, string>;
 }
 
-export const EMPTY_CONTACT_VALUES: Record<ContactField, string> = { name: "", email: "", subject: "", message: "" };
+export const EMPTY_CONTACT_VALUES: Record<ContactField, string> = {
+  name: "",
+  email: "",
+  subject: "",
+  message: "",
+};

@@ -45,7 +45,8 @@ export class HttpRevalidator implements Revalidator {
           body: JSON.stringify({ tags: ["content"], reasons }),
           signal: AbortSignal.timeout(5000),
         });
-        if (!response.ok) this.logger.warn({ status: response.status }, "web revalidation rejected");
+        if (!response.ok)
+          this.logger.warn({ status: response.status }, "web revalidation rejected");
       } catch (error) {
         this.logger.warn({ err: error }, "web revalidation failed; relying on time-based refresh");
       } finally {

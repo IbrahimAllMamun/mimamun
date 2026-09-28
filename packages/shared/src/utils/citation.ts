@@ -135,9 +135,14 @@ export interface CitableResearch {
 export function formatResearchCitation(research: CitableResearch): string {
   const year = yearOf(research.completedOn ?? null);
   const degree = research.degree ? research.degree.split(/\s+in\s+/i)[0]?.trim() : null;
-  const descriptor = [degree ? `${degree} ${research.kindNoun}` : research.kindNoun, research.institution]
+  const descriptor = [
+    degree ? `${degree} ${research.kindNoun}` : research.kindNoun,
+    research.institution,
+  ]
     .filter(Boolean)
     .join(", ");
-  const descriptorText = descriptor ? ` [${descriptor.charAt(0).toUpperCase()}${descriptor.slice(1)}]` : "";
+  const descriptorText = descriptor
+    ? ` [${descriptor.charAt(0).toUpperCase()}${descriptor.slice(1)}]`
+    : "";
   return `${apaAuthorName(research.author)} (${year ?? "n.d."}). ${research.title.replace(/[.]$/, "")}${descriptorText}.`;
 }

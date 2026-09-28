@@ -22,16 +22,23 @@ function secretMatches(provided: string | null): boolean {
  */
 export async function POST(request: Request) {
   if (!secretMatches(request.headers.get("x-revalidate-secret"))) {
-    return Response.json({ success: false, error: { code: "FORBIDDEN", message: "Forbidden" } }, { status: 403 });
+    return Response.json(
+      { success: false, error: { code: "FORBIDDEN", message: "Forbidden" } },
+      { status: 403 },
+    );
   }
   let tags: string[] = ["content"];
   try {
     const body = (await request.json()) as { tags?: unknown };
-    if (Array.isArray(body.tags)) tags = body.tags.filter((tag): tag is string => typeof tag === "string");
+    if (Array.isArray(body.tags))
+      tags = body.tags.filter((tag): tag is string => typeof tag === "string");
   } catch {
     // An empty or malformed body revalidates the default tag.
   }
   const accepted = tags.filter((tag) => ALLOWED_TAGS.has(tag));
   for (const tag of accepted) revalidateTag(tag, { expire: 0 });
-  return Response.json({ success: true, data: { revalidated: accepted } }, { headers: { "cache-control": "no-store" } });
+  return Response.json(
+    { success: true, data: { revalidated: accepted } },
+    { headers: { "cache-control": "no-store" } },
+  );
 }

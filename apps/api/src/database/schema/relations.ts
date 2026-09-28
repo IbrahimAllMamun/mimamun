@@ -46,8 +46,16 @@ export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
 }));
 
 export const profileRelations = relations(profile, ({ one }) => ({
-  avatar: one(media, { fields: [profile.avatarMediaId], references: [media.id], relationName: "profile_avatar" }),
-  cv: one(media, { fields: [profile.cvMediaId], references: [media.id], relationName: "profile_cv" }),
+  avatar: one(media, {
+    fields: [profile.avatarMediaId],
+    references: [media.id],
+    relationName: "profile_avatar",
+  }),
+  cv: one(media, {
+    fields: [profile.cvMediaId],
+    references: [media.id],
+    relationName: "profile_cv",
+  }),
 }));
 
 export const seoMetadataRelations = relations(seoMetadata, ({ one }) => ({
@@ -60,7 +68,10 @@ export const experiencesRelations = relations(experiences, ({ one, many }) => ({
 }));
 
 export const experienceProjectsRelations = relations(experienceProjects, ({ one }) => ({
-  experience: one(experiences, { fields: [experienceProjects.experienceId], references: [experiences.id] }),
+  experience: one(experiences, {
+    fields: [experienceProjects.experienceId],
+    references: [experiences.id],
+  }),
   project: one(projects, { fields: [experienceProjects.projectId], references: [projects.id] }),
 }));
 
@@ -79,7 +90,10 @@ export const tagsRelations = relations(tags, ({ many }) => ({
 }));
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
-  category: one(projectCategories, { fields: [projects.categoryId], references: [projectCategories.id] }),
+  category: one(projectCategories, {
+    fields: [projects.categoryId],
+    references: [projectCategories.id],
+  }),
   cover: one(media, { fields: [projects.coverMediaId], references: [media.id] }),
   seo: one(seoMetadata, { fields: [projects.seoId], references: [seoMetadata.id] }),
   tags: many(projectTags),
@@ -121,7 +135,11 @@ export const projectPublicationsRelations = relations(projectPublications, ({ on
 
 export const researchRelations = relations(research, ({ one, many }) => ({
   education: one(education, { fields: [research.educationId], references: [education.id] }),
-  pdf: one(media, { fields: [research.pdfMediaId], references: [media.id], relationName: "research_pdf" }),
+  pdf: one(media, {
+    fields: [research.pdfMediaId],
+    references: [media.id],
+    relationName: "research_pdf",
+  }),
   poster: one(media, {
     fields: [research.posterMediaId],
     references: [media.id],
@@ -152,7 +170,10 @@ export const publicationsRelations = relations(publications, ({ one, many }) => 
 }));
 
 export const conferencePresentationsRelations = relations(conferencePresentations, ({ one }) => ({
-  research: one(research, { fields: [conferencePresentations.researchId], references: [research.id] }),
+  research: one(research, {
+    fields: [conferencePresentations.researchId],
+    references: [research.id],
+  }),
   poster: one(media, {
     fields: [conferencePresentations.posterMediaId],
     references: [media.id],
@@ -217,12 +238,18 @@ export const credentialsRelations = relations(credentials, ({ one, many }) => ({
     references: [media.id],
     relationName: "credential_pdf",
   }),
-  relatedProject: one(projects, { fields: [credentials.relatedProjectId], references: [projects.id] }),
+  relatedProject: one(projects, {
+    fields: [credentials.relatedProjectId],
+    references: [projects.id],
+  }),
   skills: many(credentialSkills),
 }));
 
 export const credentialSkillsRelations = relations(credentialSkills, ({ one }) => ({
-  credential: one(credentials, { fields: [credentialSkills.credentialId], references: [credentials.id] }),
+  credential: one(credentials, {
+    fields: [credentialSkills.credentialId],
+    references: [credentials.id],
+  }),
   skill: one(skills, { fields: [credentialSkills.skillId], references: [skills.id] }),
 }));
 
@@ -242,7 +269,10 @@ export const blogPostsRelations = relations(blogPosts, ({ one, many }) => ({
 
 export const blogPostCategoriesRelations = relations(blogPostCategories, ({ one }) => ({
   post: one(blogPosts, { fields: [blogPostCategories.postId], references: [blogPosts.id] }),
-  category: one(blogCategories, { fields: [blogPostCategories.categoryId], references: [blogCategories.id] }),
+  category: one(blogCategories, {
+    fields: [blogPostCategories.categoryId],
+    references: [blogCategories.id],
+  }),
 }));
 
 export const blogPostTagsRelations = relations(blogPostTags, ({ one }) => ({

@@ -12,7 +12,13 @@ const SessionContext = createContext<SessionDTO | null>(null);
  * first requests already carry it. Permissions here only shape the interface;
  * the API authorises every request on its own.
  */
-export function SessionProvider({ session, children }: { session: SessionDTO; children: ReactNode }) {
+export function SessionProvider({
+  session,
+  children,
+}: {
+  session: SessionDTO;
+  children: ReactNode;
+}) {
   setCsrfToken(session.csrfToken);
   return <SessionContext value={session}>{children}</SessionContext>;
 }
@@ -25,5 +31,8 @@ export function useSession(): SessionDTO {
 
 export function useCan(): (permission: Permission) => boolean {
   const session = useSession();
-  return useCallback((permission: Permission) => session.user.permissions.includes(permission), [session]);
+  return useCallback(
+    (permission: Permission) => session.user.permissions.includes(permission),
+    [session],
+  );
 }

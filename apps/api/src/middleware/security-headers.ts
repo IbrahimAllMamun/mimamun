@@ -7,7 +7,12 @@ import helmet from "helmet";
 export const securityHeaders = helmet({
   contentSecurityPolicy: {
     useDefaults: false,
-    directives: { defaultSrc: ["'none'"], frameAncestors: ["'none'"], baseUri: ["'none'"], formAction: ["'none'"] },
+    directives: {
+      defaultSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+      baseUri: ["'none'"],
+      formAction: ["'none'"],
+    },
   },
   crossOriginResourcePolicy: { policy: "same-site" },
   crossOriginOpenerPolicy: { policy: "same-origin" },

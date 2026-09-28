@@ -88,12 +88,25 @@ export function Panel({
 }
 
 /** Shown when a request failed: what happened, and a retry. */
-export function ErrorPanel({ error, onRetry }: { error: ApiErrorBody | null; onRetry?: () => void }) {
+export function ErrorPanel({
+  error,
+  onRetry,
+}: {
+  error: ApiErrorBody | null;
+  onRetry?: () => void;
+}) {
   return (
-    <div role="alert" className="flex flex-wrap items-start gap-3 rounded-md border border-error/40 bg-error-tint px-4 py-3 text-sm">
+    <div
+      role="alert"
+      className="flex flex-wrap items-start gap-3 rounded-md border border-error/40 bg-error-tint px-4 py-3 text-sm"
+    >
       <Icon icon={CircleAlert} size={18} className="mt-0.5 shrink-0 text-error" />
       <div className="flex-1 space-y-1">
-        <p className="font-medium text-ink">{error?.code === "FORBIDDEN" ? "You do not have access to this" : "This could not be loaded"}</p>
+        <p className="font-medium text-ink">
+          {error?.code === "FORBIDDEN"
+            ? "You do not have access to this"
+            : "This could not be loaded"}
+        </p>
         <p className="text-ink-2">{error?.message ?? "Please try again."}</p>
       </div>
       {onRetry && error?.code !== "FORBIDDEN" ? (
@@ -119,7 +132,15 @@ export function LoadingRows({ rows = 5 }: { rows?: number }) {
   );
 }
 
-export function EmptyPanel({ title, children, action }: { title: string; children?: ReactNode; action?: ReactNode }) {
+export function EmptyPanel({
+  title,
+  children,
+  action,
+}: {
+  title: string;
+  children?: ReactNode;
+  action?: ReactNode;
+}) {
   return (
     <div className="rounded-md border border-dashed border-rule-strong px-6 py-10 text-center">
       <p className="font-serif text-xl text-ink">{title}</p>
@@ -139,5 +160,9 @@ export function relativeTime(iso: string | null | undefined): string {
   if (Math.abs(seconds) < 3600) return format.format(-Math.round(seconds / 60), "minute");
   if (Math.abs(seconds) < 86_400) return format.format(-Math.round(seconds / 3600), "hour");
   if (Math.abs(seconds) < 7 * 86_400) return format.format(-Math.round(seconds / 86_400), "day");
-  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(date);
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(date);
 }

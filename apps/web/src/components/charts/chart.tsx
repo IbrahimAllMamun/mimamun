@@ -27,21 +27,53 @@ const SERIES = [
 
 type Marker = (typeof SERIES)[number]["marker"];
 
-function MarkerShape({ kind, x, y, size, color }: { kind: Marker; x: number; y: number; size: number; color: string }) {
+function MarkerShape({
+  kind,
+  x,
+  y,
+  size,
+  color,
+}: {
+  kind: Marker;
+  x: number;
+  y: number;
+  size: number;
+  color: string;
+}) {
   const r = size / 2;
   switch (kind) {
     case "square":
       return <rect x={x - r} y={y - r} width={size} height={size} fill={color} />;
     case "triangle":
-      return <path d={`M${x},${y - r * 1.15} L${x + r * 1.1},${y + r * 0.85} L${x - r * 1.1},${y + r * 0.85} Z`} fill={color} />;
+      return (
+        <path
+          d={`M${x},${y - r * 1.15} L${x + r * 1.1},${y + r * 0.85} L${x - r * 1.1},${y + r * 0.85} Z`}
+          fill={color}
+        />
+      );
     case "diamond":
-      return <path d={`M${x},${y - r * 1.25} L${x + r * 1.1},${y} L${x},${y + r * 1.25} L${x - r * 1.1},${y} Z`} fill={color} />;
+      return (
+        <path
+          d={`M${x},${y - r * 1.25} L${x + r * 1.1},${y} L${x},${y + r * 1.25} L${x - r * 1.1},${y} Z`}
+          fill={color}
+        />
+      );
     case "cross":
       return (
-        <path d={`M${x - r},${y - r} L${x + r},${y + r} M${x + r},${y - r} L${x - r},${y + r}`} stroke={color} strokeWidth={1.75} />
+        <path
+          d={`M${x - r},${y - r} L${x + r},${y + r} M${x + r},${y - r} L${x - r},${y + r}`}
+          stroke={color}
+          strokeWidth={1.75}
+        />
       );
     case "plus":
-      return <path d={`M${x - r},${y} L${x + r},${y} M${x},${y - r} L${x},${y + r}`} stroke={color} strokeWidth={1.75} />;
+      return (
+        <path
+          d={`M${x - r},${y} L${x + r},${y} M${x},${y - r} L${x},${y + r}`}
+          stroke={color}
+          strokeWidth={1.75}
+        />
+      );
     default:
       return <circle cx={x} cy={y} r={r} fill={color} />;
   }
@@ -54,10 +86,30 @@ interface Geometry {
   margin: { top: number; right: number; bottom: number; left: number };
 }
 
-const WIDE: Geometry = { width: 640, height: 360, font: 12, margin: { top: 16, right: 96, bottom: 52, left: 56 } };
-const COMPACT: Geometry = { width: 320, height: 260, font: 11, margin: { top: 14, right: 16, bottom: 48, left: 44 } };
+const WIDE: Geometry = {
+  width: 640,
+  height: 360,
+  font: 12,
+  margin: { top: 16, right: 96, bottom: 52, left: 56 },
+};
+const COMPACT: Geometry = {
+  width: 320,
+  height: 260,
+  font: 11,
+  margin: { top: 14, right: 16, bottom: 48, left: 44 },
+};
 
-function ChartSvg({ chart, geometry, titleId, descId }: { chart: ChartBlockData; geometry: Geometry; titleId: string; descId: string }) {
+function ChartSvg({
+  chart,
+  geometry,
+  titleId,
+  descId,
+}: {
+  chart: ChartBlockData;
+  geometry: Geometry;
+  titleId: string;
+  descId: string;
+}) {
   const { width, height, margin, font } = geometry;
   const innerW = width - margin.left - margin.right;
   const innerH = height - margin.top - margin.bottom;
@@ -65,9 +117,12 @@ function ChartSvg({ chart, geometry, titleId, descId }: { chart: ChartBlockData;
   const numericX = chart.chartType !== "bar" && xs.every((value) => typeof value === "number");
   const values = series.flatMap((s) => s.values);
   const [yMinRaw, yMaxRaw] = extent(values) ?? [0, 1];
-  const yDomainMin = chart.chartType === "bar" || chart.chartType === "area" ? Math.min(0, yMinRaw) : yMinRaw;
+  const yDomainMin =
+    chart.chartType === "bar" || chart.chartType === "area" ? Math.min(0, yMinRaw) : yMinRaw;
   const integerValues = values.every((value) => value === null || Number.isInteger(value));
-  const yTicks = niceTicks(yDomainMin, yMaxRaw, geometry === COMPACT ? 4 : 5, { integer: integerValues && chart.yFormat !== "percent" });
+  const yTicks = niceTicks(yDomainMin, yMaxRaw, geometry === COMPACT ? 4 : 5, {
+    integer: integerValues && chart.yFormat !== "percent",
+  });
   const y = linearScale([yTicks.min, yTicks.max], [margin.top + innerH, margin.top]);
 
   let xPosition: (index: number) => number;
@@ -78,7 +133,10 @@ function ChartSvg({ chart, geometry, titleId, descId }: { chart: ChartBlockData;
     const xTicks = niceTicks(xMin, xMax, geometry === COMPACT ? 4 : 6);
     const x = linearScale([xTicks.min, xTicks.max], [margin.left, margin.left + innerW]);
     xPosition = (index) => x(xs[index] as number);
-    xTickLabels = xTicks.values.map((value) => ({ position: x(value), label: formatNumber(value) }));
+    xTickLabels = xTicks.values.map((value) => ({
+      position: x(value),
+      label: formatNumber(value),
+    }));
   } else {
     xPosition = (index) => margin.left + band * index + band / 2;
     const step = Math.ceil(xs.length / (geometry === COMPACT ? 4 : 8));
@@ -123,15 +181,35 @@ function ChartSvg({ chart, geometry, titleId, descId }: { chart: ChartBlockData;
       <g aria-hidden>
         {yTicks.values.map((tick) => (
           <g key={tick}>
-            <line x1={margin.left} x2={margin.left + innerW} y1={y(tick)} y2={y(tick)} stroke="var(--rule)" strokeWidth={1} />
+            <line
+              x1={margin.left}
+              x2={margin.left + innerW}
+              y1={y(tick)}
+              y2={y(tick)}
+              stroke="var(--rule)"
+              strokeWidth={1}
+            />
             <text x={margin.left - 8} y={y(tick)} dy="0.32em" textAnchor="end" fill="var(--ink-3)">
               {yLabel(tick)}
             </text>
           </g>
         ))}
-        <line x1={margin.left} x2={margin.left + innerW} y1={baseline} y2={baseline} stroke="var(--ink)" strokeWidth={1} />
+        <line
+          x1={margin.left}
+          x2={margin.left + innerW}
+          y1={baseline}
+          y2={baseline}
+          stroke="var(--ink)"
+          strokeWidth={1}
+        />
         {xTickLabels.map((tick) => (
-          <text key={`${tick.position}-${tick.label}`} x={tick.position} y={margin.top + innerH + font + 8} textAnchor="middle" fill="var(--ink-3)">
+          <text
+            key={`${tick.position}-${tick.label}`}
+            x={tick.position}
+            y={margin.top + innerH + font + 8}
+            textAnchor="middle"
+            fill="var(--ink-3)"
+          >
             {tick.label.length > 14 ? `${tick.label.slice(0, 13)}…` : tick.label}
           </text>
         ))}
@@ -173,7 +251,8 @@ function ChartSvg({ chart, geometry, titleId, descId }: { chart: ChartBlockData;
               <g key={item.name} aria-hidden>
                 {item.values.map((value, index) => {
                   if (value === null) return null;
-                  const x0 = margin.left + band * index + (band - groupWidth) / 2 + barWidth * seriesIndex;
+                  const x0 =
+                    margin.left + band * index + (band - groupWidth) / 2 + barWidth * seriesIndex;
                   const top = Math.min(y(value), baseline);
                   const barHeight = Math.abs(baseline - y(value));
                   return (
@@ -196,7 +275,12 @@ function ChartSvg({ chart, geometry, titleId, descId }: { chart: ChartBlockData;
             .map((value, index) => (value === null ? null : { x: xPosition(index), y: y(value) }))
             .filter((point): point is { x: number; y: number } => point !== null);
           if (points.length === 0) return null;
-          const path = points.map((point, index) => `${index === 0 ? "M" : "L"}${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(" ");
+          const path = points
+            .map(
+              (point, index) =>
+                `${index === 0 ? "M" : "L"}${point.x.toFixed(1)},${point.y.toFixed(1)}`,
+            )
+            .join(" ");
           const last = points[points.length - 1]!;
           return (
             <g key={item.name} aria-hidden>
@@ -222,11 +306,24 @@ function ChartSvg({ chart, geometry, titleId, descId }: { chart: ChartBlockData;
               ) : null}
               {points.length <= 40 || chart.chartType === "scatter"
                 ? points.map((point, index) => (
-                    <MarkerShape key={index} kind={style.marker} x={point.x} y={point.y} size={chart.chartType === "scatter" ? 7 : 6} color={style.color} />
+                    <MarkerShape
+                      key={index}
+                      kind={style.marker}
+                      x={point.x}
+                      y={point.y}
+                      size={chart.chartType === "scatter" ? 7 : 6}
+                      color={style.color}
+                    />
                   ))
                 : null}
               {endLabels.has(seriesIndex) ? (
-                <text x={last.x + 8} y={endLabels.get(seriesIndex)} dy="0.32em" fill={style.color} fontWeight={500}>
+                <text
+                  x={last.x + 8}
+                  y={endLabels.get(seriesIndex)}
+                  dy="0.32em"
+                  fill={style.color}
+                  fontWeight={500}
+                >
                   {item.name.length > 12 ? `${item.name.slice(0, 11)}…` : item.name}
                 </text>
               ) : null}
@@ -240,7 +337,10 @@ function ChartSvg({ chart, geometry, titleId, descId }: { chart: ChartBlockData;
 
 export function Chart({ chart, figureNumber }: { chart: ChartBlockData; figureNumber?: number }) {
   const id = useId().replace(/:/g, "");
-  const legend = chart.data.series.map((series, index) => ({ name: series.name, style: SERIES[index % SERIES.length]! }));
+  const legend = chart.data.series.map((series, index) => ({
+    name: series.name,
+    style: SERIES[index % SERIES.length]!,
+  }));
   return (
     <figure className="space-y-3">
       <figcaption className="space-y-1">
@@ -261,7 +361,15 @@ export function Chart({ chart, figureNumber }: { chart: ChartBlockData; figureNu
                 <rect x="4" y="0" width="20" height="10" fill={style.color} />
               ) : (
                 <>
-                  <line x1="0" x2="28" y1="5" y2="5" stroke={style.color} strokeWidth="2" strokeDasharray={style.dash || undefined} />
+                  <line
+                    x1="0"
+                    x2="28"
+                    y1="5"
+                    y2="5"
+                    stroke={style.color}
+                    strokeWidth="2"
+                    strokeDasharray={style.dash || undefined}
+                  />
                   <MarkerShape kind={style.marker} x={14} y={5} size={6} color={style.color} />
                 </>
               )}
@@ -271,7 +379,9 @@ export function Chart({ chart, figureNumber }: { chart: ChartBlockData; figureNu
         ))}
       </ul>
       <p className="text-sm text-ink-2">{chart.description}</p>
-      {chart.source ? <p className="label normal-case tracking-normal">Source: {chart.source}</p> : null}
+      {chart.source ? (
+        <p className="label normal-case tracking-normal">Source: {chart.source}</p>
+      ) : null}
       <details className="group text-sm">
         <summary className="inline-flex min-h-11 cursor-pointer items-center text-primary underline decoration-1 underline-offset-4">
           View data as a table
@@ -301,7 +411,9 @@ export function Chart({ chart, figureNumber }: { chart: ChartBlockData; figureNu
                     const value = series.values[row];
                     return (
                       <td key={series.name} className="py-1 pr-4 text-right">
-                        {value === null || value === undefined ? "—" : formatNumber(value, chart.yFormat)}
+                        {value === null || value === undefined
+                          ? "—"
+                          : formatNumber(value, chart.yFormat)}
                       </td>
                     );
                   })}

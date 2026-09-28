@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { EMPTY_SEO, STATIC_ROUTE_KEYS, type StaticRouteKey } from "@portfolio/shared";
+import { STATIC_ROUTE_KEYS, type EMPTY_SEO, type StaticRouteKey } from "@portfolio/shared";
 import { Button } from "@/components/ui/button";
 import { apiRequest, fieldErrors } from "@/lib/api/client";
 import { SeoFields } from "../form/field-control";
@@ -26,7 +26,10 @@ export function ProfileSettings() {
             <li>Name, title and statement: home page, header, social cards.</li>
             <li>Biography: About page (Markdown).</li>
             <li>Research interests: Research and About pages.</li>
-            <li>CV: the “Download CV” buttons and /cv link. Without a CV, visitors are sent to the contact form.</li>
+            <li>
+              CV: the “Download CV” buttons and /cv link. Without a CV, visitors are sent to the
+              contact form.
+            </li>
           </ul>
         </Panel>
       }
@@ -34,29 +37,93 @@ export function ProfileSettings() {
         {
           title: "Identity",
           fields: [
-            { name: "fullName", label: "Full name", kind: "text", required: true, maxLength: 120, width: "half" },
-            { name: "headline", label: "Professional title", kind: "text", required: true, maxLength: 120, width: "half" },
-            { name: "statement", label: "Statement", kind: "textarea", rows: 2, maxLength: 300, help: "One sentence under your name on the home page." },
+            {
+              name: "fullName",
+              label: "Full name",
+              kind: "text",
+              required: true,
+              maxLength: 120,
+              width: "half",
+            },
+            {
+              name: "headline",
+              label: "Professional title",
+              kind: "text",
+              required: true,
+              maxLength: 120,
+              width: "half",
+            },
+            {
+              name: "statement",
+              label: "Statement",
+              kind: "textarea",
+              rows: 2,
+              maxLength: 300,
+              help: "One sentence under your name on the home page.",
+            },
             { name: "location", label: "Location", kind: "text", maxLength: 160, width: "half" },
             { name: "email", label: "Public email", kind: "email", width: "half" },
-            { name: "availability", label: "Availability", kind: "text", maxLength: 200, help: "Optional, e.g. “Open to research collaborations”. Leave empty to hide." },
+            {
+              name: "availability",
+              label: "Availability",
+              kind: "text",
+              maxLength: 200,
+              help: "Optional, e.g. “Open to research collaborations”. Leave empty to hide.",
+            },
           ],
         },
         {
           title: "Portrait and CV",
           fields: [
-            { name: "avatarMediaId", label: "Portrait", kind: "media", accept: "image", help: "Optional. Shown on the About page." },
-            { name: "cvMediaId", label: "CV (PDF)", kind: "media", accept: "document", help: "Upload a new version any time; the /cv link always serves the current one." },
+            {
+              name: "avatarMediaId",
+              label: "Portrait",
+              kind: "media",
+              accept: "image",
+              help: "Optional. Shown on the About page.",
+            },
+            {
+              name: "cvMediaId",
+              label: "CV (PDF)",
+              kind: "media",
+              accept: "document",
+              help: "Upload a new version any time; the /cv link always serves the current one.",
+            },
           ],
         },
         {
           title: "Writing about you",
           fields: [
-            { name: "intro", label: "Short introduction", kind: "markdown", rows: 4, maxLength: 2000 },
+            {
+              name: "intro",
+              label: "Short introduction",
+              kind: "markdown",
+              rows: 4,
+              maxLength: 2000,
+            },
             { name: "bio", label: "Biography", kind: "markdown", rows: 12, maxLength: 12000 },
-            { name: "researchInterests", label: "Research interests", kind: "textarea", rows: 3, maxLength: 4000 },
-            { name: "philosophy", label: "Working philosophy", kind: "markdown", rows: 4, maxLength: 6000 },
-            { name: "interests", label: "Outside work", kind: "markdown", rows: 3, maxLength: 4000, help: "Optional section at the end of the About page." },
+            {
+              name: "researchInterests",
+              label: "Research interests",
+              kind: "textarea",
+              rows: 3,
+              maxLength: 4000,
+            },
+            {
+              name: "philosophy",
+              label: "Working philosophy",
+              kind: "markdown",
+              rows: 4,
+              maxLength: 6000,
+            },
+            {
+              name: "interests",
+              label: "Outside work",
+              kind: "markdown",
+              rows: 3,
+              maxLength: 4000,
+              help: "Optional section at the end of the About page.",
+            },
           ],
         },
       ]}
@@ -96,16 +163,39 @@ export function SiteSettings() {
           title: "Site",
           fields: [
             { name: "siteName", label: "Site name", kind: "text", required: true, maxLength: 120 },
-            { name: "siteDescription", label: "Description", kind: "textarea", required: true, rows: 2, maxLength: 300, help: "Used by search engines when a page has no description of its own." },
-            { name: "defaultOgImageId", label: "Default social image", kind: "media", accept: "image", help: "1200×630. Without it, a card with your name is generated." },
+            {
+              name: "siteDescription",
+              label: "Description",
+              kind: "textarea",
+              required: true,
+              rows: 2,
+              maxLength: 300,
+              help: "Used by search engines when a page has no description of its own.",
+            },
+            {
+              name: "defaultOgImageId",
+              label: "Default social image",
+              kind: "media",
+              accept: "image",
+              help: "1200×630. Without it, a card with your name is generated.",
+            },
             { name: "footerNote", label: "Footer note", kind: "text", maxLength: 300 },
           ],
         },
         {
           title: "Contact form",
           fields: [
-            { name: "contactFormEnabled", label: "Accept messages through the contact form", kind: "boolean" },
-            { name: "contactNotificationEmail", label: "Send notifications to", kind: "email", help: "Needs SMTP settings on the server. Leave empty to only use the inbox here." },
+            {
+              name: "contactFormEnabled",
+              label: "Accept messages through the contact form",
+              kind: "boolean",
+            },
+            {
+              name: "contactNotificationEmail",
+              label: "Send notifications to",
+              kind: "email",
+              help: "Needs SMTP settings on the server. Leave empty to only use the inbox here.",
+            },
           ],
         },
         {
@@ -113,14 +203,33 @@ export function SiteSettings() {
           description: "Anonymous, cookie-free page counts. No IP addresses are stored.",
           fields: [
             { name: "analyticsEnabled", label: "Record anonymous page views", kind: "boolean" },
-            { name: "analyticsRetentionDays", label: "Keep events for (days)", kind: "number", min: 30, max: 1095, step: 1, width: "half" },
+            {
+              name: "analyticsRetentionDays",
+              label: "Keep events for (days)",
+              kind: "number",
+              min: 30,
+              max: 1095,
+              step: 1,
+              width: "half",
+            },
           ],
         },
         {
           title: "GitHub",
           fields: [
-            { name: "githubUsername", label: "GitHub username", kind: "text", width: "half", placeholder: "IbrahimAllMamun" },
-            { name: "githubSyncEnabled", label: "Sync repositories automatically", kind: "boolean", help: "Runs on a schedule; the site keeps the last good copy if GitHub is unavailable." },
+            {
+              name: "githubUsername",
+              label: "GitHub username",
+              kind: "text",
+              width: "half",
+              placeholder: "IbrahimAllMamun",
+            },
+            {
+              name: "githubSyncEnabled",
+              label: "Sync repositories automatically",
+              kind: "boolean",
+              help: "Runs on a schedule; the site keeps the last good copy if GitHub is unavailable.",
+            },
           ],
         },
       ]}
@@ -162,14 +271,31 @@ export function SeoSettings() {
             <Panel
               key={key}
               title={
-                <button type="button" onClick={() => setOpen(open === key ? null : key)} aria-expanded={open === key} className="flex w-full items-center gap-3 text-left">
+                <button
+                  type="button"
+                  onClick={() => setOpen(open === key ? null : key)}
+                  aria-expanded={open === key}
+                  className="flex w-full items-center gap-3 text-left"
+                >
                   {ROUTE_LABELS[key]}
-                  <span className="font-mono text-xs font-normal text-ink-3">{key === "home" ? "/" : `/${key}`}</span>
+                  <span className="font-mono text-xs font-normal text-ink-3">
+                    {key === "home" ? "/" : `/${key}`}
+                  </span>
                 </button>
               }
-              description={row.title || row.description ? `${row.title ?? ""}${row.title && row.description ? " — " : ""}${row.description ?? ""}` : "Using defaults"}
+              description={
+                row.title || row.description
+                  ? `${row.title ?? ""}${row.title && row.description ? " — " : ""}${row.description ?? ""}`
+                  : "Using defaults"
+              }
             >
-              {open === key ? <RouteSeoForm row={row} onSaved={query.reload} /> : <p className="text-sm text-ink-3">{row.updatedAt ? `Updated ${relativeTime(row.updatedAt)}` : "Not customised"}</p>}
+              {open === key ? (
+                <RouteSeoForm row={row} onSaved={query.reload} />
+              ) : (
+                <p className="text-sm text-ink-3">
+                  {row.updatedAt ? `Updated ${relativeTime(row.updatedAt)}` : "Not customised"}
+                </p>
+              )}
             </Panel>
           );
         })}
@@ -180,7 +306,15 @@ export function SeoSettings() {
 
 function RouteSeoForm({ row, onSaved }: { row: RouteSeo; onSaved: () => void }) {
   const toast = useToast();
-  const [record, setRecord] = useState<FormRecord>({ seo: { title: row.title, description: row.description, canonicalUrl: row.canonicalUrl, ogImageId: row.ogImageId, noindex: row.noindex } });
+  const [record, setRecord] = useState<FormRecord>({
+    seo: {
+      title: row.title,
+      description: row.description,
+      canonicalUrl: row.canonicalUrl,
+      ogImageId: row.ogImageId,
+      noindex: row.noindex,
+    },
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const save = async () => {
@@ -189,7 +323,9 @@ function RouteSeoForm({ row, onSaved }: { row: RouteSeo; onSaved: () => void }) 
     setSaving(false);
     if (!result.ok) {
       const mapped = fieldErrors(result.error.details);
-      setErrors(Object.fromEntries(Object.entries(mapped).map(([key, value]) => [`seo.${key}`, value])));
+      setErrors(
+        Object.fromEntries(Object.entries(mapped).map(([key, value]) => [`seo.${key}`, value])),
+      );
       toast.error(result.error.message);
       return;
     }
@@ -198,7 +334,14 @@ function RouteSeoForm({ row, onSaved }: { row: RouteSeo; onSaved: () => void }) 
     onSaved();
   };
   return (
-    <FormProvider value={{ record, setValue: (path, value) => setRecord((current) => setIn(current, path, value)), errors, options: {} }}>
+    <FormProvider
+      value={{
+        record,
+        setValue: (path, value) => setRecord((current) => setIn(current, path, value)),
+        errors,
+        options: {},
+      }}
+    >
       <div className="space-y-4">
         <SeoFields path="seo" />
         <Button onClick={() => void save()} pending={saving}>

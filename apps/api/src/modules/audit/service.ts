@@ -5,7 +5,15 @@ import type { DbExecutor } from "../../database/client";
 import { auditLogs, users } from "../../database/schema";
 import { iso, isoRequired } from "../../lib/http";
 
-const SENSITIVE_KEYS = new Set(["password", "passwordHash", "token", "tokenHash", "csrfToken", "currentPassword", "newPassword"]);
+const SENSITIVE_KEYS = new Set([
+  "password",
+  "passwordHash",
+  "token",
+  "tokenHash",
+  "csrfToken",
+  "currentPassword",
+  "newPassword",
+]);
 const MAX_JSON_BYTES = 20_000;
 
 function sanitize(value: unknown, depth = 0): unknown {
@@ -61,15 +69,22 @@ export interface AuditEntry {
   actor?: { id: string | null; email: string | null; name: string | null };
 }
 
-export async function recordAudit(db: DbExecutor, req: Request | null, entry: AuditEntry): Promise<void> {
+export async function recordAudit(
+  db: DbExecutor,
+  req: Request | null,
+  entry: AuditEntry,
+): Promise<void> {
   const before = sanitize(entry.before ?? null) as Record<string, unknown> | null;
   const after = sanitize(entry.after ?? null) as Record<string, unknown> | null;
-  const isObject = (value: unknown) => value !== null && typeof value === "object" && !Array.isArray(value);
+  const isObject = (value: unknown) =>
+    value !== null && typeof value === "object" && !Array.isArray(value);
   const diff =
     isObject(before) && isObject(after) ? diffSnapshots(before, after) : { before, after };
-  const actor = entry.actor ?? (req?.auth
-    ? { id: req.auth.user.id, email: req.auth.user.email, name: req.auth.user.name }
-    : { id: null, email: null, name: null });
+  const actor =
+    entry.actor ??
+    (req?.auth
+      ? { id: req.auth.user.id, email: req.auth.user.email, name: req.auth.user.name }
+      : { id: null, email: null, name: null });
   await db.insert(auditLogs).values({
     userId: actor.id,
     actorEmail: actor.email,
@@ -87,7 +102,14 @@ export async function recordAudit(db: DbExecutor, req: Request | null, entry: Au
 
 export async function listAuditLogs(
   db: DbExecutor,
-  query: { q?: string | null; entityType?: string | null; userId?: string | null; action?: string | null; page: number; pageSize: number },
+  query: {
+    q?: string | null;
+    entityType?: string | null;
+    userId?: string | null;
+    action?: string | null;
+    page: number;
+    pageSize: number;
+  },
 ): Promise<{ items: AuditLogDTO[]; total: number }> {
   const filters: SQL[] = [];
   if (query.entityType) filters.push(eq(auditLogs.entityType, query.entityType));
@@ -95,7 +117,11 @@ export async function listAuditLogs(
   if (query.action) filters.push(eq(auditLogs.action, query.action));
   if (query.q) {
     const term = `%${query.q.replace(/[%_\\]/g, "\\$&")}%`;
-    const search = or(ilike(auditLogs.summary, term), ilike(auditLogs.actorEmail, term), ilike(auditLogs.action, term));
+    const search = or(
+      ilike(auditLogs.summary, term),
+      ilike(auditLogs.actorEmail, term),
+      ilike(auditLogs.action, term),
+    );
     if (search) filters.push(search);
   }
   const where = filters.length ? and(...filters) : undefined;
@@ -110,10 +136,16 @@ export async function listAuditLogs(
       .offset((query.page - 1) * query.pageSize),
     db.select({ value: count() }).from(auditLogs).where(where),
   ]);
-  return { items: rows.map(({ log, userName }) => toAuditDTO(log, userName)), total: totalRow?.value ?? 0 };
+  return {
+    items: rows.map(({ log, userName }) => toAuditDTO(log, userName)),
+    total: totalRow?.value ?? 0,
+  };
 }
 
-export function toAuditDTO(log: typeof auditLogs.$inferSelect, userName: string | null): AuditLogDTO {
+export function toAuditDTO(
+  log: typeof auditLogs.$inferSelect,
+  userName: string | null,
+): AuditLogDTO {
   return {
     id: log.id,
     actor: { id: log.userId, name: userName ?? log.actorName, email: log.actorEmail },

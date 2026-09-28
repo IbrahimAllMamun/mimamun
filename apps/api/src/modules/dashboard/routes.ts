@@ -25,7 +25,10 @@ import { toAuditDTO } from "../audit/service";
 type Editorial = typeof projects | typeof research | typeof publications | typeof blogPosts;
 
 async function statusCounts(db: DbExecutor, table: Editorial) {
-  const rows = await db.select({ status: table.status, value: count() }).from(table).groupBy(table.status);
+  const rows = await db
+    .select({ status: table.status, value: count() })
+    .from(table)
+    .groupBy(table.status);
   const pick = (status: string) => rows.find((row) => row.status === status)?.value ?? 0;
   return { published: pick("published"), draft: pick("draft"), archived: pick("archived") };
 }
@@ -40,7 +43,11 @@ async function recentDrafts(db: DbExecutor): Promise<DashboardDTO["drafts"]> {
   const lists = await Promise.all(
     sources.map(async (source) => {
       const rows = await db
-        .select({ id: source.table.id, title: source.table.title, updatedAt: source.table.updatedAt })
+        .select({
+          id: source.table.id,
+          title: source.table.title,
+          updatedAt: source.table.updatedAt,
+        })
         .from(source.table)
         .where(eq(source.table.status, "draft"))
         .orderBy(desc(source.table.updatedAt))
@@ -54,7 +61,10 @@ async function recentDrafts(db: DbExecutor): Promise<DashboardDTO["drafts"]> {
       }));
     }),
   );
-  return lists.flat().sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 6);
+  return lists
+    .flat()
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    .slice(0, 6);
 }
 
 export function dashboardRouter(deps: AppDeps): Router {
@@ -67,40 +77,60 @@ export function dashboardRouter(deps: AppDeps): Router {
     const canAnalytics = permissions.includes(PERMISSIONS.ANALYTICS_READ);
     const canAudit = permissions.includes(PERMISSIONS.AUDIT_READ);
 
-    const [projectCounts, researchCounts, publicationCounts, postCounts, [credentialCount], [mediaCount], [newMessages], drafts] =
-      await Promise.all([
-        statusCounts(db, projects),
-        statusCounts(db, research),
-        statusCounts(db, publications),
-        statusCounts(db, blogPosts),
-        db.select({ value: count() }).from(credentials),
-        db.select({ value: count() }).from(media),
-        db.select({ value: count() }).from(contactMessages).where(eq(contactMessages.status, "new")),
-        recentDrafts(db),
-      ]);
-
-    const [activityRows, messageRows, [owner], [settings], [github], analytics] = await Promise.all([
-      canAudit
-        ? db
-            .select({ log: auditLogs, userName: users.name })
-            .from(auditLogs)
-            .leftJoin(users, eq(users.id, auditLogs.userId))
-            .orderBy(desc(auditLogs.createdAt))
-            .limit(8)
-        : Promise.resolve([]),
-      canMessages
-        ? db.select().from(contactMessages).where(ne(contactMessages.status, "spam")).orderBy(desc(contactMessages.createdAt)).limit(5)
-        : Promise.resolve([]),
-      db.select().from(profile),
-      db.select().from(siteSettings),
-      db.select().from(integrationStatus).where(eq(integrationStatus.key, "github")),
-      canAnalytics ? analyticsSummary(db, 7, true) : Promise.resolve(null),
+    const [
+      projectCounts,
+      researchCounts,
+      publicationCounts,
+      postCounts,
+      [credentialCount],
+      [mediaCount],
+      [newMessages],
+      drafts,
+    ] = await Promise.all([
+      statusCounts(db, projects),
+      statusCounts(db, research),
+      statusCounts(db, publications),
+      statusCounts(db, blogPosts),
+      db.select({ value: count() }).from(credentials),
+      db.select({ value: count() }).from(media),
+      db.select({ value: count() }).from(contactMessages).where(eq(contactMessages.status, "new")),
+      recentDrafts(db),
     ]);
+
+    const [activityRows, messageRows, [owner], [settings], [github], analytics] = await Promise.all(
+      [
+        canAudit
+          ? db
+              .select({ log: auditLogs, userName: users.name })
+              .from(auditLogs)
+              .leftJoin(users, eq(users.id, auditLogs.userId))
+              .orderBy(desc(auditLogs.createdAt))
+              .limit(8)
+          : Promise.resolve([]),
+        canMessages
+          ? db
+              .select()
+              .from(contactMessages)
+              .where(ne(contactMessages.status, "spam"))
+              .orderBy(desc(contactMessages.createdAt))
+              .limit(5)
+          : Promise.resolve([]),
+        db.select().from(profile),
+        db.select().from(siteSettings),
+        db.select().from(integrationStatus).where(eq(integrationStatus.key, "github")),
+        canAnalytics ? analyticsSummary(db, 7, true) : Promise.resolve(null),
+      ],
+    );
 
     const [casedProjects] = await db
       .select({ value: count() })
       .from(projects)
-      .where(and(eq(projects.status, "published"), sql`jsonb_array_length(coalesce(${projects.sections} -> 'results', '[]'::jsonb)) > 0`));
+      .where(
+        and(
+          eq(projects.status, "published"),
+          sql`jsonb_array_length(coalesce(${projects.sections} -> 'results', '[]'::jsonb)) > 0`,
+        ),
+      );
 
     const dto: DashboardDTO = {
       counts: {
@@ -127,12 +157,42 @@ export function dashboardRouter(deps: AppDeps): Router {
       })),
       analytics,
       checklist: [
-        { key: "cv", label: "Upload your CV so the Download CV button appears", done: Boolean(owner?.cvMediaId), href: "/admin/profile" },
-        { key: "avatar", label: "Add a portrait photo (optional)", done: Boolean(owner?.avatarMediaId), href: "/admin/profile" },
-        { key: "case-study", label: "Complete a project case study with results", done: (casedProjects?.value ?? 0) > 0, href: "/admin/projects" },
-        { key: "og-image", label: "Set a default social sharing image", done: Boolean(settings?.defaultOgImageId), href: "/admin/settings" },
-        { key: "mail", label: "Configure SMTP for contact notifications", done: deps.mailer.configured, href: "/admin/system" },
-        { key: "github", label: "Sync and choose GitHub repositories to show", done: Boolean(github?.lastSuccessAt), href: "/admin/integrations" },
+        {
+          key: "cv",
+          label: "Upload your CV so the Download CV button appears",
+          done: Boolean(owner?.cvMediaId),
+          href: "/admin/profile",
+        },
+        {
+          key: "avatar",
+          label: "Add a portrait photo (optional)",
+          done: Boolean(owner?.avatarMediaId),
+          href: "/admin/profile",
+        },
+        {
+          key: "case-study",
+          label: "Complete a project case study with results",
+          done: (casedProjects?.value ?? 0) > 0,
+          href: "/admin/projects",
+        },
+        {
+          key: "og-image",
+          label: "Set a default social sharing image",
+          done: Boolean(settings?.defaultOgImageId),
+          href: "/admin/settings",
+        },
+        {
+          key: "mail",
+          label: "Configure SMTP for contact notifications",
+          done: deps.mailer.configured,
+          href: "/admin/system",
+        },
+        {
+          key: "github",
+          label: "Sync and choose GitHub repositories to show",
+          done: Boolean(github?.lastSuccessAt),
+          href: "/admin/integrations",
+        },
       ],
       integrations: [
         {

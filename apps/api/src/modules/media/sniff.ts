@@ -21,7 +21,8 @@ function ascii(buffer: Buffer, start: number, length: number): string {
  * notably SVG and HTML, which can carry scripts.
  */
 export function detectFileType(buffer: Buffer): DetectedType | null {
-  if (startsWith(buffer, [0xff, 0xd8, 0xff])) return { mime: "image/jpeg", ext: "jpg", kind: "image" };
+  if (startsWith(buffer, [0xff, 0xd8, 0xff]))
+    return { mime: "image/jpeg", ext: "jpg", kind: "image" };
   if (startsWith(buffer, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) {
     return { mime: "image/png", ext: "png", kind: "image" };
   }
@@ -30,14 +31,17 @@ export function detectFileType(buffer: Buffer): DetectedType | null {
   }
   if (ascii(buffer, 4, 4) === "ftyp") {
     const brand = ascii(buffer, 8, 4);
-    if (brand === "avif" || brand === "avis") return { mime: "image/avif", ext: "avif", kind: "image" };
+    if (brand === "avif" || brand === "avis")
+      return { mime: "image/avif", ext: "avif", kind: "image" };
     if (["isom", "iso2", "mp41", "mp42", "avc1", "M4V ", "dash"].includes(brand)) {
       return { mime: "video/mp4", ext: "mp4", kind: "video" };
     }
     return null;
   }
-  if (startsWith(buffer, [0x1a, 0x45, 0xdf, 0xa3])) return { mime: "video/webm", ext: "webm", kind: "video" };
-  if (ascii(buffer, 0, 5) === "%PDF-") return { mime: "application/pdf", ext: "pdf", kind: "document" };
+  if (startsWith(buffer, [0x1a, 0x45, 0xdf, 0xa3]))
+    return { mime: "video/webm", ext: "webm", kind: "video" };
+  if (ascii(buffer, 0, 5) === "%PDF-")
+    return { mime: "application/pdf", ext: "pdf", kind: "document" };
   return null;
 }
 
@@ -47,7 +51,9 @@ export function detectFileType(buffer: Buffer): DetectedType | null {
  */
 export function pdfHasActiveContent(buffer: Buffer): boolean {
   const text = buffer.toString("latin1");
-  return /\/(JavaScript|Launch|EmbeddedFile|RichMedia|XFA)\b/.test(text) || /\/JS\s*[(<[]/.test(text);
+  return (
+    /\/(JavaScript|Launch|EmbeddedFile|RichMedia|XFA)\b/.test(text) || /\/JS\s*[(<[]/.test(text)
+  );
 }
 
 /** Keeps a readable, safe download name: no paths, control characters or quotes. */
@@ -57,6 +63,8 @@ export function sanitizeFileName(original: string, ext: string): string {
     .pop()!
     .normalize("NFKC")
     .replace(/\.[^.]*$/, "")
+    // Control characters are exactly what this strips from file names.
+    // eslint-disable-next-line no-control-regex
     .replace(/[\u0000-\u001f\u007f"'<>:|?*]/g, "")
     .replace(/\s+/g, " ")
     .trim()

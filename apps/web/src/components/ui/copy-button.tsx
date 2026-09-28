@@ -25,7 +25,11 @@ export function CopyButton({ text, label = "Copy" }: { text: string; label?: str
       <Icon icon={state === "copied" ? Check : Copy} size={15} />
       <span>{state === "copied" ? "Copied" : label}</span>
       <span aria-live="polite" className="sr-only">
-        {state === "copied" ? "Copied to clipboard" : state === "failed" ? "Copy failed; select the text manually" : ""}
+        {state === "copied"
+          ? "Copied to clipboard"
+          : state === "failed"
+            ? "Copy failed; select the text manually"
+            : ""}
       </span>
     </button>
   );

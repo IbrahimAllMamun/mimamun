@@ -33,7 +33,8 @@ export function pageMetadata(input: PageMetadataInput): Metadata {
   const seo = input.seo ?? routeSeo ?? null;
   const siteName = input.site?.settings.siteName ?? "Ibrahim All-Mamun";
   const title = seo?.title ?? input.title ?? null;
-  const description = seo?.description ?? input.description ?? input.site?.settings.siteDescription ?? undefined;
+  const description =
+    seo?.description ?? input.description ?? input.site?.settings.siteDescription ?? undefined;
   const canonical = seo?.canonicalUrl ?? absoluteUrl(input.path);
   const imageMedia = seo?.ogImage ?? input.image ?? null;
   const imageUrl = imageMedia
@@ -73,13 +74,21 @@ export function pageMetadata(input: PageMetadataInput): Metadata {
           }
         : {}),
     },
-    twitter: { card: "summary_large_image", title: fullTitle, description, images: images.map((image) => image.url) },
+    twitter: {
+      card: "summary_large_image",
+      title: fullTitle,
+      description,
+      images: images.map((image) => image.url),
+    },
   };
 }
 
 /** Serialises JSON-LD safely for inline <script> (prevents `</script>` injection). */
 export function jsonLdString(data: unknown): string {
-  return JSON.stringify(data).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026");
+  return JSON.stringify(data)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026");
 }
 
 export function personSchema(site: SiteDTO) {
@@ -91,7 +100,9 @@ export function personSchema(site: SiteDTO) {
     jobTitle: profile.headline,
     url: SITE_URL,
     email: profile.email ? `mailto:${profile.email}` : undefined,
-    address: profile.location ? { "@type": "PostalAddress", addressLocality: profile.location } : undefined,
+    address: profile.location
+      ? { "@type": "PostalAddress", addressLocality: profile.location }
+      : undefined,
     image: profile.avatar ? absoluteUrl(profile.avatar.url) : undefined,
     sameAs: site.socialLinks.filter((link) => /^https?:/.test(link.url)).map((link) => link.url),
   };

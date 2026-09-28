@@ -1,10 +1,16 @@
-import { SKILL_LEVEL_LABELS, type ProjectLinkDTO, type SkillCategoryDTO, type SkillDTO } from "@portfolio/shared";
+import {
+  SKILL_LEVEL_LABELS,
+  type ProjectLinkDTO,
+  type SkillCategoryDTO,
+  type SkillDTO,
+} from "@portfolio/shared";
 import { TextLink } from "@/components/ui/text-link";
 
 function uniqueProjects(category: SkillCategoryDTO): ProjectLinkDTO[] {
   const seen = new Map<string, ProjectLinkDTO>();
   const visit = (node: SkillCategoryDTO) => {
-    for (const skill of node.skills) for (const project of skill.projects) seen.set(project.slug, project);
+    for (const skill of node.skills)
+      for (const project of skill.projects) seen.set(project.slug, project);
     node.children.forEach(visit);
   };
   visit(category);
@@ -20,7 +26,14 @@ function SkillList({ skills }: { skills: SkillDTO[] }) {
           <span>{skill.name}</span>
           {skill.level || skill.years ? (
             <span className="ml-1 font-mono text-xs text-ink-3">
-              ({[skill.level ? SKILL_LEVEL_LABELS[skill.level] : null, skill.years ? `${skill.years} yrs` : null].filter(Boolean).join(", ")})
+              (
+              {[
+                skill.level ? SKILL_LEVEL_LABELS[skill.level] : null,
+                skill.years ? `${skill.years} yrs` : null,
+              ]
+                .filter(Boolean)
+                .join(", ")}
+              )
             </span>
           ) : null}
           {index < skills.length - 1 ? (
@@ -40,7 +53,13 @@ function SkillList({ skills }: { skills: SkillDTO[] }) {
  * carry a level only when one was recorded; there are no percentage bars.
  * The last column lists the projects where the skills were used.
  */
-export function SkillsMap({ categories, tableNumber }: { categories: SkillCategoryDTO[]; tableNumber?: number }) {
+export function SkillsMap({
+  categories,
+  tableNumber,
+}: {
+  categories: SkillCategoryDTO[];
+  tableNumber?: number;
+}) {
   if (categories.length === 0) return null;
   return (
     <figure className="space-y-3">
@@ -49,7 +68,10 @@ export function SkillsMap({ categories, tableNumber }: { categories: SkillCatego
         <span className="font-serif text-lg text-ink">Skills and tools by area</span>
       </figcaption>
       <div className="border-y-2 border-ink">
-        <div aria-hidden className="hidden border-b border-rule py-2 lg:grid lg:grid-cols-12 lg:gap-x-6">
+        <div
+          aria-hidden
+          className="hidden border-b border-rule py-2 lg:grid lg:grid-cols-12 lg:gap-x-6"
+        >
           <span className="label col-span-3">Area</span>
           <span className="label col-span-6">Skills and tools</span>
           <span className="label col-span-3">Used in</span>
@@ -64,7 +86,9 @@ export function SkillsMap({ categories, tableNumber }: { categories: SkillCatego
               >
                 <dt className="lg:col-span-3">
                   <span className="font-medium text-ink">{category.name}</span>
-                  {category.description ? <span className="block text-sm text-ink-3">{category.description}</span> : null}
+                  {category.description ? (
+                    <span className="block text-sm text-ink-3">{category.description}</span>
+                  ) : null}
                 </dt>
                 <dd className="space-y-2 lg:col-span-6">
                   <SkillList skills={category.skills} />

@@ -1,5 +1,8 @@
 /** Server-side configuration for the web app. */
-export const API_INTERNAL_URL = (process.env.API_INTERNAL_URL ?? "http://localhost:4000").replace(/\/$/, "");
+export const API_INTERNAL_URL = (process.env.API_INTERNAL_URL ?? "http://localhost:4000").replace(
+  /\/$/,
+  "",
+);
 
 /**
  * Canonical public origin, e.g. https://example.com (no trailing slash). Read

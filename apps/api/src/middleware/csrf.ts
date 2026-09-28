@@ -31,7 +31,13 @@ export function csrfProtection(allowedOrigin: string): RequestHandler {
     if (req.auth) {
       const token = req.header("x-csrf-token") ?? "";
       if (!token || !safeEqual(token, req.auth.csrfToken)) {
-        return next(new AppError(403, "CSRF_INVALID", "Security token missing or expired. Reload the page and try again."));
+        return next(
+          new AppError(
+            403,
+            "CSRF_INVALID",
+            "Security token missing or expired. Reload the page and try again.",
+          ),
+        );
       }
     }
     next();

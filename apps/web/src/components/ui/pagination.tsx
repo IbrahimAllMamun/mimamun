@@ -15,7 +15,10 @@ export function Pagination({
   if (totalPages <= 1) return null;
   const itemClass = "inline-flex min-h-11 items-center gap-2 text-sm link";
   return (
-    <nav aria-label="Pagination" className="flex items-center justify-between border-t border-rule pt-6">
+    <nav
+      aria-label="Pagination"
+      className="flex items-center justify-between border-t border-rule pt-6"
+    >
       {page > 1 ? (
         <Link href={hrefFor(page - 1)} className={itemClass} rel="prev">
           <Icon icon={ArrowLeft} size={14} /> Previous

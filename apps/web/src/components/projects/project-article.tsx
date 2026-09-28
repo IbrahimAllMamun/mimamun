@@ -14,7 +14,13 @@ import { TagList } from "@/components/ui/tag";
 import { TextLink } from "@/components/ui/text-link";
 
 /** The case-study layout, shared by the public page and the admin preview. */
-export function ProjectArticle({ project, preview = false }: { project: ProjectDetailDTO; preview?: boolean }) {
+export function ProjectArticle({
+  project,
+  preview = false,
+}: {
+  project: ProjectDetailDTO;
+  preview?: boolean;
+}) {
   const figureNumbers = numberFigures(project.sections.map((section) => section.blocks));
   const period = formatPeriod(project.startedOn, project.completedOn);
   const links = [
@@ -28,7 +34,9 @@ export function ProjectArticle({ project, preview = false }: { project: ProjectD
     <article>
       <PageHeader
         breadcrumbs={[{ name: "Projects", href: "/projects" }, { name: project.title }]}
-        eyebrow={[PROJECT_TYPE_LABELS[project.type], project.category?.name, project.year].filter(Boolean).join(" · ")}
+        eyebrow={[PROJECT_TYPE_LABELS[project.type], project.category?.name, project.year]
+          .filter(Boolean)
+          .join(" · ")}
         title={project.title}
         lead={project.summary}
       >
@@ -54,7 +62,11 @@ export function ProjectArticle({ project, preview = false }: { project: ProjectD
         />
         {project.technologies.length || project.tags.length ? (
           <div className="mt-5 space-y-2">
-            <TagList items={project.technologies} label="Technologies" hrefFor={preview ? undefined : (tech) => `/projects?tech=${encodeURIComponent(tech)}`} />
+            <TagList
+              items={project.technologies}
+              label="Technologies"
+              hrefFor={preview ? undefined : (tech) => `/projects?tech=${encodeURIComponent(tech)}`}
+            />
             <TagList items={project.tags.map((tag) => tag.name)} label="Tags" />
           </div>
         ) : null}
@@ -71,7 +83,9 @@ export function ProjectArticle({ project, preview = false }: { project: ProjectD
             preload
             className="h-auto w-full rounded-xs border border-rule bg-muted"
           />
-          {project.cover.caption ? <figcaption className="mt-2 text-sm text-ink-3">{project.cover.caption}</figcaption> : null}
+          {project.cover.caption ? (
+            <figcaption className="mt-2 text-sm text-ink-3">{project.cover.caption}</figcaption>
+          ) : null}
         </figure>
       ) : null}
 
@@ -79,13 +93,20 @@ export function ProjectArticle({ project, preview = false }: { project: ProjectD
         <section aria-label="Headline results" className="container-page mt-10">
           <dl className="grid grid-cols-2 border-y-2 border-ink sm:grid-cols-4">
             {project.metrics.map((metric) => (
-              <div key={metric.label} className="border-rule py-5 pr-4 [&:not(:first-child)]:border-l [&:not(:first-child)]:pl-4">
+              <div
+                key={metric.label}
+                className="border-rule py-5 pr-4 [&:not(:first-child)]:border-l [&:not(:first-child)]:pl-4"
+              >
                 <dt className="label">{metric.label}</dt>
                 <dd className="mt-1 font-serif text-3xl tabular-nums text-ink">
                   {metric.value}
-                  {metric.unit ? <span className="ml-1 text-lg text-ink-2">{metric.unit}</span> : null}
+                  {metric.unit ? (
+                    <span className="ml-1 text-lg text-ink-2">{metric.unit}</span>
+                  ) : null}
                 </dd>
-                {metric.context ? <dd className="mt-1 text-sm text-ink-3">{metric.context}</dd> : null}
+                {metric.context ? (
+                  <dd className="mt-1 text-sm text-ink-3">{metric.context}</dd>
+                ) : null}
               </div>
             ))}
           </dl>
@@ -99,15 +120,28 @@ export function ProjectArticle({ project, preview = false }: { project: ProjectD
               <CaseStudyNav sections={project.sections.map(({ key, label }) => ({ key, label }))} />
             </aside>
           ) : null}
-          <div className={hasNav ? "col-span-4 space-y-16 sm:col-span-8 lg:col-span-9" : "col-span-4 space-y-16 sm:col-span-8 lg:col-span-9 lg:col-start-4"}>
+          <div
+            className={
+              hasNav
+                ? "col-span-4 space-y-16 sm:col-span-8 lg:col-span-9"
+                : "col-span-4 space-y-16 sm:col-span-8 lg:col-span-9 lg:col-start-4"
+            }
+          >
             {hasNav ? (
               <details className="border-y border-rule py-3 lg:hidden">
-                <summary className="flex min-h-11 cursor-pointer items-center label">Contents</summary>
+                <summary className="flex min-h-11 cursor-pointer items-center label">
+                  Contents
+                </summary>
                 <ol className="mt-2 space-y-1 pb-2">
                   {project.sections.map((section, index) => (
                     <li key={section.key}>
-                      <a href={`#${section.key}`} className="flex min-h-11 items-center gap-3 text-ink-2 hover:text-ink">
-                        <span className="font-mono text-xs">{String(index + 1).padStart(2, "0")}</span>
+                      <a
+                        href={`#${section.key}`}
+                        className="flex min-h-11 items-center gap-3 text-ink-2 hover:text-ink"
+                      >
+                        <span className="font-mono text-xs">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
                         {section.label}
                       </a>
                     </li>
@@ -116,12 +150,27 @@ export function ProjectArticle({ project, preview = false }: { project: ProjectD
               </details>
             ) : null}
             {project.sections.map((section, index) => (
-              <section key={section.key} id={section.key} aria-labelledby={`${section.key}-title`} className="scroll-mt-(--sticky-offset)">
-                <h2 id={`${section.key}-title`} className="mb-6 flex items-baseline gap-4 text-3xl text-ink">
-                  <span className="font-mono text-sm text-ink-3 tabular-nums">{String(index + 1).padStart(2, "0")}</span>
+              <section
+                key={section.key}
+                id={section.key}
+                aria-labelledby={`${section.key}-title`}
+                className="scroll-mt-(--sticky-offset)"
+              >
+                <h2
+                  id={`${section.key}-title`}
+                  className="mb-6 flex items-baseline gap-4 text-3xl text-ink"
+                >
+                  <span className="font-mono text-sm text-ink-3 tabular-nums">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
                   {section.label}
                 </h2>
-                <Blocks blocks={section.blocks} media={project.media} figureNumbers={figureNumbers} headingBase={3} />
+                <Blocks
+                  blocks={section.blocks}
+                  media={project.media}
+                  figureNumbers={figureNumbers}
+                  headingBase={3}
+                />
               </section>
             ))}
 
@@ -144,8 +193,10 @@ export function ProjectArticle({ project, preview = false }: { project: ProjectD
                             className="h-auto w-full rounded-xs border border-rule bg-muted"
                           />
                         ) : null}
-                        {item.caption ?? item.media.caption ? (
-                          <figcaption className="mt-2 text-sm text-ink-3">{item.caption ?? item.media.caption}</figcaption>
+                        {(item.caption ?? item.media.caption) ? (
+                          <figcaption className="mt-2 text-sm text-ink-3">
+                            {item.caption ?? item.media.caption}
+                          </figcaption>
                         ) : null}
                       </figure>
                     </li>
@@ -154,7 +205,10 @@ export function ProjectArticle({ project, preview = false }: { project: ProjectD
               </section>
             ) : null}
 
-            {project.relatedResearch.length || project.relatedPublications.length || project.repositories.length || project.experiences.length ? (
+            {project.relatedResearch.length ||
+            project.relatedPublications.length ||
+            project.repositories.length ||
+            project.experiences.length ? (
               <section aria-labelledby="context-title" className="border-t-2 border-ink pt-6">
                 <h2 id="context-title" className="label mb-4">
                   Context and outputs
@@ -166,7 +220,9 @@ export function ProjectArticle({ project, preview = false }: { project: ProjectD
                       {project.relatedResearch.map((item) => (
                         <dd key={item.slug} className="mt-1">
                           <TextLink href={`/research/${item.slug}`}>{item.title}</TextLink>
-                          <span className="ml-2 font-mono text-xs text-ink-3">{RESEARCH_KIND_LABELS[item.kind]}</span>
+                          <span className="ml-2 font-mono text-xs text-ink-3">
+                            {RESEARCH_KIND_LABELS[item.kind]}
+                          </span>
                         </dd>
                       ))}
                     </div>
@@ -177,7 +233,9 @@ export function ProjectArticle({ project, preview = false }: { project: ProjectD
                       {project.relatedPublications.map((item) => (
                         <dd key={item.slug} className="mt-1">
                           <TextLink href={`/publications#${item.slug}`}>{item.title}</TextLink>
-                          {item.venue ? <span className="block text-sm text-ink-3">{item.venue}</span> : null}
+                          {item.venue ? (
+                            <span className="block text-sm text-ink-3">{item.venue}</span>
+                          ) : null}
                         </dd>
                       ))}
                     </div>
@@ -198,7 +256,9 @@ export function ProjectArticle({ project, preview = false }: { project: ProjectD
                       {project.repositories.map((repo) => (
                         <dd key={repo.id} className="mt-1">
                           <TextLink href={repo.url}>{repo.fullName}</TextLink>
-                          {repo.description ? <span className="block text-sm text-ink-3">{repo.description}</span> : null}
+                          {repo.description ? (
+                            <span className="block text-sm text-ink-3">{repo.description}</span>
+                          ) : null}
                         </dd>
                       ))}
                     </div>

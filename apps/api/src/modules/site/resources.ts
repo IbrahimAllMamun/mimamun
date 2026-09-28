@@ -23,7 +23,9 @@ export const socialLinkResource = defineResource({
     listItem(row, {
       title: String(row.label),
       subtitle: String(row.url),
-      extra: { platform: SOCIAL_PLATFORM_LABELS[row.platform as SocialPlatform] ?? String(row.platform) },
+      extra: {
+        platform: SOCIAL_PLATFORM_LABELS[row.platform as SocialPlatform] ?? String(row.platform),
+      },
     }),
 });
 
@@ -35,7 +37,8 @@ export const focusAreaResource = defineResource({
   input: focusAreaInput,
   searchColumns: ["title", "description"],
   defaultSort: [asc(focusAreas.displayOrder)],
-  listItem: (row) => listItem(row, { title: String(row.title), subtitle: (row.evidence as string | null) ?? null }),
+  listItem: (row) =>
+    listItem(row, { title: String(row.title), subtitle: (row.evidence as string | null) ?? null }),
 });
 
 export const approachStepResource = defineResource({
@@ -64,7 +67,9 @@ export const navigationResource = defineResource({
   searchColumns: ["label", "href"],
   defaultSort: [asc(navigationItems.location), asc(navigationItems.displayOrder)],
   filters: (query) =>
-    query.type === "header" || query.type === "footer" ? [eq(navigationItems.location, query.type)] : [],
+    query.type === "header" || query.type === "footer"
+      ? [eq(navigationItems.location, query.type)]
+      : [],
   listItem: (row) =>
     listItem(row, {
       title: String(row.label),

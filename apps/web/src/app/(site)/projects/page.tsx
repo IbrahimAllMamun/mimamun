@@ -22,7 +22,9 @@ function pickParams(searchParams: Record<string, string | string[] | undefined>)
   return params;
 }
 
-export async function generateMetadata({ searchParams }: PageProps<"/projects">): Promise<Metadata> {
+export async function generateMetadata({
+  searchParams,
+}: PageProps<"/projects">): Promise<Metadata> {
   const site = await publicApi.site();
   const filtered = Object.keys(pickParams(await searchParams)).length > 0;
   return pageMetadata({
@@ -38,7 +40,10 @@ export async function generateMetadata({ searchParams }: PageProps<"/projects">)
 export default async function ProjectsPage({ searchParams }: PageProps<"/projects">) {
   const params = pickParams(await searchParams);
   const filtered = Object.keys(params).length > 0;
-  const [result, github] = await Promise.all([publicApi.projects(params), filtered ? null : publicApi.github()]);
+  const [result, github] = await Promise.all([
+    publicApi.projects(params),
+    filtered ? null : publicApi.github(),
+  ]);
   const page = Number(params.page ?? 1) || 1;
   const hrefFor = (target: number) => {
     const next = new URLSearchParams({ ...params, page: String(target) });
@@ -64,7 +69,11 @@ export default async function ProjectsPage({ searchParams }: PageProps<"/project
             <div className="col-span-4 sm:col-span-8 lg:col-span-12">
               {result.data.length === 0 ? (
                 <EmptyState
-                  title={Object.keys(params).length ? "No projects match these filters" : "No projects published yet"}
+                  title={
+                    Object.keys(params).length
+                      ? "No projects match these filters"
+                      : "No projects published yet"
+                  }
                   action={
                     Object.keys(params).length ? (
                       <ButtonLink href="/projects" variant="secondary" size="sm">
@@ -78,14 +87,26 @@ export default async function ProjectsPage({ searchParams }: PageProps<"/project
                     : "Case studies will appear here once they are published."}
                 </EmptyState>
               ) : (
-                <div key={JSON.stringify(params)} className="motion-safe:animate-fade border-b border-rule">
+                <div
+                  key={JSON.stringify(params)}
+                  className="motion-safe:animate-fade border-b border-rule"
+                >
                   {result.data.map((project, index) => (
-                    <ProjectRow key={project.id} project={project} index={(page - 1) * 24 + index} headingLevel={2} />
+                    <ProjectRow
+                      key={project.id}
+                      project={project}
+                      index={(page - 1) * 24 + index}
+                      headingLevel={2}
+                    />
                   ))}
                 </div>
               )}
               <div className="mt-8">
-                <Pagination page={result.meta.page} totalPages={result.meta.totalPages} hrefFor={hrefFor} />
+                <Pagination
+                  page={result.meta.page}
+                  totalPages={result.meta.totalPages}
+                  hrefFor={hrefFor}
+                />
               </div>
             </div>
             {github?.ok ? (

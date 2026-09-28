@@ -25,7 +25,10 @@ export function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function uploadMedia(file: File, fields: { altText?: string; title?: string; caption?: string } = {}): Promise<ClientResult<AdminMediaDTO>> {
+export function uploadMedia(
+  file: File,
+  fields: { altText?: string; title?: string; caption?: string } = {},
+): Promise<ClientResult<AdminMediaDTO>> {
   const body = new FormData();
   body.set("file", file);
   for (const [key, value] of Object.entries(fields)) if (value) body.set(key, value);

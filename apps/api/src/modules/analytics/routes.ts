@@ -9,7 +9,10 @@ import type { AppDeps } from "../../types";
 import { analyticsSummary, recordEvent, shouldTrack } from "./service";
 
 async function analyticsEnabled(deps: Pick<AppDeps, "db">): Promise<boolean> {
-  const [row] = await deps.db.select({ enabled: siteSettings.analyticsEnabled }).from(siteSettings).where(eq(siteSettings.id, 1));
+  const [row] = await deps.db
+    .select({ enabled: siteSettings.analyticsEnabled })
+    .from(siteSettings)
+    .where(eq(siteSettings.id, 1));
   return row?.enabled ?? false;
 }
 

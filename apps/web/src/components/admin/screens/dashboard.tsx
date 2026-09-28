@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Circle, ExternalLink, Plus, Upload } from "lucide-react";
-import { ENTITY_TYPE_LABELS, PERMISSIONS, type DashboardDTO, type EntityType } from "@portfolio/shared";
+import {
+  ENTITY_TYPE_LABELS,
+  PERMISSIONS,
+  type DashboardDTO,
+  type EntityType,
+} from "@portfolio/shared";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { StatusBadge } from "@/components/ui/status";
@@ -11,9 +16,22 @@ import { AdminPageHeader, ErrorPanel, LoadingRows, Panel, relativeTime } from ".
 import { useCan, useSession } from "../session";
 import { useApiQuery } from "../use-api";
 
-function StatCard({ label, value, detail, href }: { label: string; value: number; detail?: string; href: string }) {
+function StatCard({
+  label,
+  value,
+  detail,
+  href,
+}: {
+  label: string;
+  value: number;
+  detail?: string;
+  href: string;
+}) {
   return (
-    <Link href={href} className="group rounded-md border border-rule bg-elevated px-4 py-3 transition-colors hover:border-ink-3">
+    <Link
+      href={href}
+      className="group rounded-md border border-rule bg-elevated px-4 py-3 transition-colors hover:border-ink-3"
+    >
       <p className="label">{label}</p>
       <p className="mt-1 font-serif text-3xl text-ink tabular-nums">{value}</p>
       {detail ? <p className="text-xs text-ink-3">{detail}</p> : null}
@@ -22,7 +40,12 @@ function StatCard({ label, value, detail, href }: { label: string; value: number
 }
 
 function statusDetail(counts: { published: number; draft: number; archived: number }): string {
-  return [`${counts.draft} draft${counts.draft === 1 ? "" : "s"}`, counts.archived ? `${counts.archived} archived` : null].filter(Boolean).join(" · ");
+  return [
+    `${counts.draft} draft${counts.draft === 1 ? "" : "s"}`,
+    counts.archived ? `${counts.archived} archived` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 }
 
 function change(current: number, previous: number): string | null {
@@ -61,28 +84,67 @@ export function Dashboard() {
       {data ? (
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
-            <StatCard label="Projects" value={data.counts.projects.published} detail={statusDetail(data.counts.projects)} href="/admin/projects" />
-            <StatCard label="Research" value={data.counts.research.published} detail={statusDetail(data.counts.research)} href="/admin/research" />
-            <StatCard label="Publications" value={data.counts.publications.published} detail={statusDetail(data.counts.publications)} href="/admin/publications" />
-            <StatCard label="Writing" value={data.counts.posts.published} detail={statusDetail(data.counts.posts)} href="/admin/blog-posts" />
-            <StatCard label="Certifications" value={data.counts.credentials} href="/admin/credentials" />
+            <StatCard
+              label="Projects"
+              value={data.counts.projects.published}
+              detail={statusDetail(data.counts.projects)}
+              href="/admin/projects"
+            />
+            <StatCard
+              label="Research"
+              value={data.counts.research.published}
+              detail={statusDetail(data.counts.research)}
+              href="/admin/research"
+            />
+            <StatCard
+              label="Publications"
+              value={data.counts.publications.published}
+              detail={statusDetail(data.counts.publications)}
+              href="/admin/publications"
+            />
+            <StatCard
+              label="Writing"
+              value={data.counts.posts.published}
+              detail={statusDetail(data.counts.posts)}
+              href="/admin/blog-posts"
+            />
+            <StatCard
+              label="Certifications"
+              value={data.counts.credentials}
+              href="/admin/credentials"
+            />
             <StatCard label="Media files" value={data.counts.media} href="/admin/media" />
-            {can(PERMISSIONS.MESSAGES_MANAGE) ? <StatCard label="New messages" value={data.counts.newMessages} href="/admin/messages?status=new" /> : null}
+            {can(PERMISSIONS.MESSAGES_MANAGE) ? (
+              <StatCard
+                label="New messages"
+                value={data.counts.newMessages}
+                href="/admin/messages?status=new"
+              />
+            ) : null}
           </div>
-          <p className="-mt-3 text-xs text-ink-3">Counts show published items; drafts and archived items are listed underneath.</p>
+          <p className="-mt-3 text-xs text-ink-3">
+            Counts show published items; drafts and archived items are listed underneath.
+          </p>
 
           <div className="grid gap-6 lg:grid-cols-2">
             <Panel title="Continue editing" description="Most recently changed drafts.">
               {data.drafts.length ? (
                 <ul className="divide-y divide-rule">
                   {data.drafts.map((draft) => (
-                    <li key={`${draft.type}-${draft.id}`} className="flex items-center justify-between gap-3 py-2.5">
+                    <li
+                      key={`${draft.type}-${draft.id}`}
+                      className="flex items-center justify-between gap-3 py-2.5"
+                    >
                       <div className="min-w-0">
-                        <Link href={draft.href} className="block truncate text-sm font-medium text-ink hover:underline">
+                        <Link
+                          href={draft.href}
+                          className="block truncate text-sm font-medium text-ink hover:underline"
+                        >
                           {draft.title}
                         </Link>
                         <p className="text-xs text-ink-3">
-                          {ENTITY_TYPE_LABELS[draft.type as EntityType] ?? draft.type} · {relativeTime(draft.updatedAt)}
+                          {ENTITY_TYPE_LABELS[draft.type as EntityType] ?? draft.type} ·{" "}
+                          {relativeTime(draft.updatedAt)}
                         </p>
                       </div>
                       <StatusBadge tone="attention">Draft</StatusBadge>
@@ -98,10 +160,26 @@ export function Dashboard() {
               <ul className="space-y-1">
                 {data.checklist.map((item) => (
                   <li key={item.key}>
-                    <Link href={item.href} className="flex min-h-9 items-center gap-2.5 rounded-xs px-1 text-sm hover:bg-muted">
-                      <Icon icon={item.done ? CheckCircle2 : Circle} size={16} className={item.done ? "text-success" : "text-ink-3"} />
-                      <span className={cn("flex-1", item.done ? "text-ink-3 line-through decoration-rule-strong" : "text-ink")}>{item.label}</span>
-                      {item.done ? null : <Icon icon={ArrowRight} size={14} className="text-ink-3" />}
+                    <Link
+                      href={item.href}
+                      className="flex min-h-9 items-center gap-2.5 rounded-xs px-1 text-sm hover:bg-muted"
+                    >
+                      <Icon
+                        icon={item.done ? CheckCircle2 : Circle}
+                        size={16}
+                        className={item.done ? "text-success" : "text-ink-3"}
+                      />
+                      <span
+                        className={cn(
+                          "flex-1",
+                          item.done ? "text-ink-3 line-through decoration-rule-strong" : "text-ink",
+                        )}
+                      >
+                        {item.label}
+                      </span>
+                      {item.done ? null : (
+                        <Icon icon={ArrowRight} size={14} className="text-ink-3" />
+                      )}
                     </Link>
                   </li>
                 ))}
@@ -123,9 +201,21 @@ export function Dashboard() {
                   <ul className="divide-y divide-rule">
                     {data.recentMessages.map((message) => (
                       <li key={message.id} className="py-2.5">
-                        <Link href={`/admin/messages/${message.id}`} className="flex items-baseline justify-between gap-3">
-                          <span className={cn("truncate text-sm", message.status === "new" ? "font-medium text-ink" : "text-ink-2")}>{message.subject}</span>
-                          <span className="shrink-0 text-xs text-ink-3">{relativeTime(message.createdAt)}</span>
+                        <Link
+                          href={`/admin/messages/${message.id}`}
+                          className="flex items-baseline justify-between gap-3"
+                        >
+                          <span
+                            className={cn(
+                              "truncate text-sm",
+                              message.status === "new" ? "font-medium text-ink" : "text-ink-2",
+                            )}
+                          >
+                            {message.subject}
+                          </span>
+                          <span className="shrink-0 text-xs text-ink-3">
+                            {relativeTime(message.createdAt)}
+                          </span>
                         </Link>
                         <p className="truncate text-xs text-ink-3">
                           {message.name} · {message.message}
@@ -153,9 +243,14 @@ export function Dashboard() {
                     {data.recentActivity.map((entry) => (
                       <li key={entry.id} className="flex items-baseline justify-between gap-3 py-2">
                         <span className="min-w-0 truncate text-sm text-ink-2">
-                          <span className="text-ink">{entry.actor.name ?? entry.actor.email ?? "System"}</span> · {entry.summary ?? entry.action}
+                          <span className="text-ink">
+                            {entry.actor.name ?? entry.actor.email ?? "System"}
+                          </span>{" "}
+                          · {entry.summary ?? entry.action}
                         </span>
-                        <span className="shrink-0 text-xs text-ink-3">{relativeTime(entry.createdAt)}</span>
+                        <span className="shrink-0 text-xs text-ink-3">
+                          {relativeTime(entry.createdAt)}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -169,7 +264,11 @@ export function Dashboard() {
           {data.analytics ? (
             <Panel
               title="Last 7 days"
-              description={data.analytics.enabled ? "Anonymous, cookie-free counts." : "Analytics is switched off in Settings."}
+              description={
+                data.analytics.enabled
+                  ? "Anonymous, cookie-free counts."
+                  : "Analytics is switched off in Settings."
+              }
               actions={
                 <Link href="/admin/analytics" className="text-sm text-primary hover:underline">
                   Analytics
@@ -178,10 +277,28 @@ export function Dashboard() {
             >
               <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 {[
-                  { label: "Page views", value: data.analytics.totals.pageViews, detail: change(data.analytics.totals.pageViews, data.analytics.previousTotals.pageViews) },
-                  { label: "Visitors", value: data.analytics.totals.visitors, detail: change(data.analytics.totals.visitors, data.analytics.previousTotals.visitors) },
+                  {
+                    label: "Page views",
+                    value: data.analytics.totals.pageViews,
+                    detail: change(
+                      data.analytics.totals.pageViews,
+                      data.analytics.previousTotals.pageViews,
+                    ),
+                  },
+                  {
+                    label: "Visitors",
+                    value: data.analytics.totals.visitors,
+                    detail: change(
+                      data.analytics.totals.visitors,
+                      data.analytics.previousTotals.visitors,
+                    ),
+                  },
                   { label: "Downloads", value: data.analytics.totals.downloads, detail: null },
-                  { label: "Outbound clicks", value: data.analytics.totals.outboundClicks, detail: null },
+                  {
+                    label: "Outbound clicks",
+                    value: data.analytics.totals.outboundClicks,
+                    detail: null,
+                  },
                 ].map((stat) => (
                   <div key={stat.label}>
                     <dt className="label">{stat.label}</dt>
@@ -207,7 +324,12 @@ export function Dashboard() {
           ) : null}
 
           <p className="text-sm">
-            <a href="/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-primary hover:underline">
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-primary hover:underline"
+            >
               <Icon icon={ExternalLink} size={14} /> Open the public site
             </a>
           </p>

@@ -1,6 +1,10 @@
 import { Router } from "express";
 import { asc, desc, eq } from "drizzle-orm";
-import { githubRepositoryUpdateInput, PERMISSIONS, type AdminGithubRepoDTO } from "@portfolio/shared";
+import {
+  githubRepositoryUpdateInput,
+  PERMISSIONS,
+  type AdminGithubRepoDTO,
+} from "@portfolio/shared";
 import { githubRepositories, integrationStatus, siteSettings } from "../../database/schema";
 import { syncGithubRepositories } from "../../integrations/github/sync";
 import { requirePermission } from "../../middleware/auth";
@@ -43,7 +47,11 @@ export function integrationsRouter(deps: AppDeps): Router {
       db
         .select()
         .from(githubRepositories)
-        .orderBy(desc(githubRepositories.isSelected), asc(githubRepositories.displayOrder), desc(githubRepositories.pushedAt)),
+        .orderBy(
+          desc(githubRepositories.isSelected),
+          asc(githubRepositories.displayOrder),
+          desc(githubRepositories.pushedAt),
+        ),
     ]);
     ok(res, {
       username: settings?.githubUsername ?? null,
@@ -83,7 +91,11 @@ export function integrationsRouter(deps: AppDeps): Router {
     const id = String(req.params.id);
     if (!UUID_PATTERN.test(id)) throw notFound("Repository");
     const input = parse(githubRepositoryUpdateInput, req.body);
-    const [row] = await db.update(githubRepositories).set(input).where(eq(githubRepositories.id, id)).returning();
+    const [row] = await db
+      .update(githubRepositories)
+      .set(input)
+      .where(eq(githubRepositories.id, id))
+      .returning();
     if (!row) throw notFound("Repository");
     await recordAudit(db, req, {
       action: "integration.github_curate",

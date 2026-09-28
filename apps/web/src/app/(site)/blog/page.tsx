@@ -26,15 +26,24 @@ function pickParams(searchParams: Record<string, string | string[] | undefined>)
 export async function generateMetadata({ searchParams }: PageProps<"/blog">): Promise<Metadata> {
   const site = await publicApi.site();
   const filtered = Object.keys(pickParams(await searchParams)).length > 0;
-  return pageMetadata({ site: site.ok ? site.data : null, title: "Writing", path: "/blog", routeKey: "blog", noindex: filtered });
+  return pageMetadata({
+    site: site.ok ? site.data : null,
+    title: "Writing",
+    path: "/blog",
+    routeKey: "blog",
+    noindex: filtered,
+  });
 }
 
 export default async function BlogPage({ searchParams }: PageProps<"/blog">) {
   const params = pickParams(await searchParams);
   const [site, result] = await Promise.all([publicApi.site(), publicApi.blog(params)]);
-  const lead = (site.ok ? site.data.routeSeo.blog?.description : null) ?? "Notes on statistics, data science and analytics.";
+  const lead =
+    (site.ok ? site.data.routeSeo.blog?.description : null) ??
+    "Notes on statistics, data science and analytics.";
   const filtered = Boolean(params.q || params.category || params.tag);
-  const hrefFor = (target: number) => `/blog?${new URLSearchParams({ ...params, page: String(target) })}`;
+  const hrefFor = (target: number) =>
+    `/blog?${new URLSearchParams({ ...params, page: String(target) })}`;
 
   return (
     <>
@@ -48,33 +57,47 @@ export default async function BlogPage({ searchParams }: PageProps<"/blog">) {
               <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 {result.meta.categories.length > 1 ? (
                   <nav aria-label="Categories" className="flex flex-wrap items-center gap-1">
-                    {[{ name: "All", slug: null as string | null }, ...result.meta.categories].map((category) => {
-                      const active = (params.category ?? null) === category.slug;
-                      return (
-                        <Link
-                          key={category.slug ?? "all"}
-                          href={category.slug ? `/blog?category=${category.slug}` : "/blog"}
-                          aria-current={active ? "page" : undefined}
-                          className={cn(
-                            "inline-flex min-h-11 items-center rounded-sm px-3 text-sm transition-colors duration-(--duration-fast)",
-                            active ? "bg-ink text-paper" : "text-ink-2 hover:bg-muted hover:text-ink",
-                          )}
-                        >
-                          {category.name}
-                        </Link>
-                      );
-                    })}
+                    {[{ name: "All", slug: null as string | null }, ...result.meta.categories].map(
+                      (category) => {
+                        const active = (params.category ?? null) === category.slug;
+                        return (
+                          <Link
+                            key={category.slug ?? "all"}
+                            href={category.slug ? `/blog?category=${category.slug}` : "/blog"}
+                            aria-current={active ? "page" : undefined}
+                            className={cn(
+                              "inline-flex min-h-11 items-center rounded-sm px-3 text-sm transition-colors duration-(--duration-fast)",
+                              active
+                                ? "bg-ink text-paper"
+                                : "text-ink-2 hover:bg-muted hover:text-ink",
+                            )}
+                          >
+                            {category.name}
+                          </Link>
+                        );
+                      },
+                    )}
                   </nav>
                 ) : (
                   <span />
                 )}
-                <form action="/blog" role="search" className="flex w-full items-center gap-2 lg:w-80">
-                  {params.category ? <input type="hidden" name="category" value={params.category} /> : null}
+                <form
+                  action="/blog"
+                  role="search"
+                  className="flex w-full items-center gap-2 lg:w-80"
+                >
+                  {params.category ? (
+                    <input type="hidden" name="category" value={params.category} />
+                  ) : null}
                   <label htmlFor="blog-search" className="sr-only">
                     Search writing
                   </label>
                   <div className="relative flex-1">
-                    <Icon icon={Search} size={16} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ink-3" />
+                    <Icon
+                      icon={Search}
+                      size={16}
+                      className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-ink-3"
+                    />
                     <input
                       id="blog-search"
                       name="q"
@@ -103,7 +126,9 @@ export default async function BlogPage({ searchParams }: PageProps<"/blog">) {
                   )
                 }
               >
-                {filtered ? "Try another word or category." : "Notes on statistics and analytics will appear here once they are published."}
+                {filtered
+                  ? "Try another word or category."
+                  : "Notes on statistics and analytics will appear here once they are published."}
               </EmptyState>
             ) : (
               <div className="border-b border-rule">
@@ -113,7 +138,11 @@ export default async function BlogPage({ searchParams }: PageProps<"/blog">) {
               </div>
             )}
             <div className="mt-8">
-              <Pagination page={result.meta.page} totalPages={result.meta.totalPages} hrefFor={hrefFor} />
+              <Pagination
+                page={result.meta.page}
+                totalPages={result.meta.totalPages}
+                hrefFor={hrefFor}
+              />
             </div>
           </>
         )}

@@ -30,7 +30,10 @@ export function PageHeader({
             {title}
           </h1>
           {lead ? (
-            <div className="motion-enter max-w-2xl font-serif text-xl text-ink-2" style={stagger(2)}>
+            <div
+              className="motion-enter max-w-2xl font-serif text-xl text-ink-2"
+              style={stagger(2)}
+            >
               {lead}
             </div>
           ) : null}

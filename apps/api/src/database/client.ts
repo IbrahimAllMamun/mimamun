@@ -22,10 +22,7 @@ export function createDatabase(config: AppConfig["database"]): DatabaseHandle {
     // Guard against runaway queries holding connections.
     statement_timeout: 15_000,
     application_name: "portfolio-api",
-    ssl:
-      config.ssl === "disable"
-        ? undefined
-        : { rejectUnauthorized: config.ssl === "require" },
+    ssl: config.ssl === "disable" ? undefined : { rejectUnauthorized: config.ssl === "require" },
   });
   const db = drizzle({ client: pool, schema, casing: "snake_case" });
   return {

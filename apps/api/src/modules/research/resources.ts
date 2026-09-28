@@ -37,7 +37,9 @@ export const researchResource = defineResource<ResearchInput>({
   defaultSort: [desc(research.featured), asc(research.displayOrder), desc(research.updatedAt)],
   sorts: { title: [asc(research.title)] },
   filters: (query) =>
-    query.type && query.type in RESEARCH_KIND_LABELS ? [eq(research.kind, query.type as ResearchKind)] : [],
+    query.type && query.type in RESEARCH_KIND_LABELS
+      ? [eq(research.kind, query.type as ResearchKind)]
+      : [],
   relationKeys: ["projectIds"],
   listItem: (row) =>
     listItem(row, {
@@ -56,7 +58,8 @@ export const researchResource = defineResource<ResearchInput>({
     const links = await loadLinks(db, projectResearch, "researchId", ids, "projectId");
     return new Map(ids.map((id) => [id, { projectIds: links.get(id) ?? [] }]));
   },
-  saveRelations: (tx, id, input) => syncLinks(tx, projectResearch, "researchId", id, "projectId", input.projectIds),
+  saveRelations: (tx, id, input) =>
+    syncLinks(tx, projectResearch, "researchId", id, "projectId", input.projectIds),
   validate: async (db, input) => {
     await assertMediaExists(db, [
       { id: input.pdfMediaId, kind: "document", path: "pdfMediaId" },
@@ -85,7 +88,9 @@ export const publicationResource = defineResource<PublicationInput>({
     listItem(row, {
       title: String(row.title),
       subtitle: [row.venue, row.publishedOn].filter(Boolean).join(" · ") || null,
-      extra: { publicationStatus: PUBLICATION_STATUS_LABELS[row.publicationStatus as PublicationStatus] },
+      extra: {
+        publicationStatus: PUBLICATION_STATUS_LABELS[row.publicationStatus as PublicationStatus],
+      },
     }),
   derived: (input) => ({
     searchText: buildSearchText({
@@ -114,11 +119,16 @@ export const presentationResource = defineResource<PresentationInput>({
   table: conferencePresentations,
   input: presentationInput,
   searchColumns: ["title", "conferenceName", "conferenceShortName", "location"],
-  defaultSort: [sql`${conferencePresentations.presentedOn} DESC NULLS LAST`, asc(conferencePresentations.displayOrder)],
+  defaultSort: [
+    sql`${conferencePresentations.presentedOn} DESC NULLS LAST`,
+    asc(conferencePresentations.displayOrder),
+  ],
   listItem: (row) =>
     listItem(row, {
       title: String(row.title),
-      subtitle: [row.conferenceShortName ?? row.conferenceName, row.presentedOn].filter(Boolean).join(" · "),
+      subtitle: [row.conferenceShortName ?? row.conferenceName, row.presentedOn]
+        .filter(Boolean)
+        .join(" · "),
       extra: { type: PRESENTATION_TYPE_LABELS[row.presentationType as PresentationType] },
     }),
   validate: async (db, input) => {

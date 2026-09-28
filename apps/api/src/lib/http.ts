@@ -4,7 +4,9 @@ import type { FieldError } from "@portfolio/shared";
 import { badRequest } from "./errors";
 
 export function ok<T>(res: Response, data: T, meta?: unknown, status = 200): Response {
-  return res.status(status).json(meta === undefined ? { success: true, data } : { success: true, data, meta });
+  return res
+    .status(status)
+    .json(meta === undefined ? { success: true, data } : { success: true, data, meta });
 }
 
 export function created<T>(res: Response, data: T): Response {
@@ -23,7 +25,11 @@ export function zodIssuesToFieldErrors(issues: readonly z.core.$ZodIssue[]): Fie
 }
 
 /** Validates input against a schema, throwing a 400 VALIDATION_ERROR with field details. */
-export function parse<S extends z.ZodType>(schema: S, input: unknown, message = "Invalid request"): z.output<S> {
+export function parse<S extends z.ZodType>(
+  schema: S,
+  input: unknown,
+  message = "Invalid request",
+): z.output<S> {
   const result = schema.safeParse(input);
   if (!result.success) throw badRequest(message, zodIssuesToFieldErrors(result.error.issues));
   return result.data;

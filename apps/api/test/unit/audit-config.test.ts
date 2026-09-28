@@ -14,7 +14,11 @@ describe("audit diff", () => {
 });
 
 describe("configuration", () => {
-  const base = { DATABASE_URL: "postgres://x", NODE_ENV: "production", APP_URL: "https://example.com" };
+  const base = {
+    DATABASE_URL: "postgres://x",
+    NODE_ENV: "production",
+    APP_URL: "https://example.com",
+  };
 
   it("refuses to start in production without a strong secret", () => {
     expect(() => loadConfig(base)).toThrow(/APP_SECRET/);
@@ -22,7 +26,9 @@ describe("configuration", () => {
   });
 
   it("requires https in production", () => {
-    expect(() => loadConfig({ ...base, APP_URL: "http://example.com", APP_SECRET: "x".repeat(40) })).toThrow(/https/);
+    expect(() =>
+      loadConfig({ ...base, APP_URL: "http://example.com", APP_SECRET: "x".repeat(40) }),
+    ).toThrow(/https/);
   });
 
   it("uses secure __Host- cookies in production", () => {
@@ -32,6 +38,8 @@ describe("configuration", () => {
   });
 
   it("requires MAIL_FROM when SMTP is configured", () => {
-    expect(() => loadConfig({ DATABASE_URL: "postgres://x", SMTP_HOST: "smtp.example.com" })).toThrow(/MAIL_FROM/);
+    expect(() =>
+      loadConfig({ DATABASE_URL: "postgres://x", SMTP_HOST: "smtp.example.com" }),
+    ).toThrow(/MAIL_FROM/);
   });
 });

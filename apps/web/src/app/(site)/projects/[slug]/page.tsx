@@ -7,7 +7,9 @@ import { publicApi } from "@/lib/api/server";
 import { SITE_URL } from "@/lib/env";
 import { absoluteUrl, breadcrumbSchema, graph, pageMetadata } from "@/lib/seo";
 
-export async function generateMetadata({ params }: PageProps<"/projects/[slug]">): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<"/projects/[slug]">): Promise<Metadata> {
   const { slug } = await params;
   const [site, project] = await Promise.all([publicApi.site(), publicApi.project(slug)]);
   if (!project.ok) return { title: "Project" };
@@ -50,7 +52,8 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[slug
             creator: { "@id": `${SITE_URL}/#person` },
             dateModified: data.updatedAt,
             datePublished: data.publishedAt ?? undefined,
-            keywords: [...data.technologies, ...data.tags.map((tag) => tag.name)].join(", ") || undefined,
+            keywords:
+              [...data.technologies, ...data.tags.map((tag) => tag.name)].join(", ") || undefined,
             image: data.cover ? absoluteUrl(data.cover.url) : undefined,
           },
           breadcrumbSchema([

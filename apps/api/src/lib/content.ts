@@ -40,7 +40,11 @@ export async function uniqueSlug(
     const conditions: SQL[] = [eq(slugColumn, candidate)];
     if (options.excludeId) conditions.push(ne(idColumn, options.excludeId));
     if (options.scope) conditions.push(options.scope);
-    const rows = await db.select({ id: idColumn }).from(table).where(and(...conditions)).limit(1);
+    const rows = await db
+      .select({ id: idColumn })
+      .from(table)
+      .where(and(...conditions))
+      .limit(1);
     if (rows.length === 0) return candidate;
   }
   throw new Error("Could not find a unique slug");
@@ -81,7 +85,12 @@ export async function loadLinks(
   const rows = (await db
     .select({ owner, target })
     .from(joinTable)
-    .where(sql`${owner} IN (${sql.join(ownerIds.map((id) => sql`${id}`), sql`, `)})`)) as {
+    .where(
+      sql`${owner} IN (${sql.join(
+        ownerIds.map((id) => sql`${id}`),
+        sql`, `,
+      )})`,
+    )) as {
     owner: string;
     target: string;
   }[];
@@ -94,7 +103,9 @@ export async function loadLinks(
 }
 
 function seoIsEmpty(input: SeoFieldsInput): boolean {
-  return !input.title && !input.description && !input.canonicalUrl && !input.ogImageId && !input.noindex;
+  return (
+    !input.title && !input.description && !input.canonicalUrl && !input.ogImageId && !input.noindex
+  );
 }
 
 /** Creates, updates or clears the SEO row referenced by a content record. Returns the id to store. */
@@ -124,7 +135,8 @@ export async function upsertSeo(
 }
 
 export async function loadSeo(db: DbExecutor, seoId: string | null): Promise<SeoFieldsInput> {
-  if (!seoId) return { title: null, description: null, canonicalUrl: null, ogImageId: null, noindex: false };
+  if (!seoId)
+    return { title: null, description: null, canonicalUrl: null, ogImageId: null, noindex: false };
   const [row] = await db.select().from(seoMetadata).where(eq(seoMetadata.id, seoId));
   return {
     title: row?.title ?? null,
@@ -136,7 +148,11 @@ export async function loadSeo(db: DbExecutor, seoId: string | null): Promise<Seo
 }
 
 /** Sets display_order to the position of each id in `ids` in one statement. */
-export async function reorderRows(tx: DbExecutor, table: PgTable, ids: readonly string[]): Promise<void> {
+export async function reorderRows(
+  tx: DbExecutor,
+  table: PgTable,
+  ids: readonly string[],
+): Promise<void> {
   if (ids.length === 0) return;
   const idColumn = column(table, "id");
   column(table, "displayOrder"); // asserts the table is orderable

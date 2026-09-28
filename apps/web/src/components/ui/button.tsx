@@ -9,7 +9,8 @@ const base =
   "inline-flex items-center justify-center gap-2 font-sans font-medium whitespace-nowrap select-none rounded-sm border transition-[background-color,border-color,color,transform] duration-(--duration-fast) ease-out active:translate-y-px disabled:pointer-events-none disabled:opacity-50";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-primary text-on-primary border-primary hover:bg-primary-hover hover:border-primary-hover",
+  primary:
+    "bg-primary text-on-primary border-primary hover:bg-primary-hover hover:border-primary-hover",
   secondary: "bg-transparent text-ink border-rule-strong hover:border-ink hover:bg-elevated",
   ghost: "bg-transparent text-ink-2 border-transparent hover:bg-muted hover:text-ink",
   danger: "bg-error text-on-primary border-error hover:opacity-90",
@@ -71,7 +72,11 @@ export function ButtonLink({
   const classes = buttonClass(variant, size, className);
   if (external || href.startsWith("/media/") || href === "/cv") {
     return (
-      <a href={href} className={classes} {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
+      <a
+        href={href}
+        className={classes}
+        {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      >
         {children}
       </a>
     );

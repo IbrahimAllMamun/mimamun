@@ -57,7 +57,9 @@ export async function loadSession(
       roleId: roles.id,
       roleKey: roles.key,
       roleName: roles.name,
-      permissions: sql<string[]>`coalesce(array_agg(${rolePermissions.permission}) filter (where ${rolePermissions.permission} is not null), '{}')`,
+      permissions: sql<
+        string[]
+      >`coalesce(array_agg(${rolePermissions.permission}) filter (where ${rolePermissions.permission} is not null), '{}')`,
     })
     .from(sessions)
     .innerJoin(users, eq(users.id, sessions.userId))
@@ -99,7 +101,11 @@ export async function revokeSession(db: DbExecutor, sessionId: string): Promise<
 }
 
 /** Revokes every session of a user, optionally keeping one (the caller's). */
-export async function revokeUserSessions(db: DbExecutor, userId: string, exceptSessionId?: string): Promise<void> {
+export async function revokeUserSessions(
+  db: DbExecutor,
+  userId: string,
+  exceptSessionId?: string,
+): Promise<void> {
   await db
     .update(sessions)
     .set({ revokedAt: new Date() })

@@ -33,7 +33,10 @@ export const skillCategories = pgTable(
       foreignColumns: [t.id],
       name: "skill_categories_parent_fk",
     }).onDelete("restrict"),
-    check("skill_categories_not_own_parent", sql`${t.parentId} IS NULL OR ${t.parentId} <> ${t.id}`),
+    check(
+      "skill_categories_not_own_parent",
+      sql`${t.parentId} IS NULL OR ${t.parentId} <> ${t.id}`,
+    ),
     check("skill_categories_slug_format", sql`${t.slug} ~ ${sql.raw(`'${SLUG_CHECK}'`)}`),
     index("skill_categories_parent_idx").on(t.parentId, t.displayOrder),
   ],
@@ -53,7 +56,10 @@ export const skills = pgTable(
     level: skillLevelEnum(),
     years: numeric({ precision: 4, scale: 1, mode: "number" }),
     icon: text(),
-    technologies: text().array().notNull().default(sql`'{}'::text[]`),
+    technologies: text()
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     featured: boolean().notNull().default(false),
     displayOrder: integer().notNull().default(0),
     isVisible: boolean().notNull().default(true),

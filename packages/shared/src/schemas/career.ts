@@ -83,7 +83,10 @@ export const educationInput = z
   })
   .refine(endAfterStart, { error: "End date must be after the start date", path: ["endDate"] })
   .refine(
-    (value) => value.gradeValue === null || value.gradeScale === null || value.gradeValue <= value.gradeScale,
+    (value) =>
+      value.gradeValue === null ||
+      value.gradeScale === null ||
+      value.gradeValue <= value.gradeScale,
     { error: "Grade cannot exceed the scale", path: ["gradeValue"] },
   );
 export type EducationInput = z.infer<typeof educationInput>;

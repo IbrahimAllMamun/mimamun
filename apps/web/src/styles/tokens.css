@@ -55,9 +55,13 @@
 
   /* ── Typography ────────────────────────────────────────────────── */
   --font-serif: var(--font-newsreader), "Newsreader", ui-serif, Georgia, "Times New Roman", serif;
-  --font-serif-italic: var(--font-newsreader-italic), var(--font-newsreader), ui-serif, Georgia, serif;
-  --font-sans: var(--font-plex-sans), "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: var(--font-plex-mono), "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-serif-italic:
+    var(--font-newsreader-italic), var(--font-newsreader), ui-serif, Georgia, serif;
+  --font-sans:
+    var(--font-plex-sans), "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+  --font-mono:
+    var(--font-plex-mono), "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   /* Fluid scale between 360px and 1440px viewports. */
   --text-xs: 0.75rem;

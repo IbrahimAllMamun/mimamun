@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { X } from "lucide-react";
@@ -34,7 +35,9 @@ export function ProjectFilters({ facets, total }: { facets: ProjectFacetsDTO; to
     for (const [key, value] of data.entries()) {
       if (typeof value === "string" && value.trim() !== "") next.set(key, value.trim());
     }
-    startTransition(() => router.replace(`/projects${next.size ? `?${next}` : ""}`, { scroll: false }));
+    startTransition(() =>
+      router.replace(`/projects${next.size ? `?${next}` : ""}`, { scroll: false }),
+    );
   };
 
   useEffect(() => {
@@ -75,7 +78,8 @@ export function ProjectFilters({ facets, total }: { facets: ProjectFacetsDTO; to
           className={control}
         />
       </div>
-      <FilterControls facets={facets} params={params} />
+      {/* Keyed by the URL so the selects follow back/forward navigation and "Clear all". */}
+      <FilterControls key={params.toString()} facets={facets} params={params} />
       <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
         <p aria-live="polite" className="text-ink-2">
           {pending ? "Updating…" : `${total} ${total === 1 ? "project" : "projects"}`}
@@ -86,9 +90,14 @@ export function ProjectFilters({ facets, total }: { facets: ProjectFacetsDTO; to
           </button>
         </noscript>
         {params.size ? (
-          <a href="/projects" className="inline-flex min-h-11 items-center gap-1 text-ink-2 hover:text-ink">
+          <Link
+            href="/projects"
+            scroll={false}
+            onClick={() => setQuery("")}
+            className="inline-flex min-h-11 items-center gap-1 text-ink-2 hover:text-ink"
+          >
             <Icon icon={X} size={14} /> Clear all
-          </a>
+          </Link>
         ) : null}
       </div>
     </form>
@@ -122,19 +131,28 @@ function FilterControls({
       name: "category",
       label: "Category",
       all: "All categories",
-      options: facets.categories.map((item) => ({ value: item.slug, label: `${item.name} (${item.count})` })),
+      options: facets.categories.map((item) => ({
+        value: item.slug,
+        label: `${item.name} (${item.count})`,
+      })),
     },
     {
       name: "tech",
       label: "Technology",
       all: "Any technology",
-      options: facets.technologies.map((item) => ({ value: item.name, label: `${item.name} (${item.count})` })),
+      options: facets.technologies.map((item) => ({
+        value: item.name,
+        label: `${item.name} (${item.count})`,
+      })),
     },
     {
       name: "year",
       label: "Year",
       all: "Any year",
-      options: facets.years.map((item) => ({ value: String(item.year), label: `${item.year} (${item.count})` })),
+      options: facets.years.map((item) => ({
+        value: String(item.year),
+        label: `${item.year} (${item.count})`,
+      })),
     },
   ].filter((field) => field.options.length > 1 || params.get(field.name));
   return (
@@ -144,7 +162,12 @@ function FilterControls({
           <label htmlFor={`filter-${field.name}`} className="label mb-1.5 block">
             {field.label}
           </label>
-          <select id={`filter-${field.name}`} name={field.name} defaultValue={params.get(field.name) ?? ""} className={control}>
+          <select
+            id={`filter-${field.name}`}
+            name={field.name}
+            defaultValue={params.get(field.name) ?? ""}
+            className={control}
+          >
             <option value="">{field.all}</option>
             {field.options.map((option) => (
               <option key={option.value} value={option.value}>
@@ -158,7 +181,12 @@ function FilterControls({
         <label htmlFor="filter-sort" className="label mb-1.5 block">
           Sort
         </label>
-        <select id="filter-sort" name="sort" defaultValue={params.get("sort") ?? ""} className={control}>
+        <select
+          id="filter-sort"
+          name="sort"
+          defaultValue={params.get("sort") ?? ""}
+          className={control}
+        >
           {SORTS.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}

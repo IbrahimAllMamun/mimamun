@@ -56,7 +56,9 @@ export async function verifyCredentials(
       .update(users)
       .set({
         failedLoginCount: lock ? 0 : failures,
-        lockedUntil: lock ? new Date(Date.now() + config.lockoutMinutes * 60_000) : user.lockedUntil,
+        lockedUntil: lock
+          ? new Date(Date.now() + config.lockoutMinutes * 60_000)
+          : user.lockedUntil,
       })
       .where(eq(users.id, user.id));
     return { ok: false, error: INVALID_CREDENTIALS, userId: user.id };
@@ -108,7 +110,11 @@ export async function createPasswordResetToken(
 }
 
 /** Consumes a reset token and sets the new password. Returns the user id. */
-export async function resetPasswordWithToken(db: Database, token: string, newPassword: string): Promise<string> {
+export async function resetPasswordWithToken(
+  db: Database,
+  token: string,
+  newPassword: string,
+): Promise<string> {
   const passwordHash = await hashPassword(newPassword);
   return db.transaction(async (tx) => {
     const [row] = await tx
@@ -123,9 +129,16 @@ export async function resetPasswordWithToken(db: Database, token: string, newPas
       )
       .for("update");
     if (!row) {
-      throw new AppError(400, "VALIDATION_ERROR", "This reset link is invalid or has expired. Request a new one.");
+      throw new AppError(
+        400,
+        "VALIDATION_ERROR",
+        "This reset link is invalid or has expired. Request a new one.",
+      );
     }
-    await tx.update(passwordResetTokens).set({ usedAt: new Date() }).where(eq(passwordResetTokens.id, row.id));
+    await tx
+      .update(passwordResetTokens)
+      .set({ usedAt: new Date() })
+      .where(eq(passwordResetTokens.id, row.id));
     await tx
       .update(users)
       .set({ passwordHash, passwordChangedAt: new Date(), failedLoginCount: 0, lockedUntil: null })
@@ -140,7 +153,10 @@ export async function changePassword(
   currentPassword: string,
   newPassword: string,
 ): Promise<void> {
-  const [user] = await db.select({ passwordHash: users.passwordHash }).from(users).where(eq(users.id, userId));
+  const [user] = await db
+    .select({ passwordHash: users.passwordHash })
+    .from(users)
+    .where(eq(users.id, userId));
   if (!user || !(await verifyPassword(user.passwordHash, currentPassword))) {
     throw new AppError(400, "VALIDATION_ERROR", "Current password is incorrect", [
       { path: "currentPassword", message: "Current password is incorrect" },

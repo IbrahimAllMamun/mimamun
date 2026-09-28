@@ -39,18 +39,27 @@ export function LoginForm({ next, notice }: { next: string; notice?: string | nu
   return (
     <form onSubmit={submit} noValidate className="space-y-5">
       <h1 className="font-serif text-2xl text-ink">Sign in</h1>
-      {notice ? <p className="rounded-sm bg-success-tint px-3 py-2 text-sm text-ink">{notice}</p> : null}
+      {notice ? (
+        <p className="rounded-sm bg-success-tint px-3 py-2 text-sm text-ink">{notice}</p>
+      ) : null}
       {error ? (
-        <div role="alert" className="flex gap-2 rounded-sm border border-error/40 bg-error-tint px-3 py-2 text-sm text-ink">
+        <div
+          role="alert"
+          className="flex gap-2 rounded-sm border border-error/40 bg-error-tint px-3 py-2 text-sm text-ink"
+        >
           <Icon icon={CircleAlert} size={16} className="mt-0.5 shrink-0 text-error" />
           {error}
         </div>
       ) : null}
       <Field label="Email" required error={errors.email}>
-        {(props) => <Input {...props} name="email" type="email" autoComplete="username" autoFocus />}
+        {(props) => (
+          <Input {...props} name="email" type="email" autoComplete="username" autoFocus />
+        )}
       </Field>
       <Field label="Password" required error={errors.password}>
-        {(props) => <Input {...props} name="password" type="password" autoComplete="current-password" />}
+        {(props) => (
+          <Input {...props} name="password" type="password" autoComplete="current-password" />
+        )}
       </Field>
       <Button type="submit" pending={pending} className="w-full">
         {pending ? "Signing in…" : "Sign in"}

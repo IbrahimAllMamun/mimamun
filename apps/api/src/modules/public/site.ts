@@ -7,7 +7,14 @@ import {
   type StaticRouteKey,
 } from "@portfolio/shared";
 import type { DbExecutor } from "../../database/client";
-import { media, navigationItems, profile, seoMetadata, siteSettings, socialLinks } from "../../database/schema";
+import {
+  media,
+  navigationItems,
+  profile,
+  seoMetadata,
+  siteSettings,
+  socialLinks,
+} from "../../database/schema";
 import { isoRequired } from "../../lib/http";
 import { loadMediaMap, mediaUrl, pick } from "../media/mapper";
 
@@ -69,17 +76,27 @@ export async function getSite(db: DbExecutor): Promise<SiteDTO | null> {
   const [profileDTO, settingsRows, links, nav, seoRows] = await Promise.all([
     getProfile(db),
     db.select().from(siteSettings).where(eq(siteSettings.id, 1)),
-    db.select().from(socialLinks).where(eq(socialLinks.isVisible, true)).orderBy(asc(socialLinks.displayOrder)),
+    db
+      .select()
+      .from(socialLinks)
+      .where(eq(socialLinks.isVisible, true))
+      .orderBy(asc(socialLinks.displayOrder)),
     db
       .select()
       .from(navigationItems)
       .where(eq(navigationItems.isVisible, true))
       .orderBy(asc(navigationItems.location), asc(navigationItems.displayOrder)),
-    db.select().from(seoMetadata).where(and(isNotNull(seoMetadata.routeKey))),
+    db
+      .select()
+      .from(seoMetadata)
+      .where(and(isNotNull(seoMetadata.routeKey))),
   ]);
   const settings = settingsRows[0];
   if (!profileDTO || !settings) return null;
-  const mediaMap = await loadMediaMap(db, [settings.defaultOgImageId, ...seoRows.map((row) => row.ogImageId)]);
+  const mediaMap = await loadMediaMap(db, [
+    settings.defaultOgImageId,
+    ...seoRows.map((row) => row.ogImageId),
+  ]);
   const routeSeo: SiteDTO["routeSeo"] = {};
   for (const row of seoRows) {
     if (row.routeKey && (STATIC_ROUTE_KEYS as readonly string[]).includes(row.routeKey)) {

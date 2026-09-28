@@ -15,7 +15,10 @@ export const EMBED_HOSTS: readonly string[] = [
   "*.hf.space",
 ];
 
-export const VIDEO_FRAME_HOSTS: readonly string[] = ["www.youtube-nocookie.com", "player.vimeo.com"];
+export const VIDEO_FRAME_HOSTS: readonly string[] = [
+  "www.youtube-nocookie.com",
+  "player.vimeo.com",
+];
 
 export function hostMatches(hostname: string, pattern: string): boolean {
   const host = hostname.toLowerCase();

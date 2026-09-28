@@ -1,5 +1,10 @@
 import { ArrowRight, Download } from "lucide-react";
-import { formatMonth, type EducationDTO, type ExperienceDTO, type ProfileDTO } from "@portfolio/shared";
+import {
+  formatMonth,
+  type EducationDTO,
+  type ExperienceDTO,
+  type ProfileDTO,
+} from "@portfolio/shared";
 import { ButtonLink } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { TextLink } from "@/components/ui/text-link";
@@ -30,7 +35,9 @@ export function FrontMatter({
     facts.push({
       label: "Currently",
       value: roleLine(role),
-      detail: [role.department, role.startDate ? `since ${formatMonth(role.startDate)}` : null].filter(Boolean).join(" · "),
+      detail: [role.department, role.startDate ? `since ${formatMonth(role.startDate)}` : null]
+        .filter(Boolean)
+        .join(" · "),
     });
   }
   const last = previous[0];
@@ -38,14 +45,18 @@ export function FrontMatter({
     facts.push({
       label: "Previously",
       value: roleLine(last),
-      detail: [last.department, last.endDate ? `until ${formatMonth(last.endDate)}` : null].filter(Boolean).join(" · "),
+      detail: [last.department, last.endDate ? `until ${formatMonth(last.endDate)}` : null]
+        .filter(Boolean)
+        .join(" · "),
     });
   }
   if (education.length) {
     const institutions = [...new Set(education.map((item) => item.institution))].join(", ");
     facts.push({
       label: "Trained in",
-      value: education.map((item) => [item.degree, item.fieldOfStudy].filter(Boolean).join(" ")).join("; "),
+      value: education
+        .map((item) => [item.degree, item.fieldOfStudy].filter(Boolean).join(" "))
+        .join("; "),
       detail: institutions,
     });
   }
@@ -63,11 +74,18 @@ export function FrontMatter({
             <p className="label motion-enter">{profile.headline}</p>
           </div>
           <div className="col-span-4 sm:col-span-8 lg:col-span-9">
-            <h1 id="front-matter-title" className="display motion-enter text-5xl text-ink" style={stagger(1)}>
+            <h1
+              id="front-matter-title"
+              className="display motion-enter text-5xl text-ink"
+              style={stagger(1)}
+            >
               {profile.fullName}
             </h1>
             {profile.statement ? (
-              <p className="motion-enter mt-6 max-w-3xl font-serif text-2xl leading-snug text-ink-2" style={stagger(2)}>
+              <p
+                className="motion-enter mt-6 max-w-3xl font-serif text-2xl leading-snug text-ink-2"
+                style={stagger(2)}
+              >
                 {profile.statement}
               </p>
             ) : null}

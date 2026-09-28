@@ -13,12 +13,28 @@ export interface SectionDefinition {
 }
 
 export const PROJECT_SECTIONS = [
-  { key: "overview", label: "Overview", help: "The full description: what the project is and why it exists." },
+  {
+    key: "overview",
+    label: "Overview",
+    help: "The full description: what the project is and why it exists.",
+  },
   { key: "problem", label: "Problem", help: "The question or business problem being solved." },
   { key: "objective", label: "Objective", help: "What a successful outcome looks like." },
-  { key: "data", label: "Data", help: "Sources, size, time span, quality issues, access constraints." },
-  { key: "methodology", label: "Methodology", help: "The analytical approach and why it was chosen." },
-  { key: "feature_engineering", label: "Feature engineering", help: "Transformations and derived variables." },
+  {
+    key: "data",
+    label: "Data",
+    help: "Sources, size, time span, quality issues, access constraints.",
+  },
+  {
+    key: "methodology",
+    label: "Methodology",
+    help: "The analytical approach and why it was chosen.",
+  },
+  {
+    key: "feature_engineering",
+    label: "Feature engineering",
+    help: "Transformations and derived variables.",
+  },
   { key: "modeling", label: "Modeling", help: "Models considered and the final specification." },
   { key: "evaluation", label: "Evaluation", help: "Validation design, metrics and baselines." },
   { key: "results", label: "Results", help: "What the evaluation showed. Use real figures only." },
@@ -32,9 +48,17 @@ export type ProjectSectionKey = (typeof PROJECT_SECTIONS)[number]["key"];
 export const RESEARCH_SECTIONS = [
   { key: "data", label: "Data", help: "Data sources, sampling and preparation." },
   { key: "methodology", label: "Methodology", help: "Study design and analytical approach." },
-  { key: "statistical_methods", label: "Statistical methods", help: "Tests, estimators and diagnostics." },
+  {
+    key: "statistical_methods",
+    label: "Statistical methods",
+    help: "Tests, estimators and diagnostics.",
+  },
   { key: "models", label: "Models", help: "Model specifications and comparisons." },
-  { key: "findings", label: "Findings", help: "Results as reported in the work. Do not overstate." },
+  {
+    key: "findings",
+    label: "Findings",
+    help: "Results as reported in the work. Do not overstate.",
+  },
   { key: "limitations", label: "Limitations", help: "Threats to validity and open questions." },
 ] as const satisfies readonly SectionDefinition[];
 
@@ -81,8 +105,7 @@ export function orderedSections(
 export function emptySections<K extends string>(
   definitions: readonly { key: K }[],
 ): Record<K, Block[]> {
-  return Object.fromEntries(definitions.map((definition) => [definition.key, []])) as unknown as Record<
-    K,
-    Block[]
-  >;
+  return Object.fromEntries(
+    definitions.map((definition) => [definition.key, []]),
+  ) as unknown as Record<K, Block[]>;
 }

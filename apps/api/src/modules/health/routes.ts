@@ -17,7 +17,10 @@ export function healthRouter(deps: Pick<AppDeps, "db">): Router {
     const started = performance.now();
     try {
       await deps.db.execute(sql`SELECT 1`);
-      res.json({ success: true, data: { status: "ok", latencyMs: Math.round(performance.now() - started) } });
+      res.json({
+        success: true,
+        data: { status: "ok", latencyMs: Math.round(performance.now() - started) },
+      });
     } catch {
       res.status(503).json({
         success: false,

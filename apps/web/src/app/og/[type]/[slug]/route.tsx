@@ -5,7 +5,12 @@ import { renderCard, type CardInput } from "@/lib/og/card";
 
 const CACHE = { "cache-control": "public, max-age=3600, stale-while-revalidate=86400" };
 
-async function cardFor(type: string, slug: string, author: string, role: string): Promise<CardInput | null> {
+async function cardFor(
+  type: string,
+  slug: string,
+  author: string,
+  role: string,
+): Promise<CardInput | null> {
   const host = new URL(SITE_URL).host;
   const base = { author, role, host };
   switch (type) {
@@ -14,7 +19,14 @@ async function cardFor(type: string, slug: string, author: string, role: string)
       const site = await publicApi.site();
       if (!site.ok) return null;
       // The name is the title here, so the footer carries the address instead.
-      return { ...base, author: host, host: "", eyebrow: site.data.profile.location ?? "Portfolio", title: author, description: site.data.profile.statement };
+      return {
+        ...base,
+        author: host,
+        host: "",
+        eyebrow: site.data.profile.location ?? "Portfolio",
+        title: author,
+        description: site.data.profile.statement,
+      };
     }
     case "projects": {
       const project = await publicApi.project(slug);
@@ -22,7 +34,9 @@ async function cardFor(type: string, slug: string, author: string, role: string)
       const data = project.data;
       return {
         ...base,
-        eyebrow: ["Case study", PROJECT_TYPE_LABELS[data.type], data.year].filter(Boolean).join(" · "),
+        eyebrow: ["Case study", PROJECT_TYPE_LABELS[data.type], data.year]
+          .filter(Boolean)
+          .join(" · "),
         title: data.title,
         description: data.summary,
         tone: "primary",
@@ -34,7 +48,9 @@ async function cardFor(type: string, slug: string, author: string, role: string)
       const data = research.data;
       return {
         ...base,
-        eyebrow: [RESEARCH_KIND_LABELS[data.kind], data.institution, data.year].filter(Boolean).join(" · "),
+        eyebrow: [RESEARCH_KIND_LABELS[data.kind], data.institution, data.year]
+          .filter(Boolean)
+          .join(" · "),
         title: data.title,
         description: data.summary,
         tone: "secondary",
@@ -46,7 +62,9 @@ async function cardFor(type: string, slug: string, author: string, role: string)
       const data = post.data;
       return {
         ...base,
-        eyebrow: ["Writing", data.publishedAt ? formatDate(data.publishedAt) : null].filter(Boolean).join(" · "),
+        eyebrow: ["Writing", data.publishedAt ? formatDate(data.publishedAt) : null]
+          .filter(Boolean)
+          .join(" · "),
         title: data.title,
         description: data.excerpt,
         tone: "accent",
@@ -56,7 +74,13 @@ async function cardFor(type: string, slug: string, author: string, role: string)
       const credential = await publicApi.credential(slug);
       if (!credential.ok) return null;
       const data = credential.data;
-      return { ...base, eyebrow: `${data.type.name} · ${data.provider.name}`, title: data.title, description: data.description, tone: "primary" };
+      return {
+        ...base,
+        eyebrow: `${data.type.name} · ${data.provider.name}`,
+        title: data.title,
+        description: data.description,
+        tone: "primary",
+      };
     }
     default:
       return null;
@@ -70,6 +94,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/og/[type
   const author = site.ok ? site.data.profile.fullName : "Ibrahim All-Mamun";
   const role = site.ok ? site.data.profile.headline : "Data Scientist";
   const card = await cardFor(type, slug, author, role);
-  if (!card) return new Response("Not found", { status: 404, headers: { "cache-control": "no-store" } });
+  if (!card)
+    return new Response("Not found", { status: 404, headers: { "cache-control": "no-store" } });
   return renderCard(card, { headers: CACHE });
 }

@@ -15,29 +15,49 @@ function pgError(error: unknown): PgLikeError | null {
   let current: unknown = error;
   for (let depth = 0; depth < 3 && current; depth += 1) {
     const candidate = current as PgLikeError & { cause?: unknown };
-    if (typeof candidate.code === "string" && /^[0-9A-Z]{5}$/.test(candidate.code)) return candidate;
+    if (typeof candidate.code === "string" && /^[0-9A-Z]{5}$/.test(candidate.code))
+      return candidate;
     current = candidate.cause;
   }
   return null;
 }
 
-const CONNECTION_ERRORS = new Set(["ECONNREFUSED", "ECONNRESET", "ETIMEDOUT", "ENOTFOUND", "EAI_AGAIN"]);
+const CONNECTION_ERRORS = new Set([
+  "ECONNREFUSED",
+  "ECONNRESET",
+  "ETIMEDOUT",
+  "ENOTFOUND",
+  "EAI_AGAIN",
+]);
 
 function toAppError(error: unknown): AppError | null {
   if (error instanceof AppError) return error;
   if (error instanceof multer.MulterError) {
-    if (error.code === "LIMIT_FILE_SIZE") return new AppError(413, "PAYLOAD_TOO_LARGE", "The file is larger than the allowed limit");
+    if (error.code === "LIMIT_FILE_SIZE")
+      return new AppError(413, "PAYLOAD_TOO_LARGE", "The file is larger than the allowed limit");
     return new AppError(400, "VALIDATION_ERROR", "Invalid upload");
   }
   const bodyError = error as { type?: string; status?: number };
-  if (bodyError.type === "entity.too.large") return new AppError(413, "PAYLOAD_TOO_LARGE", "Request body is too large");
-  if (bodyError.type === "entity.parse.failed") return new AppError(400, "VALIDATION_ERROR", "Malformed JSON body");
+  if (bodyError.type === "entity.too.large")
+    return new AppError(413, "PAYLOAD_TOO_LARGE", "Request body is too large");
+  if (bodyError.type === "entity.parse.failed")
+    return new AppError(400, "VALIDATION_ERROR", "Malformed JSON body");
   const pg = pgError(error);
-  if (pg?.code === "23505") return new AppError(409, "CONFLICT", "A record with the same unique value already exists");
+  if (pg?.code === "23505")
+    return new AppError(409, "CONFLICT", "A record with the same unique value already exists");
   if (pg?.code === "23503") {
-    return new AppError(409, "CONFLICT", "This record is referenced by other content, or references something that does not exist");
+    return new AppError(
+      409,
+      "CONFLICT",
+      "This record is referenced by other content, or references something that does not exist",
+    );
   }
-  if (pg?.code === "23514" || pg?.code === "22P02" || pg?.code === "22007" || pg?.code === "22008") {
+  if (
+    pg?.code === "23514" ||
+    pg?.code === "22P02" ||
+    pg?.code === "22007" ||
+    pg?.code === "22008"
+  ) {
     return new AppError(400, "VALIDATION_ERROR", "The data violates a validation rule");
   }
   if (pg?.code && (pg.code.startsWith("08") || pg.code === "57P01" || pg.code === "53300")) {
@@ -64,10 +84,18 @@ export function errorHandler(logger: Logger): ErrorRequestHandler {
     const body: ApiFailure = {
       success: false,
       error: appError
-        ? { code: appError.code, message: appError.message, ...(appError.details ? { details: appError.details } : {}) }
-        : { code: "INTERNAL_ERROR", message: "Something went wrong on our side. Please try again." },
+        ? {
+            code: appError.code,
+            message: appError.message,
+            ...(appError.details ? { details: appError.details } : {}),
+          }
+        : {
+            code: "INTERNAL_ERROR",
+            message: "Something went wrong on our side. Please try again.",
+          },
     };
-    if (appError?.headers) for (const [key, value] of Object.entries(appError.headers)) res.setHeader(key, value);
+    if (appError?.headers)
+      for (const [key, value] of Object.entries(appError.headers)) res.setHeader(key, value);
     if (res.headersSent) return;
     res.status(status).json(body);
   };

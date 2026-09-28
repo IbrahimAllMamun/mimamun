@@ -21,7 +21,8 @@ export function classifyUserAgent(userAgent: string | undefined | null): UserAge
 
   let device: DeviceCategory = "desktop";
   if (/ipad|tablet|kindle|silk|playbook|(android(?!.*mobile))/i.test(ua)) device = "tablet";
-  else if (/mobi|iphone|ipod|android.*mobile|windows phone|blackberry|opera mini/i.test(ua)) device = "mobile";
+  else if (/mobi|iphone|ipod|android.*mobile|windows phone|blackberry|opera mini/i.test(ua))
+    device = "mobile";
 
   let browser = "Other";
   if (/edg(e|a|ios)?\//i.test(ua)) browser = "Edge";

@@ -64,7 +64,13 @@ export function MobileMenu({
           <nav aria-label="Primary" className="py-6">
             <ul className="space-y-1">
               <li>
-                <Link href="/" className={cn("block py-2 font-serif text-3xl", pathname === "/" ? "text-ink" : "text-ink-2")}>
+                <Link
+                  href="/"
+                  className={cn(
+                    "block py-2 font-serif text-3xl",
+                    pathname === "/" ? "text-ink" : "text-ink-2",
+                  )}
+                >
                   Home
                 </Link>
               </li>
@@ -86,7 +92,10 @@ export function MobileMenu({
           </nav>
           <div className="mt-auto space-y-4 border-t border-rule pt-5">
             {hasCv ? (
-              <a href="/cv" className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary">
+              <a
+                href="/cv"
+                className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-primary"
+              >
                 <Icon icon={Download} size={16} /> Download CV
               </a>
             ) : null}
@@ -96,7 +105,9 @@ export function MobileMenu({
                   <a
                     href={link.url}
                     className="inline-flex min-h-11 items-center gap-1 text-sm text-ink-2 hover:text-ink"
-                    {...(link.url.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    {...(link.url.startsWith("http")
+                      ? { target: "_blank", rel: "noopener noreferrer" }
+                      : {})}
                   >
                     {link.label}
                     <Icon icon={ArrowUpRight} size={14} />

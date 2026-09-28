@@ -44,12 +44,20 @@ export function MediaField({
               {media.mimeType} · {formatBytes(media.sizeBytes)}
               {media.width && media.height ? ` · ${media.width}×${media.height}` : ""}
             </p>
-            {media.kind === "image" && !media.alt ? <p className="text-xs text-accent">No alt text yet — add it in the media library.</p> : null}
+            {media.kind === "image" && !media.alt ? (
+              <p className="text-xs text-accent">No alt text yet — add it in the media library.</p>
+            ) : null}
           </div>
           <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(true)}>
             Change
           </Button>
-          <Button type="button" variant="ghost" size="sm" onClick={() => onChange(null)} aria-label="Remove file">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => onChange(null)}
+            aria-label="Remove file"
+          >
             <Icon icon={X} size={14} />
           </Button>
         </div>
@@ -70,7 +78,12 @@ export function MediaField({
           <UploadButton accept={accept} onUploaded={select} label="Upload" />
         </>
       )}
-      <MediaLibraryDialog open={open} onClose={() => setOpen(false)} onSelect={select} accept={accept} />
+      <MediaLibraryDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        onSelect={select}
+        accept={accept}
+      />
     </div>
   );
 }

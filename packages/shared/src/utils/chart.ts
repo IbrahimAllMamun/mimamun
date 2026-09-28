@@ -37,7 +37,12 @@ function roundTo(value: number, step: number): number {
  * Round tick values spanning [min, max]. With `integer`, steps never fall
  * below 1, so counts are not labelled 0.2, 0.4…
  */
-export function niceTicks(min: number, max: number, maxTicks = 5, { integer = false }: { integer?: boolean } = {}): Ticks {
+export function niceTicks(
+  min: number,
+  max: number,
+  maxTicks = 5,
+  { integer = false }: { integer?: boolean } = {},
+): Ticks {
   if (!Number.isFinite(min) || !Number.isFinite(max)) {
     return { min: 0, max: 1, step: 0.25, values: [0, 0.25, 0.5, 0.75, 1] };
   }
@@ -153,7 +158,9 @@ export function parseChartCsv(text: string): { data: ChartSeriesData } | { error
   const body = rows.slice(1);
   const inconsistent = body.findIndex((row) => row.length !== header.length);
   if (inconsistent >= 0) {
-    return { error: `Row ${inconsistent + 2} has ${body[inconsistent]?.length} cells; expected ${header.length}.` };
+    return {
+      error: `Row ${inconsistent + 2} has ${body[inconsistent]?.length} cells; expected ${header.length}.`,
+    };
   }
   const rawX = body.map((row) => row[0] ?? "");
   const numericX = rawX.every((value) => toNumber(value) !== null);
@@ -167,13 +174,17 @@ export function parseChartCsv(text: string): { data: ChartSeriesData } | { error
 
 export function chartDataToCsv(data: ChartSeriesData, xLabel = "x"): string {
   const header = [xLabel || "x", ...data.series.map((series) => series.name)];
-  const escape = (value: string) => (/[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value);
+  const escape = (value: string) =>
+    /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
   const lines = [header.map(escape).join(",")];
   data.x.forEach((xValue, row) => {
-    const cells = [String(xValue), ...data.series.map((series) => {
-      const value = series.values[row];
-      return value === null || value === undefined ? "" : String(value);
-    })];
+    const cells = [
+      String(xValue),
+      ...data.series.map((series) => {
+        const value = series.values[row];
+        return value === null || value === undefined ? "" : String(value);
+      }),
+    ];
     lines.push(cells.map(escape).join(","));
   });
   return lines.join("\n");

@@ -1,7 +1,16 @@
 "use client";
 
 import { X } from "lucide-react";
-import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/cn";
@@ -61,12 +70,21 @@ export function Dialog({
               </h2>
               {description ? <div className="text-sm text-ink-2">{description}</div> : null}
             </div>
-            <button type="button" onClick={onClose} className="-m-1 rounded-sm p-2 text-ink-3 hover:bg-muted hover:text-ink" aria-label="Close">
+            <button
+              type="button"
+              onClick={onClose}
+              className="-m-1 rounded-sm p-2 text-ink-3 hover:bg-muted hover:text-ink"
+              aria-label="Close"
+            >
               <Icon icon={X} size={18} />
             </button>
           </header>
           <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>
-          {footer ? <footer className="flex flex-wrap justify-end gap-2 border-t border-rule px-5 py-3">{footer}</footer> : null}
+          {footer ? (
+            <footer className="flex flex-wrap justify-end gap-2 border-t border-rule px-5 py-3">
+              {footer}
+            </footer>
+          ) : null}
         </>
       ) : null}
     </dialog>
@@ -84,8 +102,14 @@ const ConfirmContext = createContext<((options: ConfirmOptions) => Promise<boole
 
 /** `await confirm({...})` resolves true when the user confirms. */
 export function ConfirmProvider({ children }: { children: ReactNode }) {
-  const [request, setRequest] = useState<(ConfirmOptions & { resolve: (value: boolean) => void }) | null>(null);
-  const confirm = useCallback((options: ConfirmOptions) => new Promise<boolean>((resolve) => setRequest({ ...options, resolve })), []);
+  const [request, setRequest] = useState<
+    (ConfirmOptions & { resolve: (value: boolean) => void }) | null
+  >(null);
+  const confirm = useCallback(
+    (options: ConfirmOptions) =>
+      new Promise<boolean>((resolve) => setRequest({ ...options, resolve })),
+    [],
+  );
   const settle = (value: boolean) => {
     request?.resolve(value);
     setRequest(null);
@@ -103,7 +127,11 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
             <Button variant="secondary" onClick={() => settle(false)}>
               Cancel
             </Button>
-            <Button variant={request?.tone === "danger" ? "danger" : "primary"} onClick={() => settle(true)} autoFocus>
+            <Button
+              variant={request?.tone === "danger" ? "danger" : "primary"}
+              onClick={() => settle(true)}
+              autoFocus
+            >
               {request?.confirmLabel ?? "Confirm"}
             </Button>
           </>

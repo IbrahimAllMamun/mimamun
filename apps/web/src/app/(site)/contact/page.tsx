@@ -11,11 +11,20 @@ import { pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await publicApi.site();
-  return pageMetadata({ site: site.ok ? site.data : null, title: "Contact", path: "/contact", routeKey: "contact" });
+  return pageMetadata({
+    site: site.ok ? site.data : null,
+    title: "Contact",
+    path: "/contact",
+    routeKey: "contact",
+  });
 }
 
 export default async function ContactPage({ searchParams }: PageProps<"/contact">) {
-  const [site, token, params] = await Promise.all([publicApi.site(), publicApi.contactToken(), searchParams]);
+  const [site, token, params] = await Promise.all([
+    publicApi.site(),
+    publicApi.contactToken(),
+    searchParams,
+  ]);
   const profile = site.ok ? site.data.profile : null;
   const links = site.ok ? site.data.socialLinks.filter((link) => link.platform !== "email") : [];
   const formEnabled = site.ok && site.data.settings.contactFormEnabled;
@@ -23,10 +32,17 @@ export default async function ContactPage({ searchParams }: PageProps<"/contact"
 
   return (
     <>
-      <PageHeader eyebrow="Contact" title="Contact" lead="Get in touch about data science roles, research or collaboration." />
+      <PageHeader
+        eyebrow="Contact"
+        title="Contact"
+        lead="Get in touch about data science roles, research or collaboration."
+      />
       <div className="container-page">
         <div className="grid-editorial gap-y-12">
-          <aside aria-label="Direct contact" className="col-span-4 space-y-8 sm:col-span-8 lg:col-span-3">
+          <aside
+            aria-label="Direct contact"
+            className="col-span-4 space-y-8 sm:col-span-8 lg:col-span-3"
+          >
             {profile?.email ? (
               <div className="space-y-1">
                 <p className="label">Email</p>
@@ -68,21 +84,34 @@ export default async function ContactPage({ searchParams }: PageProps<"/contact"
 
           <div className="col-span-4 space-y-6 sm:col-span-8 lg:col-span-7 lg:col-start-5">
             {cvRequested && !profile?.cv ? (
-              <div role="status" className="flex gap-3 rounded-sm border border-info/40 bg-info-tint px-4 py-3 text-sm">
+              <div
+                role="status"
+                className="flex gap-3 rounded-sm border border-info/40 bg-info-tint px-4 py-3 text-sm"
+              >
                 <Icon icon={Info} size={18} className="mt-0.5 shrink-0 text-info" />
-                <p className="text-ink">The CV is not available to download at the moment. You can request a copy with the form below.</p>
+                <p className="text-ink">
+                  The CV is not available to download at the moment. You can request a copy with the
+                  form below.
+                </p>
               </div>
             ) : null}
             {!formEnabled ? (
               <UnavailableNotice title="The contact form is closed">
-                {profile?.email ? `Please email ${profile.email} instead.` : "Please try again later."}
+                {profile?.email
+                  ? `Please email ${profile.email} instead.`
+                  : "Please try again later."}
               </UnavailableNotice>
             ) : !token.ok ? (
               <UnavailableNotice title="The contact form is temporarily unavailable">
-                {profile?.email ? `Please email ${profile.email} instead.` : "Please try again in a few minutes."}
+                {profile?.email
+                  ? `Please email ${profile.email} instead.`
+                  : "Please try again in a few minutes."}
               </UnavailableNotice>
             ) : (
-              <ContactForm token={token.data.token} initialSubject={cvRequested ? "CV request" : ""} />
+              <ContactForm
+                token={token.data.token}
+                initialSubject={cvRequested ? "CV request" : ""}
+              />
             )}
           </div>
         </div>

@@ -59,10 +59,17 @@ export function contactPublicRouter(deps: AppDeps): Router {
 
   router.post("/contact", perHour, perDay, async (req, res) => {
     const [settings] = await db
-      .select({ enabled: siteSettings.contactFormEnabled, notifyEmail: siteSettings.contactNotificationEmail })
+      .select({
+        enabled: siteSettings.contactFormEnabled,
+        notifyEmail: siteSettings.contactNotificationEmail,
+      })
       .from(siteSettings);
     if (settings && !settings.enabled) {
-      throw new AppError(503, "SERVICE_UNAVAILABLE", "The contact form is currently closed. Please email directly.");
+      throw new AppError(
+        503,
+        "SERVICE_UNAVAILABLE",
+        "The contact form is currently closed. Please email directly.",
+      );
     }
     const input = parse(contactInput, req.body, "Please check the highlighted fields");
     const accepted = { message: "Thank you — your message has been sent." };
@@ -101,7 +108,11 @@ export function contactPublicRouter(deps: AppDeps): Router {
           subject: `Portfolio contact: ${input.subject}`.slice(0, 200),
           text: `New message from ${input.name} <${input.email}>\n\nSubject: ${input.subject}\n\n${input.message}\n\n— Sent from the contact form. Manage messages in the admin: ${config.appUrl}/admin/messages/${row.id}\n`,
         });
-        if (sent) await db.update(contactMessages).set({ notifiedAt: new Date() }).where(eq(contactMessages.id, row.id));
+        if (sent)
+          await db
+            .update(contactMessages)
+            .set({ notifiedAt: new Date() })
+            .where(eq(contactMessages.id, row.id));
       }
     }
     res.status(201).json({ success: true, data: accepted });
@@ -114,7 +125,9 @@ export function contactAdminRouter(deps: AppDeps): Router {
   const router = Router();
   const { db } = deps;
   router.use(requirePermission(PERMISSIONS.MESSAGES_MANAGE));
-  router.param("id", (_req, _res, next, value: string) => next(UUID_PATTERN.test(value) ? undefined : notFound("Message")));
+  router.param("id", (_req, _res, next, value: string) =>
+    next(UUID_PATTERN.test(value) ? undefined : notFound("Message")),
+  );
 
   router.get("/", async (req, res) => {
     const query = parse(contactListQuery, req.query);
@@ -199,9 +212,15 @@ export function contactAdminRouter(deps: AppDeps): Router {
     const input = parse(contactBulkInput, req.body);
     let affected = 0;
     if (input.action === "delete") {
-      affected = (await db.delete(contactMessages).where(inArray(contactMessages.id, input.ids)).returning({ id: contactMessages.id })).length;
+      affected = (
+        await db
+          .delete(contactMessages)
+          .where(inArray(contactMessages.id, input.ids))
+          .returning({ id: contactMessages.id })
+      ).length;
     } else {
-      const status = input.action === "read" ? "read" : input.action === "archive" ? "archived" : "spam";
+      const status =
+        input.action === "read" ? "read" : input.action === "archive" ? "archived" : "spam";
       affected = (
         await db
           .update(contactMessages)

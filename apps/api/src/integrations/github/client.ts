@@ -50,7 +50,10 @@ export class HttpGithubClient implements GithubClient {
     if (this.token) headers.authorization = `Bearer ${this.token}`;
     let response: Response;
     try {
-      response = await fetch(`${this.apiUrl}${path}`, { headers, signal: AbortSignal.timeout(this.timeoutMs) });
+      response = await fetch(`${this.apiUrl}${path}`, {
+        headers,
+        signal: AbortSignal.timeout(this.timeoutMs),
+      });
     } catch (error) {
       throw new GithubApiError(`GitHub request failed: ${(error as Error).message}`, null);
     }
@@ -64,7 +67,9 @@ export class HttpGithubClient implements GithubClient {
 
   listRepositories(username: string): Promise<GithubRepositoryPayload[]> {
     const user = encodeURIComponent(username);
-    return this.request<GithubRepositoryPayload[]>(`/users/${user}/repos?per_page=100&type=owner&sort=pushed`);
+    return this.request<GithubRepositoryPayload[]>(
+      `/users/${user}/repos?per_page=100&type=owner&sort=pushed`,
+    );
   }
 
   getLanguages(fullName: string): Promise<Record<string, number>> {

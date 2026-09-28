@@ -13,21 +13,33 @@ describe("user agent classification", () => {
     );
     expect(edge.browser).toBe("Edge");
     expect(edge.os).toBe("Windows");
-    expect(classifyUserAgent("Mozilla/5.0 (Linux; Android 14; SM-X710) AppleWebKit/537.36 Chrome/141 Safari/537.36").device).toBe("tablet");
+    expect(
+      classifyUserAgent(
+        "Mozilla/5.0 (Linux; Android 14; SM-X710) AppleWebKit/537.36 Chrome/141 Safari/537.36",
+      ).device,
+    ).toBe("tablet");
   });
 
   it("detects bots and empty agents", () => {
     expect(classifyUserAgent("Googlebot/2.1 (+http://www.google.com/bot.html)").isBot).toBe(true);
     expect(classifyUserAgent("curl/8.5.0").isBot).toBe(true);
     expect(classifyUserAgent("").isBot).toBe(true);
-    expect(describeUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Firefox/131.0")).toBe("Firefox on macOS");
+    expect(describeUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Firefox/131.0")).toBe(
+      "Firefox on macOS",
+    );
   });
 });
 
 describe("analytics helpers", () => {
   it("derives entities only from known content paths", () => {
-    expect(entityFromPath("/projects/flood-event-prediction")).toEqual({ entityType: "project", entitySlug: "flood-event-prediction" });
-    expect(entityFromPath("/blog/a-post/")).toEqual({ entityType: "blog_post", entitySlug: "a-post" });
+    expect(entityFromPath("/projects/flood-event-prediction")).toEqual({
+      entityType: "project",
+      entitySlug: "flood-event-prediction",
+    });
+    expect(entityFromPath("/blog/a-post/")).toEqual({
+      entityType: "blog_post",
+      entitySlug: "a-post",
+    });
     expect(entityFromPath("/projects")).toBeNull();
     expect(entityFromPath("/admin/projects/x")).toBeNull();
   });

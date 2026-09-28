@@ -30,7 +30,11 @@ export const blogCategoryResource = defineResource({
   slugSource: "name",
   searchColumns: ["name"],
   defaultSort: [asc(blogCategories.displayOrder), asc(blogCategories.name)],
-  listItem: (row) => listItem(row, { title: String(row.name), subtitle: (row.description as string | null) ?? null }),
+  listItem: (row) =>
+    listItem(row, {
+      title: String(row.name),
+      subtitle: (row.description as string | null) ?? null,
+    }),
 });
 
 export const blogPostResource = defineResource<BlogPostInput>({
@@ -82,7 +86,15 @@ export const blogPostResource = defineResource<BlogPostInput>({
     );
   },
   saveRelations: async (tx, id, input) => {
-    await syncLinks(tx, blogPostCategories, "postId", id, "categoryId", input.categoryIds, (_, index) => ({ displayOrder: index }));
+    await syncLinks(
+      tx,
+      blogPostCategories,
+      "postId",
+      id,
+      "categoryId",
+      input.categoryIds,
+      (_, index) => ({ displayOrder: index }),
+    );
     await syncLinks(tx, blogPostTags, "postId", id, "tagId", await ensureTags(tx, input.tags));
     await syncLinks(tx, blogPostProjects, "postId", id, "projectId", input.projectIds);
     await syncLinks(tx, blogPostResearch, "postId", id, "researchId", input.researchIds);

@@ -13,11 +13,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { createdAt, id, timestamps, timestamptz } from "./_helpers";
-import {
-  analyticsEventTypeEnum,
-  contactStatusEnum,
-  deviceCategoryEnum,
-} from "./enums";
+import { analyticsEventTypeEnum, contactStatusEnum, deviceCategoryEnum } from "./enums";
 import { projects } from "./projects";
 
 export const contactMessages = pgTable(
@@ -89,8 +85,14 @@ export const githubRepositories = pgTable(
     htmlUrl: text().notNull(),
     homepage: text(),
     primaryLanguage: text(),
-    languages: jsonb().$type<Record<string, number>>().notNull().default(sql`'{}'::jsonb`),
-    topics: text().array().notNull().default(sql`'{}'::text[]`),
+    languages: jsonb()
+      .$type<Record<string, number>>()
+      .notNull()
+      .default(sql`'{}'::jsonb`),
+    topics: text()
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     stars: integer().notNull().default(0),
     forks: integer().notNull().default(0),
     isFork: boolean().notNull().default(false),
@@ -115,6 +117,9 @@ export const integrationStatus = pgTable("integration_status", {
   lastSuccessAt: timestamptz(),
   lastErrorAt: timestamptz(),
   lastError: text(),
-  meta: jsonb().$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+  meta: jsonb()
+    .$type<Record<string, unknown>>()
+    .notNull()
+    .default(sql`'{}'::jsonb`),
   updatedAt: timestamptz().notNull().defaultNow(),
 });

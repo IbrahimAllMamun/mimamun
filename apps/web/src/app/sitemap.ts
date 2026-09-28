@@ -23,12 +23,19 @@ const SECTIONS: { key: StaticRouteKey; path: string; priority: number; prefix?: 
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   await connection();
-  const [site, entries, publications] = await Promise.all([publicApi.site(), publicApi.sitemap(), publicApi.publications()]);
+  const [site, entries, publications] = await Promise.all([
+    publicApi.site(),
+    publicApi.sitemap(),
+    publicApi.publications(),
+  ]);
   const content = entries.ok ? entries.data : [];
   const latest = (prefix?: string) =>
     content
       .filter((entry) => !prefix || entry.path.startsWith(prefix))
-      .reduce<string | undefined>((max, entry) => (!max || entry.updatedAt > max ? entry.updatedAt : max), undefined);
+      .reduce<string | undefined>(
+        (max, entry) => (!max || entry.updatedAt > max ? entry.updatedAt : max),
+        undefined,
+      );
 
   const sections = SECTIONS.filter((section) => {
     if (site.ok && site.data.routeSeo[section.key]?.noindex) return false;
@@ -44,6 +51,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...sections,
-    ...content.map((entry) => ({ url: absoluteUrl(entry.path), lastModified: entry.updatedAt, changeFrequency: "monthly" as const, priority: 0.6 })),
+    ...content.map((entry) => ({
+      url: absoluteUrl(entry.path),
+      lastModified: entry.updatedAt,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })),
   ];
 }

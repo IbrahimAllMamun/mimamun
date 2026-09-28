@@ -5,7 +5,10 @@ import { isValidStorageKey } from "../../integrations/storage";
 import { notFound } from "../../lib/errors";
 import type { AppDeps } from "../../types";
 
-function parseRange(header: string | undefined, size: number): { start: number; end: number } | null | "invalid" {
+function parseRange(
+  header: string | undefined,
+  size: number,
+): { start: number; end: number } | null | "invalid" {
   if (!header) return null;
   const match = /^bytes=(\d*)-(\d*)$/.exec(header.trim());
   if (!match) return "invalid";
@@ -57,7 +60,10 @@ export function mediaFileRouter(deps: Pick<AppDeps, "db" | "storage">): Router {
     // PDFs are left without a CSP because browser PDF viewers are blocked by it;
     // images and video are fully sandboxed.
     if (row.kind !== "document") {
-      res.setHeader("Content-Security-Policy", "default-src 'none'; img-src 'self'; media-src 'self'; sandbox");
+      res.setHeader(
+        "Content-Security-Policy",
+        "default-src 'none'; img-src 'self'; media-src 'self'; sandbox",
+      );
     } else {
       res.removeHeader("Content-Security-Policy");
     }

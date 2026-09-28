@@ -18,8 +18,33 @@ import { cn } from "@/lib/cn";
 const schema: SanitizeSchema = {
   ...defaultSchema,
   tagNames: [
-    "p", "a", "strong", "em", "del", "code", "pre", "blockquote", "ul", "ol", "li",
-    "h1", "h2", "h3", "h4", "h5", "h6", "hr", "br", "table", "thead", "tbody", "tr", "th", "td", "sup", "sub",
+    "p",
+    "a",
+    "strong",
+    "em",
+    "del",
+    "code",
+    "pre",
+    "blockquote",
+    "ul",
+    "ol",
+    "li",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "hr",
+    "br",
+    "table",
+    "thead",
+    "tbody",
+    "tr",
+    "th",
+    "td",
+    "sup",
+    "sub",
   ],
   attributes: {
     a: ["href", "title"],
@@ -44,7 +69,8 @@ function shiftHeadings(node: Root | RootContent, base: number) {
     const match = /^h([1-6])$/.exec(node.tagName);
     if (match) (node as Element).tagName = `h${Math.min(6, Number(match[1]) + base - 1)}`;
   }
-  if ("children" in node) for (const child of node.children) shiftHeadings(child as RootContent, base);
+  if ("children" in node)
+    for (const child of node.children) shiftHeadings(child as RootContent, base);
 }
 
 function MarkdownLink({ href = "", children, ...props }: ComponentProps<"a">) {
@@ -57,7 +83,11 @@ function MarkdownLink({ href = "", children, ...props }: ComponentProps<"a">) {
   }
   const external = /^https?:/.test(href);
   return (
-    <a href={href} {...props} {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
+    <a
+      href={href}
+      {...props}
+      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+    >
       {children}
     </a>
   );

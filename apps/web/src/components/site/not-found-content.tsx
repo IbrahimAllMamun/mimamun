@@ -17,7 +17,8 @@ export function NotFoundContent() {
         <div className="col-span-4 space-y-6 sm:col-span-8 lg:col-span-9">
           <h1 className="display text-5xl text-ink">This page does not exist.</h1>
           <p className="max-w-measure text-lg text-ink-2">
-            It may have moved, or the address may have a typo. Search the site or start from one of the sections below.
+            It may have moved, or the address may have a typo. Search the site or start from one of
+            the sections below.
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <ButtonLink href="/search">Search the site</ButtonLink>

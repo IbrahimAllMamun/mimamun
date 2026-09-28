@@ -50,7 +50,17 @@ export function SingletonEditor({
       </>
     );
   }
-  return <SingletonForm key={String(query.data.updatedAt ?? "")} endpoint={endpoint} title={title} description={description} groups={groups} initial={query.data} aside={aside} />;
+  return (
+    <SingletonForm
+      key={String(query.data.updatedAt ?? "")}
+      endpoint={endpoint}
+      title={title}
+      description={description}
+      groups={groups}
+      initial={query.data}
+      aside={aside}
+    />
+  );
 }
 
 function SingletonForm({
@@ -81,7 +91,10 @@ function SingletonForm({
     return () => unsaved.setDirty(endpoint, false);
   }, [dirty, endpoint, unsaved]);
 
-  const setValue = useCallback((path: string, value: unknown) => setRecord((current) => setIn(current, path, value)), []);
+  const setValue = useCallback(
+    (path: string, value: unknown) => setRecord((current) => setIn(current, path, value)),
+    [],
+  );
   const save = async (event?: React.FormEvent) => {
     event?.preventDefault();
     setSaving(true);
@@ -97,7 +110,10 @@ function SingletonForm({
     setErrors({});
     toast.success(`${title} saved`);
   };
-  const form = useMemo(() => ({ record, setValue, errors, options: NO_OPTIONS }), [record, setValue, errors]);
+  const form = useMemo(
+    () => ({ record, setValue, errors, options: NO_OPTIONS }),
+    [record, setValue, errors],
+  );
 
   return (
     <FormProvider value={form}>

@@ -23,10 +23,23 @@ import { listed } from "./visibility";
 
 async function focusAndApproach(db: DbExecutor) {
   const [areas, steps] = await Promise.all([
-    db.select().from(focusAreas).where(eq(focusAreas.isVisible, true)).orderBy(asc(focusAreas.displayOrder)),
-    db.select().from(approachSteps).where(eq(approachSteps.isVisible, true)).orderBy(asc(approachSteps.displayOrder)),
+    db
+      .select()
+      .from(focusAreas)
+      .where(eq(focusAreas.isVisible, true))
+      .orderBy(asc(focusAreas.displayOrder)),
+    db
+      .select()
+      .from(approachSteps)
+      .where(eq(approachSteps.isVisible, true))
+      .orderBy(asc(approachSteps.displayOrder)),
   ]);
-  const map = (row: { id: string; title: string; description: string; evidence: string | null }) => ({
+  const map = (row: {
+    id: string;
+    title: string;
+    description: string;
+    evidence: string | null;
+  }) => ({
     id: row.id,
     title: row.title,
     description: row.description,
@@ -35,32 +48,61 @@ async function focusAndApproach(db: DbExecutor) {
   return { focusAreas: areas.map(map), approachSteps: steps.map(map) };
 }
 
-async function countListed(db: DbExecutor, table: typeof projects | typeof research | typeof publications | typeof blogPosts | typeof conferencePresentations) {
+async function countListed(
+  db: DbExecutor,
+  table:
+    | typeof projects
+    | typeof research
+    | typeof publications
+    | typeof blogPosts
+    | typeof conferencePresentations,
+) {
   const [row] = await db.select({ value: count() }).from(table).where(listed(table));
   return row?.value ?? 0;
 }
 
 export async function getHome(db: DbExecutor): Promise<HomeDTO> {
-  const [featuredRows, latestRows, experienceItems, educationItems, presentations, publicationItems, postRows, featuredResearch, focus, credentials] =
-    await Promise.all([
-      db.select().from(projects).where(and(listed(projects), eq(projects.featured, true))).orderBy(asc(projects.displayOrder)).limit(4),
-      db.select().from(projects).where(listed(projects)).orderBy(desc(projects.publishedAt)).limit(3),
-      listPublicExperiences(db),
-      listPublicEducation(db),
-      listPublishedPresentations(db),
-      listPublishedPublications(db),
-      db.select().from(blogPosts).where(listed(blogPosts)).orderBy(desc(blogPosts.publishedAt)).limit(3),
-      listPublishedResearch(db, { featuredOnly: true, limit: 3 }),
-      focusAndApproach(db),
-      credentialSummary(db),
-    ]);
-  const [projectCount, researchCount, publicationCount, presentationCount, postCount] = await Promise.all([
-    countListed(db, projects),
-    countListed(db, research),
-    countListed(db, publications),
-    countListed(db, conferencePresentations),
-    countListed(db, blogPosts),
+  const [
+    featuredRows,
+    latestRows,
+    experienceItems,
+    educationItems,
+    presentations,
+    publicationItems,
+    postRows,
+    featuredResearch,
+    focus,
+    credentials,
+  ] = await Promise.all([
+    db
+      .select()
+      .from(projects)
+      .where(and(listed(projects), eq(projects.featured, true)))
+      .orderBy(asc(projects.displayOrder))
+      .limit(4),
+    db.select().from(projects).where(listed(projects)).orderBy(desc(projects.publishedAt)).limit(3),
+    listPublicExperiences(db),
+    listPublicEducation(db),
+    listPublishedPresentations(db),
+    listPublishedPublications(db),
+    db
+      .select()
+      .from(blogPosts)
+      .where(listed(blogPosts))
+      .orderBy(desc(blogPosts.publishedAt))
+      .limit(3),
+    listPublishedResearch(db, { featuredOnly: true, limit: 3 }),
+    focusAndApproach(db),
+    credentialSummary(db),
   ]);
+  const [projectCount, researchCount, publicationCount, presentationCount, postCount] =
+    await Promise.all([
+      countListed(db, projects),
+      countListed(db, research),
+      countListed(db, publications),
+      countListed(db, conferencePresentations),
+      countListed(db, blogPosts),
+    ]);
   return {
     ...focus,
     // Falls back to the latest projects when nothing is marked as featured.
@@ -92,7 +134,13 @@ export async function getAbout(db: DbExecutor): Promise<AboutDTO> {
     listPublicExperiences(db),
     credentialSummary(db),
   ]);
-  return { education: educationItems, skills, ...focus, experience, credentialSummary: credentials };
+  return {
+    education: educationItems,
+    skills,
+    ...focus,
+    experience,
+    credentialSummary: credentials,
+  };
 }
 
 export async function getExperiencePage(db: DbExecutor): Promise<ExperiencePageDTO> {

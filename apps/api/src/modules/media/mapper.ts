@@ -53,7 +53,10 @@ export function pick(map: Map<string, MediaDTO>, id: string | null | undefined):
 }
 
 /** Subset of the map for the given ids, as a plain object (for block rendering). */
-export function mediaRecord(map: Map<string, MediaDTO>, ids: readonly string[]): Record<string, MediaDTO> {
+export function mediaRecord(
+  map: Map<string, MediaDTO>,
+  ids: readonly string[],
+): Record<string, MediaDTO> {
   const record: Record<string, MediaDTO> = {};
   for (const id of ids) {
     const item = map.get(id);

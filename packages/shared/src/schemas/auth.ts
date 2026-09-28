@@ -36,7 +36,10 @@ export const resetPasswordInput = z.object({
 
 export const changePasswordInput = z
   .object({
-    currentPassword: z.string().min(1, { error: "Current password is required" }).max(PASSWORD_MAX_LENGTH),
+    currentPassword: z
+      .string()
+      .min(1, { error: "Current password is required" })
+      .max(PASSWORD_MAX_LENGTH),
     newPassword: password,
   })
   .refine((value) => value.currentPassword !== value.newPassword, {

@@ -1,6 +1,13 @@
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { ADMIN, createTestContext, login, resetDatabase, type Session, type TestContext } from "../helpers/context";
+import {
+  ADMIN,
+  createTestContext,
+  login,
+  resetDatabase,
+  type Session,
+  type TestContext,
+} from "../helpers/context";
 
 let ctx: TestContext;
 let admin: Session;
@@ -35,7 +42,9 @@ describe("GitHub integration", () => {
     await admin.agent.post("/api/admin/integrations/github/sync").set(admin.headers).expect(200);
     const listing = await admin.agent.get("/api/admin/integrations/github").expect(200);
     expect(listing.body.data.repositories).toHaveLength(2);
-    const target = listing.body.data.repositories.find((item: { name: string }) => item.name === "flood-lstm");
+    const target = listing.body.data.repositories.find(
+      (item: { name: string }) => item.name === "flood-lstm",
+    );
     await admin.agent
       .patch(`/api/admin/integrations/github/repositories/${target.id}`)
       .set(admin.headers)
@@ -43,12 +52,18 @@ describe("GitHub integration", () => {
       .expect(200);
     const publicList = await request(ctx.app).get("/api/public/github").expect(200);
     expect(publicList.body.data.repositories).toHaveLength(1);
-    expect(publicList.body.data.repositories[0]).toMatchObject({ name: "flood-lstm", description: "LSTM experiments" });
+    expect(publicList.body.data.repositories[0]).toMatchObject({
+      name: "flood-lstm",
+      description: "LSTM experiments",
+    });
   });
 
   it("keeps cached data and records the error when GitHub fails", async () => {
     ctx.github.fail = new Error("GitHub request failed: rate limit exceeded");
-    const response = await admin.agent.post("/api/admin/integrations/github/sync").set(admin.headers).expect(502);
+    const response = await admin.agent
+      .post("/api/admin/integrations/github/sync")
+      .set(admin.headers)
+      .expect(502);
     expect(response.body.error.message).toContain("last synced data");
     const publicList = await request(ctx.app).get("/api/public/github").expect(200);
     expect(publicList.body.data.repositories).toHaveLength(1);
@@ -79,7 +94,10 @@ describe("security behaviour", () => {
       .set("Content-Type", "application/json")
       .send('{"name": ')
       .expect(400);
-    expect(malformed.body).toEqual({ success: false, error: { code: "VALIDATION_ERROR", message: "Malformed JSON body" } });
+    expect(malformed.body).toEqual({
+      success: false,
+      error: { code: "VALIDATION_ERROR", message: "Malformed JSON body" },
+    });
     const missing = await request(ctx.app).get("/api/nope").expect(404);
     expect(missing.body.error.code).toBe("NOT_FOUND");
     expect(JSON.stringify(missing.body)).not.toMatch(/at .*\.ts/);
@@ -95,9 +113,15 @@ describe("security behaviour", () => {
   });
 
   it("treats SQL metacharacters in search as plain text", async () => {
-    const response = await request(ctx.app).get("/api/public/search").query({ q: "'; DROP TABLE projects; --" }).expect(200);
+    const response = await request(ctx.app)
+      .get("/api/public/search")
+      .query({ q: "'; DROP TABLE projects; --" })
+      .expect(200);
     expect(Array.isArray(response.body.data)).toBe(true);
-    await request(ctx.app).get("/api/public/projects").query({ q: "%' OR 1=1 --", tech: "R' OR '1'='1" }).expect(200);
+    await request(ctx.app)
+      .get("/api/public/projects")
+      .query({ q: "%' OR 1=1 --", tech: "R' OR '1'='1" })
+      .expect(200);
     const projects = await request(ctx.app).get("/api/public/projects").expect(200);
     expect(projects.body.data.length).toBeGreaterThan(0);
   });
@@ -117,7 +141,11 @@ describe("security behaviour", () => {
   });
 
   it("does not leak drafts through search or sitemap", async () => {
-    await admin.agent.post("/api/admin/projects").set(admin.headers).send({ title: "Secret draft zebra", summary: "Unpublished" }).expect(201);
+    await admin.agent
+      .post("/api/admin/projects")
+      .set(admin.headers)
+      .send({ title: "Secret draft zebra", summary: "Unpublished" })
+      .expect(201);
     const search = await request(ctx.app).get("/api/public/search?q=zebra").expect(200);
     expect(search.body.data).toHaveLength(0);
     const sitemap = await request(ctx.app).get("/api/public/sitemap").expect(200);

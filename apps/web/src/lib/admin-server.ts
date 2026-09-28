@@ -14,7 +14,13 @@ export async function getSession(): Promise<SessionDTO | null> {
 /** Only same-site admin or preview paths are allowed as post-login targets. */
 export function safeNext(value: string | string[] | undefined | null): string {
   const next = Array.isArray(value) ? value[0] : value;
-  if (!next || !/^\/(admin|preview)(\/|$|\?)/.test(next) || next.startsWith("//") || next.includes("\\")) return "/admin";
+  if (
+    !next ||
+    !/^\/(admin|preview)(\/|$|\?)/.test(next) ||
+    next.startsWith("//") ||
+    next.includes("\\")
+  )
+    return "/admin";
   if (/^\/admin\/(login|forgot-password|reset-password)/.test(next)) return "/admin";
   return next;
 }

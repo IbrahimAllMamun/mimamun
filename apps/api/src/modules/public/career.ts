@@ -10,7 +10,13 @@ import {
   type TrajectoryItemDTO,
 } from "@portfolio/shared";
 import type { DbExecutor } from "../../database/client";
-import { education, experienceProjects, experiences, projects, research } from "../../database/schema";
+import {
+  education,
+  experienceProjects,
+  experiences,
+  projects,
+  research,
+} from "../../database/schema";
 import { loadMediaMap, pick } from "../media/mapper";
 import { projectLink } from "./projects";
 import { listed } from "./visibility";
@@ -20,15 +26,35 @@ export async function listPublicExperiences(db: DbExecutor): Promise<ExperienceD
     .select()
     .from(experiences)
     .where(eq(experiences.isVisible, true))
-    .orderBy(desc(experiences.isCurrent), sql`${experiences.endDate} DESC NULLS FIRST`, asc(experiences.displayOrder));
+    .orderBy(
+      desc(experiences.isCurrent),
+      sql`${experiences.endDate} DESC NULLS FIRST`,
+      asc(experiences.displayOrder),
+    );
   if (rows.length === 0) return [];
   const [mediaMap, links] = await Promise.all([
-    loadMediaMap(db, rows.map((row) => row.companyLogoId)),
+    loadMediaMap(
+      db,
+      rows.map((row) => row.companyLogoId),
+    ),
     db
-      .select({ experienceId: experienceProjects.experienceId, slug: projects.slug, title: projects.title, type: projects.type })
+      .select({
+        experienceId: experienceProjects.experienceId,
+        slug: projects.slug,
+        title: projects.title,
+        type: projects.type,
+      })
       .from(experienceProjects)
       .innerJoin(projects, eq(projects.id, experienceProjects.projectId))
-      .where(and(inArray(experienceProjects.experienceId, rows.map((row) => row.id)), listed(projects))),
+      .where(
+        and(
+          inArray(
+            experienceProjects.experienceId,
+            rows.map((row) => row.id),
+          ),
+          listed(projects),
+        ),
+      ),
   ]);
   return rows.map((row) => ({
     id: row.id,
@@ -61,11 +87,27 @@ export async function listPublicEducation(db: DbExecutor): Promise<EducationDTO[
     .orderBy(asc(education.displayOrder), sql`${education.endDate} DESC NULLS FIRST`);
   if (rows.length === 0) return [];
   const [mediaMap, researchRows] = await Promise.all([
-    loadMediaMap(db, rows.map((row) => row.institutionLogoId)),
+    loadMediaMap(
+      db,
+      rows.map((row) => row.institutionLogoId),
+    ),
     db
-      .select({ educationId: research.educationId, slug: research.slug, title: research.title, kind: research.kind })
+      .select({
+        educationId: research.educationId,
+        slug: research.slug,
+        title: research.title,
+        kind: research.kind,
+      })
       .from(research)
-      .where(and(inArray(research.educationId, rows.map((row) => row.id)), listed(research))),
+      .where(
+        and(
+          inArray(
+            research.educationId,
+            rows.map((row) => row.id),
+          ),
+          listed(research),
+        ),
+      ),
   ]);
   return rows.map((row) => ({
     id: row.id,
@@ -149,6 +191,9 @@ export function buildTrajectory(
   const sortKey = (item: TrajectoryItemDTO) => item.start ?? item.end ?? "9999";
   // Chronological; on the same month, something that ended then comes before
   // something that started then (a previous role before the one that followed it).
-  const endedAtKey = (item: TrajectoryItemDTO) => (item.start === null && item.end !== null ? 0 : 1);
-  return items.sort((a, b) => sortKey(a).localeCompare(sortKey(b)) || endedAtKey(a) - endedAtKey(b));
+  const endedAtKey = (item: TrajectoryItemDTO) =>
+    item.start === null && item.end !== null ? 0 : 1;
+  return items.sort(
+    (a, b) => sortKey(a).localeCompare(sortKey(b)) || endedAtKey(a) - endedAtKey(b),
+  );
 }

@@ -2,10 +2,16 @@ import { NextResponse, type NextRequest } from "next/server";
 import { EMBED_HOSTS, VIDEO_FRAME_HOSTS } from "@portfolio/shared";
 
 const SESSION_COOKIES = ["__Host-portfolio_session", "portfolio_session"];
-const PUBLIC_ADMIN_PATHS = new Set(["/admin/login", "/admin/forgot-password", "/admin/reset-password"]);
+const PUBLIC_ADMIN_PATHS = new Set([
+  "/admin/login",
+  "/admin/forgot-password",
+  "/admin/reset-password",
+]);
 
 function contentSecurityPolicy(nonce: string, isDev: boolean): string {
-  const frameSources = [...EMBED_HOSTS, ...VIDEO_FRAME_HOSTS].map((host) => `https://${host}`).join(" ");
+  const frameSources = [...EMBED_HOSTS, ...VIDEO_FRAME_HOSTS]
+    .map((host) => `https://${host}`)
+    .join(" ");
   return [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}`,
@@ -35,7 +41,9 @@ function contentSecurityPolicy(nonce: string, isDev: boolean): string {
  */
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
-  const needsSession = (pathname.startsWith("/admin") && !PUBLIC_ADMIN_PATHS.has(pathname)) || pathname.startsWith("/preview/");
+  const needsSession =
+    (pathname.startsWith("/admin") && !PUBLIC_ADMIN_PATHS.has(pathname)) ||
+    pathname.startsWith("/preview/");
   if (needsSession) {
     const hasSession = SESSION_COOKIES.some((name) => request.cookies.has(name));
     if (!hasSession) {
@@ -65,7 +73,8 @@ export function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     {
-      source: "/((?!api/|media/|cv$|_next/static|_next/image|og/|favicon.ico|icon|apple-icon|robots.txt|sitemap.xml|manifest.webmanifest).*)",
+      source:
+        "/((?!api/|media/|cv$|_next/static|_next/image|og/|favicon.ico|icon|apple-icon|robots.txt|sitemap.xml|manifest.webmanifest).*)",
       missing: [
         { type: "header", key: "next-router-prefetch" },
         { type: "header", key: "purpose", value: "prefetch" },

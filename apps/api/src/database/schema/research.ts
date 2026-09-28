@@ -35,10 +35,22 @@ export const research = pgTable(
     summary: text().notNull(),
     abstract: text(),
     researchQuestion: text(),
-    sections: jsonb().$type<Partial<ResearchSections>>().notNull().default(sql`'{}'::jsonb`),
-    keywords: text().array().notNull().default(sql`'{}'::text[]`),
-    methods: text().array().notNull().default(sql`'{}'::text[]`),
-    authors: text().array().notNull().default(sql`'{}'::text[]`),
+    sections: jsonb()
+      .$type<Partial<ResearchSections>>()
+      .notNull()
+      .default(sql`'{}'::jsonb`),
+    keywords: text()
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    methods: text()
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    authors: text()
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     degree: text(),
     institution: text(),
     supervisor: text(),
@@ -86,7 +98,10 @@ export const publications = pgTable(
     id: id(),
     title: text().notNull(),
     slug: text().notNull().unique(),
-    authors: text().array().notNull().default(sql`'{}'::text[]`),
+    authors: text()
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     publicationType: publicationTypeEnum().notNull().default("journal_article"),
     publicationStatus: publicationStatusEnum().notNull().default("published"),
     venue: text(),
@@ -99,7 +114,10 @@ export const publications = pgTable(
     url: text(),
     pdfMediaId: uuid().references(() => media.id, { onDelete: "restrict" }),
     abstract: text(),
-    keywords: text().array().notNull().default(sql`'{}'::text[]`),
+    keywords: text()
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     methodology: text(),
     findings: text(),
     citationText: text(),

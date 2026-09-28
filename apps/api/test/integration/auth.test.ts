@@ -1,6 +1,13 @@
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { ADMIN, createTestContext, createUser, login, resetDatabase, type TestContext } from "../helpers/context";
+import {
+  ADMIN,
+  createTestContext,
+  createUser,
+  login,
+  resetDatabase,
+  type TestContext,
+} from "../helpers/context";
 import { TEST_ORIGIN } from "../helpers/env";
 
 let ctx: TestContext;
@@ -13,7 +20,11 @@ afterAll(() => ctx.close());
 
 describe("authentication", () => {
   it("signs in with valid credentials and returns the session with a CSRF token", async () => {
-    const response = await request(ctx.app).post("/api/auth/login").set("Origin", TEST_ORIGIN).send(ADMIN).expect(200);
+    const response = await request(ctx.app)
+      .post("/api/auth/login")
+      .set("Origin", TEST_ORIGIN)
+      .send(ADMIN)
+      .expect(200);
     expect(response.body.data.user.email).toBe(ADMIN.email);
     expect(response.body.data.user.permissions).toContain("users:manage");
     expect(response.body.data.csrfToken).toMatch(/^[A-Za-z0-9_-]{43}$/);
@@ -57,7 +68,11 @@ describe("authentication", () => {
   });
 
   it("rejects cross-site login attempts", async () => {
-    const response = await request(ctx.app).post("/api/auth/login").set("Origin", "https://evil.example").send(ADMIN).expect(403);
+    const response = await request(ctx.app)
+      .post("/api/auth/login")
+      .set("Origin", "https://evil.example")
+      .send(ADMIN)
+      .expect(403);
     expect(response.body.error.code).toBe("CSRF_INVALID");
   });
 
@@ -98,7 +113,11 @@ describe("authentication", () => {
 
 describe("password reset", () => {
   it("responds identically for known and unknown emails", async () => {
-    const known = await request(ctx.app).post("/api/auth/password/forgot").set("Origin", TEST_ORIGIN).send({ email: ADMIN.email }).expect(202);
+    const known = await request(ctx.app)
+      .post("/api/auth/password/forgot")
+      .set("Origin", TEST_ORIGIN)
+      .send({ email: ADMIN.email })
+      .expect(202);
     const unknown = await request(ctx.app)
       .post("/api/auth/password/forgot")
       .set("Origin", TEST_ORIGIN)
@@ -111,7 +130,11 @@ describe("password reset", () => {
     const user = await createUser(ctx.deps, "EDITOR", "reset@test.local");
     const session = await login(ctx.app, user);
     ctx.mailer.outbox.length = 0;
-    await request(ctx.app).post("/api/auth/password/forgot").set("Origin", TEST_ORIGIN).send({ email: user.email }).expect(202);
+    await request(ctx.app)
+      .post("/api/auth/password/forgot")
+      .set("Origin", TEST_ORIGIN)
+      .send({ email: user.email })
+      .expect(202);
     const mail = ctx.mailer.outbox.find((message) => message.to === user.email);
     expect(mail).toBeDefined();
     const token = decodeURIComponent(/token=([^\s]+)/.exec(mail!.text)![1]!);

@@ -18,7 +18,12 @@ import { graph, pageMetadata, personSchema } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await publicApi.site();
-  return pageMetadata({ site: site.ok ? site.data : null, path: "/", routeKey: "home", type: "profile" });
+  return pageMetadata({
+    site: site.ok ? site.data : null,
+    path: "/",
+    routeKey: "home",
+    type: "profile",
+  });
 }
 
 export default async function HomePage() {
@@ -59,11 +64,24 @@ export default async function HomePage() {
           publisher: { "@id": `${SITE_URL}/#person` },
         })}
       />
-      <FrontMatter profile={profile} current={data.currentExperience} previous={data.previousExperience} education={data.education} />
+      <FrontMatter
+        profile={profile}
+        current={data.currentExperience}
+        previous={data.previousExperience}
+        education={data.education}
+      />
       <FocusSection areas={data.focusAreas} index={index("focus")} />
-      <SelectedWork projects={data.featuredProjects} total={data.counts.projects} index={index("work")} />
+      <SelectedWork
+        projects={data.featuredProjects}
+        total={data.counts.projects}
+        index={index("work")}
+      />
       <ApproachSection steps={data.approachSteps} index={index("approach")} />
-      <ResearchSection research={data.featuredResearch} counts={data.counts} index={index("research")} />
+      <ResearchSection
+        research={data.featuredResearch}
+        counts={data.counts}
+        index={index("research")}
+      />
       <TrajectorySection home={data} index={index("trajectory")} />
       <CredentialsSection home={data} index={index("credentials")} />
       <WritingSection posts={data.latestPosts} index={index("writing")} />

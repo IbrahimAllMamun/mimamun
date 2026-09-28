@@ -17,13 +17,22 @@ const ORDER: ContactField[] = ["name", "email", "subject", "message"];
  * count and focus management: the first invalid field after a failed
  * submission, or the confirmation after a successful one.
  */
-export function ContactForm({ token, initialSubject = "" }: { token: string; initialSubject?: string }) {
-  const [state, formAction, pending] = useActionState<ContactFormState, FormData>(sendContactMessage, {
-    status: "idle",
-    message: null,
-    fieldErrors: {},
-    values: { ...EMPTY_CONTACT_VALUES, subject: initialSubject },
-  });
+export function ContactForm({
+  token,
+  initialSubject = "",
+}: {
+  token: string;
+  initialSubject?: string;
+}) {
+  const [state, formAction, pending] = useActionState<ContactFormState, FormData>(
+    sendContactMessage,
+    {
+      status: "idle",
+      message: null,
+      fieldErrors: {},
+      values: { ...EMPTY_CONTACT_VALUES, subject: initialSubject },
+    },
+  );
   const [messageLength, setMessageLength] = useState(state.values.message.length);
   const formRef = useRef<HTMLFormElement>(null);
   const confirmationRef = useRef<HTMLDivElement>(null);
@@ -35,13 +44,19 @@ export function ContactForm({ token, initialSubject = "" }: { token: string; ini
     }
     if (state.status === "error") {
       const firstInvalid = ORDER.find((field) => state.fieldErrors[field]);
-      if (firstInvalid) formRef.current?.querySelector<HTMLElement>(`[name="${firstInvalid}"]`)?.focus();
+      if (firstInvalid)
+        formRef.current?.querySelector<HTMLElement>(`[name="${firstInvalid}"]`)?.focus();
     }
   }, [state]);
 
   if (state.status === "success") {
     return (
-      <div ref={confirmationRef} tabIndex={-1} role="status" className="animate-enter border-l-2 border-success bg-success-tint px-5 py-6 focus:outline-none">
+      <div
+        ref={confirmationRef}
+        tabIndex={-1}
+        role="status"
+        className="animate-enter border-l-2 border-success bg-success-tint px-5 py-6 focus:outline-none"
+      >
         <p className="flex items-center gap-2 font-serif text-2xl text-ink">
           <Icon icon={CheckCircle2} size={22} className="text-success" />
           Message sent
@@ -57,9 +72,19 @@ export function ContactForm({ token, initialSubject = "" }: { token: string; ini
   }
 
   return (
-    <form ref={formRef} action={formAction} noValidate className="space-y-5" aria-describedby={state.status === "error" ? "contact-form-error" : undefined}>
+    <form
+      ref={formRef}
+      action={formAction}
+      noValidate
+      className="space-y-5"
+      aria-describedby={state.status === "error" ? "contact-form-error" : undefined}
+    >
       {state.status === "error" && state.message ? (
-        <div id="contact-form-error" role="alert" className="flex gap-3 rounded-sm border border-error/40 bg-error-tint px-4 py-3 text-sm">
+        <div
+          id="contact-form-error"
+          role="alert"
+          className="flex gap-3 rounded-sm border border-error/40 bg-error-tint px-4 py-3 text-sm"
+        >
           <Icon icon={CircleAlert} size={18} className="mt-0.5 shrink-0 text-error" />
           <p className="text-ink">{state.message}</p>
         </div>
@@ -68,23 +93,53 @@ export function ContactForm({ token, initialSubject = "" }: { token: string; ini
       <input type="hidden" name="token" value={token} />
       <div aria-hidden className="honeypot">
         <label htmlFor="contact-website">Leave this field empty</label>
-        <input id="contact-website" name="website" type="text" tabIndex={-1} autoComplete="off" defaultValue="" />
+        <input
+          id="contact-website"
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          defaultValue=""
+        />
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Name" required error={state.fieldErrors.name}>
-          {(props) => <Input {...props} name="name" autoComplete="name" maxLength={120} defaultValue={state.values.name} />}
+          {(props) => (
+            <Input
+              {...props}
+              name="name"
+              autoComplete="name"
+              maxLength={120}
+              defaultValue={state.values.name}
+            />
+          )}
         </Field>
         <Field label="Email" required error={state.fieldErrors.email}>
           {(props) => (
-            <Input {...props} name="email" type="email" autoComplete="email" inputMode="email" maxLength={254} defaultValue={state.values.email} />
+            <Input
+              {...props}
+              name="email"
+              type="email"
+              autoComplete="email"
+              inputMode="email"
+              maxLength={254}
+              defaultValue={state.values.email}
+            />
           )}
         </Field>
       </div>
       <Field label="Subject" required error={state.fieldErrors.subject}>
-        {(props) => <Input {...props} name="subject" maxLength={160} defaultValue={state.values.subject} />}
+        {(props) => (
+          <Input {...props} name="subject" maxLength={160} defaultValue={state.values.subject} />
+        )}
       </Field>
-      <Field label="Message" required error={state.fieldErrors.message} description="At least 20 characters.">
+      <Field
+        label="Message"
+        required
+        error={state.fieldErrors.message}
+        description="At least 20 characters."
+      >
         {(props) => (
           <>
             <Textarea

@@ -38,9 +38,9 @@ describe("slugify", () => {
 
 describe("text helpers", () => {
   it("strips markdown syntax", () => {
-    expect(markdownToPlainText("## Title\n\nSome **bold** and [a link](https://x.y).\n\n- item")).toBe(
-      "Title Some bold and a link. item",
-    );
+    expect(
+      markdownToPlainText("## Title\n\nSome **bold** and [a link](https://x.y).\n\n- item"),
+    ).toBe("Title Some bold and a link. item");
   });
 
   it("estimates reading time with a one-minute floor", () => {
@@ -103,7 +103,9 @@ describe("chart math", () => {
     if (!("data" in parsed)) return;
     expect(parsed.data.x).toEqual([1, 2, 3]);
     expect(parsed.data.series[1]?.values).toEqual([0.7, null, 0.45]);
-    expect(chartDataToCsv(parsed.data, "epoch")).toBe("epoch,LSTM,GRU\n1,0.8,0.7\n2,0.6,\n3,0.5,0.45");
+    expect(chartDataToCsv(parsed.data, "epoch")).toBe(
+      "epoch,LSTM,GRU\n1,0.8,0.7\n2,0.6,\n3,0.5,0.45",
+    );
   });
 
   it("reports malformed CSV instead of throwing", () => {

@@ -23,8 +23,7 @@ import type {
 import { API_INTERNAL_URL, CONTENT_REVALIDATE_SECONDS } from "../env";
 
 export type Result<T, M = undefined> =
-  | { ok: true; data: T; meta: M }
-  | { ok: false; status: number; error: ApiErrorBody };
+  { ok: true; data: T; meta: M } | { ok: false; status: number; error: ApiErrorBody };
 
 const UNAVAILABLE: ApiErrorBody = {
   code: "SERVICE_UNAVAILABLE",
@@ -44,21 +43,29 @@ interface FetchOptions {
  * time-based fallback). Failures resolve to a typed error — they never throw —
  * so a page can render an intentional unavailable state instead of crashing.
  */
-export async function apiFetch<T, M = undefined>(path: string, options: FetchOptions = {}): Promise<Result<T, M>> {
+export async function apiFetch<T, M = undefined>(
+  path: string,
+  options: FetchOptions = {},
+): Promise<Result<T, M>> {
   try {
     const response = await fetch(`${API_INTERNAL_URL}${path}`, {
-      headers: { accept: "application/json", ...(options.cookie ? { cookie: options.cookie } : {}) },
+      headers: {
+        accept: "application/json",
+        ...(options.cookie ? { cookie: options.cookie } : {}),
+      },
       ...(options.noStore
         ? { cache: "no-store" as const }
         : { next: { revalidate: CONTENT_REVALIDATE_SECONDS, tags: ["content"] } }),
       signal: AbortSignal.timeout(8000),
     });
     const body = (await response.json().catch(() => null)) as
-      | { success: true; data: T; meta?: M }
-      | { success: false; error: ApiErrorBody }
-      | null;
+      { success: true; data: T; meta?: M } | { success: false; error: ApiErrorBody } | null;
     if (!response.ok || !body || !body.success) {
-      return { ok: false, status: response.status, error: body && !body.success ? body.error : UNAVAILABLE };
+      return {
+        ok: false,
+        status: response.status,
+        error: body && !body.success ? body.error : UNAVAILABLE,
+      };
     }
     return { ok: true, data: body.data, meta: body.meta as M };
   } catch {
@@ -76,7 +83,9 @@ function query(params: Record<string, string | number | undefined | null>): stri
 }
 
 export type ProjectListMeta = PageMeta & { facets: ProjectFacetsDTO };
-export type BlogListMeta = PageMeta & { categories: { name: string; slug: string; count: number }[] };
+export type BlogListMeta = PageMeta & {
+  categories: { name: string; slug: string; count: number }[];
+};
 
 export const publicApi = {
   site: () => apiFetch<SiteDTO>("/api/public/site"),
@@ -85,15 +94,19 @@ export const publicApi = {
   experience: () => apiFetch<ExperiencePageDTO>("/api/public/experience"),
   projects: (params: Record<string, string | number | undefined | null>) =>
     apiFetch<ProjectSummaryDTO[], ProjectListMeta>(`/api/public/projects${query(params)}`),
-  project: (slug: string) => apiFetch<ProjectDetailDTO>(`/api/public/projects/${encodeURIComponent(slug)}`),
+  project: (slug: string) =>
+    apiFetch<ProjectDetailDTO>(`/api/public/projects/${encodeURIComponent(slug)}`),
   research: () => apiFetch<ResearchPageDTO>("/api/public/research"),
-  researchItem: (slug: string) => apiFetch<ResearchDetailDTO>(`/api/public/research/${encodeURIComponent(slug)}`),
+  researchItem: (slug: string) =>
+    apiFetch<ResearchDetailDTO>(`/api/public/research/${encodeURIComponent(slug)}`),
   publications: () => apiFetch<PublicationDTO[]>("/api/public/publications"),
   certifications: () => apiFetch<CredentialProviderDTO[]>("/api/public/certifications"),
-  credential: (slug: string) => apiFetch<CredentialDetailDTO>(`/api/public/certifications/${encodeURIComponent(slug)}`),
+  credential: (slug: string) =>
+    apiFetch<CredentialDetailDTO>(`/api/public/certifications/${encodeURIComponent(slug)}`),
   blog: (params: Record<string, string | number | undefined | null>) =>
     apiFetch<BlogPostSummaryDTO[], BlogListMeta>(`/api/public/blog${query(params)}`),
-  post: (slug: string) => apiFetch<BlogPostDetailDTO>(`/api/public/blog/${encodeURIComponent(slug)}`),
+  post: (slug: string) =>
+    apiFetch<BlogPostDetailDTO>(`/api/public/blog/${encodeURIComponent(slug)}`),
   github: () => apiFetch<GithubSectionDTO>("/api/public/github"),
   search: (q: string) => apiFetch<SearchResultDTO[]>(`/api/public/search${query({ q })}`),
   sitemap: () => apiFetch<SitemapEntryDTO[]>("/api/public/sitemap"),

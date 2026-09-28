@@ -26,7 +26,9 @@ async function listRoles(db: DbExecutor): Promise<RoleDTO[]> {
   const rows = await db
     .select({
       role: roles,
-      permissions: sql<string[]>`coalesce(array_agg(distinct ${rolePermissions.permission}) filter (where ${rolePermissions.permission} is not null), '{}')`,
+      permissions: sql<
+        string[]
+      >`coalesce(array_agg(distinct ${rolePermissions.permission}) filter (where ${rolePermissions.permission} is not null), '{}')`,
       userCount: sql<number>`(select count(*)::int from ${users} where ${users.roleId} = ${roles.id})`,
     })
     .from(roles)
@@ -44,7 +46,10 @@ async function listRoles(db: DbExecutor): Promise<RoleDTO[]> {
   }));
 }
 
-function toUserDTO(row: { user: typeof users.$inferSelect; role: typeof roles.$inferSelect }): AdminUserDTO {
+function toUserDTO(row: {
+  user: typeof users.$inferSelect;
+  role: typeof roles.$inferSelect;
+}): AdminUserDTO {
   return {
     id: row.user.id,
     email: row.user.email,
@@ -77,7 +82,12 @@ async function roleGrantsUserManagement(db: DbExecutor, roleId: string): Promise
   const [row] = await db
     .select({ value: count() })
     .from(rolePermissions)
-    .where(and(eq(rolePermissions.roleId, roleId), eq(rolePermissions.permission, PERMISSIONS.USERS_MANAGE)));
+    .where(
+      and(
+        eq(rolePermissions.roleId, roleId),
+        eq(rolePermissions.permission, PERMISSIONS.USERS_MANAGE),
+      ),
+    );
   return (row?.value ?? 0) > 0;
 }
 
@@ -85,7 +95,9 @@ export function usersRouter(deps: AppDeps): Router {
   const router = Router();
   const { db } = deps;
   const manage = requirePermission(PERMISSIONS.USERS_MANAGE);
-  router.param("id", (_req, _res, next, value: string) => next(UUID_PATTERN.test(value) ? undefined : notFound("Record")));
+  router.param("id", (_req, _res, next, value: string) =>
+    next(UUID_PATTERN.test(value) ? undefined : notFound("Record")),
+  );
 
   // ── Users ──────────────────────────────────────────────────────────────
   router.get("/users", manage, async (_req, res) => {
@@ -100,8 +112,14 @@ export function usersRouter(deps: AppDeps): Router {
   router.post("/users", manage, async (req, res) => {
     const input = parse(userCreateInput, req.body);
     const row = await db.transaction(async (tx) => {
-      const [existing] = await tx.select({ id: users.id }).from(users).where(sql`lower(${users.email}) = ${input.email}`);
-      if (existing) throw conflict("A user with this email already exists", [{ path: "email", message: "Already in use" }]);
+      const [existing] = await tx
+        .select({ id: users.id })
+        .from(users)
+        .where(sql`lower(${users.email}) = ${input.email}`);
+      if (existing)
+        throw conflict("A user with this email already exists", [
+          { path: "email", message: "Already in use" },
+        ]);
       const [role] = await tx.select().from(roles).where(eq(roles.id, input.roleId));
       if (!role) throw notFound("Role");
       const [user] = await tx
@@ -145,7 +163,8 @@ export function usersRouter(deps: AppDeps): Router {
         .set({ name: input.name, roleId: input.roleId, status: input.status })
         .where(eq(users.id, id))
         .returning();
-      if (input.status !== "active" || input.roleId !== current.roleId) await revokeUserSessions(tx, id);
+      if (input.status !== "active" || input.roleId !== current.roleId)
+        await revokeUserSessions(tx, id);
       await recordAudit(tx, req, {
         action: "user.update",
         entityType: "user",
@@ -165,7 +184,10 @@ export function usersRouter(deps: AppDeps): Router {
     await db.transaction(async (tx) => {
       const [current] = await tx.select().from(users).where(eq(users.id, id));
       if (!current) throw notFound("User");
-      if ((await roleGrantsUserManagement(tx, current.roleId)) && (await countActiveManagers(tx, id)) === 0) {
+      if (
+        (await roleGrantsUserManagement(tx, current.roleId)) &&
+        (await countActiveManagers(tx, id)) === 0
+      ) {
         throw conflict("At least one active user must be able to manage users");
       }
       await tx.delete(users).where(eq(users.id, id));
@@ -188,7 +210,12 @@ export function usersRouter(deps: AppDeps): Router {
       .where(eq(users.id, id))
       .returning({ email: users.email });
     if (!updated) throw notFound("User");
-    await recordAudit(db, req, { action: "user.unlock", entityType: "user", entityId: id, summary: `Unlocked ${updated.email}` });
+    await recordAudit(db, req, {
+      action: "user.unlock",
+      entityType: "user",
+      entityId: id,
+      summary: `Unlocked ${updated.email}`,
+    });
     noContent(res);
   });
 
@@ -198,15 +225,23 @@ export function usersRouter(deps: AppDeps): Router {
   const saveRole = async (tx: DbExecutor, roleId: string, permissions: string[]) => {
     await tx.delete(rolePermissions).where(eq(rolePermissions.roleId, roleId));
     if (permissions.length) {
-      await tx.insert(rolePermissions).values([...new Set(permissions)].map((permission) => ({ roleId, permission })));
+      await tx
+        .insert(rolePermissions)
+        .values([...new Set(permissions)].map((permission) => ({ roleId, permission })));
     }
   };
 
   router.post("/roles", manage, async (req, res) => {
     const input = parse(roleInput, req.body);
     await db.transaction(async (tx) => {
-      const [existing] = await tx.select({ id: roles.id }).from(roles).where(eq(roles.key, input.key));
-      if (existing) throw conflict("A role with this key already exists", [{ path: "key", message: "Already in use" }]);
+      const [existing] = await tx
+        .select({ id: roles.id })
+        .from(roles)
+        .where(eq(roles.key, input.key));
+      if (existing)
+        throw conflict("A role with this key already exists", [
+          { path: "key", message: "Already in use" },
+        ]);
       const [role] = await tx
         .insert(roles)
         .values({ key: input.key, name: input.name, description: input.description })
@@ -229,13 +264,22 @@ export function usersRouter(deps: AppDeps): Router {
     await db.transaction(async (tx) => {
       const [role] = await tx.select().from(roles).where(eq(roles.id, id)).for("update");
       if (!role) throw notFound("Role");
-      if (role.isSystem && (input.key !== role.key || !input.permissions.includes(PERMISSIONS.USERS_MANAGE))) {
+      if (
+        role.isSystem &&
+        (input.key !== role.key || !input.permissions.includes(PERMISSIONS.USERS_MANAGE))
+      ) {
         throw conflict("The Administrator role keeps its key and the users:manage permission");
       }
       const before = await listRoles(tx);
-      await tx.update(roles).set({ key: input.key, name: input.name, description: input.description }).where(eq(roles.id, id));
+      await tx
+        .update(roles)
+        .set({ key: input.key, name: input.name, description: input.description })
+        .where(eq(roles.id, id));
       await saveRole(tx, id, input.permissions);
-      if (!input.permissions.includes(PERMISSIONS.USERS_MANAGE) && (await countActiveManagers(tx)) === 0) {
+      if (
+        !input.permissions.includes(PERMISSIONS.USERS_MANAGE) &&
+        (await countActiveManagers(tx)) === 0
+      ) {
         throw conflict("At least one active user must be able to manage users");
       }
       await recordAudit(tx, req, {
@@ -256,10 +300,19 @@ export function usersRouter(deps: AppDeps): Router {
       const [role] = await tx.select().from(roles).where(eq(roles.id, id));
       if (!role) throw notFound("Role");
       if (role.isSystem) throw conflict("System roles cannot be deleted");
-      const [assigned] = await tx.select({ value: count() }).from(users).where(eq(users.roleId, id));
-      if ((assigned?.value ?? 0) > 0) throw conflict("Reassign this role's users before deleting it");
+      const [assigned] = await tx
+        .select({ value: count() })
+        .from(users)
+        .where(eq(users.roleId, id));
+      if ((assigned?.value ?? 0) > 0)
+        throw conflict("Reassign this role's users before deleting it");
       await tx.delete(roles).where(eq(roles.id, id));
-      await recordAudit(tx, req, { action: "role.delete", entityType: "role", entityId: id, summary: `Deleted role ${role.name}` });
+      await recordAudit(tx, req, {
+        action: "role.delete",
+        entityType: "role",
+        entityId: id,
+        summary: `Deleted role ${role.name}`,
+      });
     });
     noContent(res);
   });
@@ -299,7 +352,8 @@ export function usersRouter(deps: AppDeps): Router {
     if (!/^[a-f0-9]{64}$/.test(sessionId)) throw notFound("Session");
     const [session] = await db.select().from(sessions).where(eq(sessions.id, sessionId));
     if (!session) throw notFound("Session");
-    if (session.userId !== auth.user.id && !auth.permissions.includes(PERMISSIONS.USERS_MANAGE)) throw forbidden();
+    if (session.userId !== auth.user.id && !auth.permissions.includes(PERMISSIONS.USERS_MANAGE))
+      throw forbidden();
     await revokeSession(db, sessionId);
     await recordAudit(db, req, {
       action: "session.revoke",

@@ -41,19 +41,32 @@ const KIND_NOUNS: Record<ResearchKind, string> = {
   report: "report",
 };
 
-export async function toPresentationDTOs(db: DbExecutor, rows: PresentationRow[]): Promise<PresentationDTO[]> {
+export async function toPresentationDTOs(
+  db: DbExecutor,
+  rows: PresentationRow[],
+): Promise<PresentationDTO[]> {
   if (rows.length === 0) return [];
   const researchIds = rows.map((row) => row.researchId).filter((id): id is string => Boolean(id));
   const [mediaMap, researchRows] = await Promise.all([
-    loadMediaMap(db, rows.flatMap((row) => [row.posterMediaId, row.slidesMediaId])),
+    loadMediaMap(
+      db,
+      rows.flatMap((row) => [row.posterMediaId, row.slidesMediaId]),
+    ),
     researchIds.length
       ? db
-          .select({ id: research.id, slug: research.slug, title: research.title, kind: research.kind })
+          .select({
+            id: research.id,
+            slug: research.slug,
+            title: research.title,
+            kind: research.kind,
+          })
           .from(research)
           .where(and(inArray(research.id, researchIds), viewable(research)))
       : Promise.resolve([]),
   ]);
-  const linked = new Map(researchRows.map((row) => [row.id, { slug: row.slug, title: row.title, kind: row.kind }]));
+  const linked = new Map(
+    researchRows.map((row) => [row.id, { slug: row.slug, title: row.title, kind: row.kind }]),
+  );
   return rows.map((row) => ({
     id: row.id,
     title: row.title,
@@ -71,28 +84,47 @@ export async function toPresentationDTOs(db: DbExecutor, rows: PresentationRow[]
   }));
 }
 
-export async function listPublishedPresentations(db: DbExecutor, limit?: number): Promise<PresentationDTO[]> {
+export async function listPublishedPresentations(
+  db: DbExecutor,
+  limit?: number,
+): Promise<PresentationDTO[]> {
   const query = db
     .select()
     .from(conferencePresentations)
     .where(listed(conferencePresentations))
-    .orderBy(sql`${conferencePresentations.presentedOn} DESC NULLS LAST`, asc(conferencePresentations.displayOrder));
+    .orderBy(
+      sql`${conferencePresentations.presentedOn} DESC NULLS LAST`,
+      asc(conferencePresentations.displayOrder),
+    );
   return toPresentationDTOs(db, await (limit ? query.limit(limit) : query));
 }
 
-export async function toPublicationDTOs(db: DbExecutor, rows: PublicationRow[]): Promise<PublicationDTO[]> {
+export async function toPublicationDTOs(
+  db: DbExecutor,
+  rows: PublicationRow[],
+): Promise<PublicationDTO[]> {
   if (rows.length === 0) return [];
   const researchIds = rows.map((row) => row.researchId).filter((id): id is string => Boolean(id));
   const [mediaMap, researchRows] = await Promise.all([
-    loadMediaMap(db, rows.map((row) => row.pdfMediaId)),
+    loadMediaMap(
+      db,
+      rows.map((row) => row.pdfMediaId),
+    ),
     researchIds.length
       ? db
-          .select({ id: research.id, slug: research.slug, title: research.title, kind: research.kind })
+          .select({
+            id: research.id,
+            slug: research.slug,
+            title: research.title,
+            kind: research.kind,
+          })
           .from(research)
           .where(and(inArray(research.id, researchIds), viewable(research)))
       : Promise.resolve([]),
   ]);
-  const linked = new Map(researchRows.map((row) => [row.id, { slug: row.slug, title: row.title, kind: row.kind }]));
+  const linked = new Map(
+    researchRows.map((row) => [row.id, { slug: row.slug, title: row.title, kind: row.kind }]),
+  );
   return rows.map((row) => {
     const citable = {
       title: row.title,
@@ -135,11 +167,17 @@ export async function listPublishedPublications(db: DbExecutor): Promise<Publica
   return toPublicationDTOs(db, rows);
 }
 
-export async function toResearchSummaries(db: DbExecutor, rows: ResearchRow[]): Promise<ResearchSummaryDTO[]> {
+export async function toResearchSummaries(
+  db: DbExecutor,
+  rows: ResearchRow[],
+): Promise<ResearchSummaryDTO[]> {
   if (rows.length === 0) return [];
   const ids = rows.map((row) => row.id);
   const [mediaMap, presentationRows, publicationCounts, educationRows] = await Promise.all([
-    loadMediaMap(db, rows.map((row) => row.coverMediaId)),
+    loadMediaMap(
+      db,
+      rows.map((row) => row.coverMediaId),
+    ),
     db
       .select()
       .from(conferencePresentations)
@@ -153,7 +191,12 @@ export async function toResearchSummaries(db: DbExecutor, rows: ResearchRow[]): 
     db
       .select({ id: education.id, startDate: education.startDate, endDate: education.endDate })
       .from(education)
-      .where(inArray(education.id, rows.map((row) => row.educationId).filter((id): id is string => Boolean(id)))),
+      .where(
+        inArray(
+          education.id,
+          rows.map((row) => row.educationId).filter((id): id is string => Boolean(id)),
+        ),
+      ),
   ]);
   const presentations = await toPresentationDTOs(db, presentationRows);
   const counts = new Map(publicationCounts.map((row) => [row.researchId, row.value]));
@@ -177,20 +220,30 @@ export async function toResearchSummaries(db: DbExecutor, rows: ResearchRow[]): 
       year: yearOf(row.completedOn ?? linkedEducation?.endDate ?? row.startedOn),
       featured: row.featured,
       cover: pick(mediaMap, row.coverMediaId),
-      presentations: presentations.filter((presentation) => presentationRows.find((p) => p.id === presentation.id)?.researchId === row.id),
+      presentations: presentations.filter(
+        (presentation) =>
+          presentationRows.find((p) => p.id === presentation.id)?.researchId === row.id,
+      ),
       publicationCount: counts.get(row.id) ?? 0,
     };
   });
 }
 
-export async function listPublishedResearch(db: DbExecutor, options: { featuredOnly?: boolean; limit?: number } = {}) {
+export async function listPublishedResearch(
+  db: DbExecutor,
+  options: { featuredOnly?: boolean; limit?: number } = {},
+) {
   const conditions = [listed(research)];
   if (options.featuredOnly) conditions.push(eq(research.featured, true));
   const query = db
     .select()
     .from(research)
     .where(and(...conditions))
-    .orderBy(desc(research.featured), asc(research.displayOrder), sql`${research.completedOn} DESC NULLS LAST`);
+    .orderBy(
+      desc(research.featured),
+      asc(research.displayOrder),
+      sql`${research.completedOn} DESC NULLS LAST`,
+    );
   return toResearchSummaries(db, await (options.limit ? query.limit(options.limit) : query));
 }
 
@@ -200,20 +253,31 @@ export async function getResearchDetail(
   preview = false,
 ): Promise<ResearchDetailDTO | null> {
   const identity = key.id ? eq(research.id, key.id) : eq(research.slug, key.slug ?? "");
-  const [row] = await db.select().from(research).where(and(identity, viewableUnless(preview, research)));
+  const [row] = await db
+    .select()
+    .from(research)
+    .where(and(identity, viewableUnless(preview, research)));
   if (!row) return null;
   const sections = orderedSections(RESEARCH_SECTIONS, row.sections);
-  const blockMediaIds = sections.flatMap((section) => collectBlockMediaIds(section.blocks as Block[]));
+  const blockMediaIds = sections.flatMap((section) =>
+    collectBlockMediaIds(section.blocks as Block[]),
+  );
   const [[summary], publicationRows, projectRows, educationRows, mediaMap] = await Promise.all([
     toResearchSummaries(db, [row]),
-    db.select().from(publications).where(and(eq(publications.researchId, row.id), viewable(publications))),
+    db
+      .select()
+      .from(publications)
+      .where(and(eq(publications.researchId, row.id), viewable(publications))),
     db
       .select({ slug: projects.slug, title: projects.title, type: projects.type })
       .from(projectResearch)
       .innerJoin(projects, eq(projects.id, projectResearch.projectId))
       .where(and(eq(projectResearch.researchId, row.id), viewable(projects))),
     row.educationId
-      ? db.select().from(education).where(and(eq(education.id, row.educationId), eq(education.isVisible, true)))
+      ? db
+          .select()
+          .from(education)
+          .where(and(eq(education.id, row.educationId), eq(education.isVisible, true)))
       : Promise.resolve([]),
     loadMediaMap(db, [row.pdfMediaId, row.posterMediaId, row.slidesMediaId, ...blockMediaIds]),
   ]);
@@ -230,7 +294,11 @@ export async function getResearchDetail(
     slides: pick(mediaMap, row.slidesMediaId),
     externalUrl: row.externalUrl,
     education: linkedEducation
-      ? { degree: linkedEducation.degree, fieldOfStudy: linkedEducation.fieldOfStudy, institution: linkedEducation.institution }
+      ? {
+          degree: linkedEducation.degree,
+          fieldOfStudy: linkedEducation.fieldOfStudy,
+          institution: linkedEducation.institution,
+        }
       : null,
     publications: await toPublicationDTOs(db, publicationRows),
     relatedProjects: projectRows.map(projectLink),

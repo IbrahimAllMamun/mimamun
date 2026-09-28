@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { hmacHex, randomToken, safeEqual, sha256Hex, signTimestamp, verifyTimestamp } from "../../src/lib/crypto";
+import {
+  hmacHex,
+  randomToken,
+  safeEqual,
+  sha256Hex,
+  signTimestamp,
+  verifyTimestamp,
+} from "../../src/lib/crypto";
 
 describe("crypto helpers", () => {
   it("creates unpredictable url-safe tokens", () => {
@@ -9,7 +16,9 @@ describe("crypto helpers", () => {
   });
 
   it("hashes deterministically", () => {
-    expect(sha256Hex("abc")).toBe("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+    expect(sha256Hex("abc")).toBe(
+      "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+    );
     expect(hmacHex("k", "v")).toHaveLength(64);
   });
 
@@ -23,11 +32,21 @@ describe("crypto helpers", () => {
     const now = 1_700_000_000_000;
     const token = signTimestamp("secret", "contact", now);
     const options = { minAgeMs: 3000, maxAgeMs: 60_000 };
-    expect(verifyTimestamp("secret", "contact", token, { ...options, now: now + 5000 })).toBe("valid");
-    expect(verifyTimestamp("secret", "contact", token, { ...options, now: now + 1000 })).toBe("too_fast");
-    expect(verifyTimestamp("secret", "contact", token, { ...options, now: now + 120_000 })).toBe("expired");
-    expect(verifyTimestamp("other", "contact", token, { ...options, now: now + 5000 })).toBe("invalid");
-    expect(verifyTimestamp("secret", "other", token, { ...options, now: now + 5000 })).toBe("invalid");
+    expect(verifyTimestamp("secret", "contact", token, { ...options, now: now + 5000 })).toBe(
+      "valid",
+    );
+    expect(verifyTimestamp("secret", "contact", token, { ...options, now: now + 1000 })).toBe(
+      "too_fast",
+    );
+    expect(verifyTimestamp("secret", "contact", token, { ...options, now: now + 120_000 })).toBe(
+      "expired",
+    );
+    expect(verifyTimestamp("other", "contact", token, { ...options, now: now + 5000 })).toBe(
+      "invalid",
+    );
+    expect(verifyTimestamp("secret", "other", token, { ...options, now: now + 5000 })).toBe(
+      "invalid",
+    );
     expect(verifyTimestamp("secret", "contact", "garbage", options)).toBe("invalid");
   });
 });

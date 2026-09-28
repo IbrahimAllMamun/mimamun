@@ -26,14 +26,23 @@ async function seedRoles(tx: DbExecutor, log: Log) {
   for (const role of Object.values(SYSTEM_ROLES)) {
     const inserted = await tx
       .insert(s.roles)
-      .values({ key: role.key, name: role.name, description: role.description, isSystem: role.key === "ADMIN" })
+      .values({
+        key: role.key,
+        name: role.name,
+        description: role.description,
+        isSystem: role.key === "ADMIN",
+      })
       .onConflictDoNothing({ target: s.roles.key })
       .returning({ id: s.roles.id });
-    const [existing] = await tx.select({ id: s.roles.id }).from(s.roles).where(eq(s.roles.key, role.key));
+    const [existing] = await tx
+      .select({ id: s.roles.id })
+      .from(s.roles)
+      .where(eq(s.roles.key, role.key));
     if (!existing) continue;
     // ADMIN always holds every permission (new permission keys are granted on re-seed).
     // Other roles receive their defaults only when first created, so admin edits persist.
-    const permissions = role.key === "ADMIN" ? ALL_PERMISSIONS : inserted.length ? role.permissions : [];
+    const permissions =
+      role.key === "ADMIN" ? ALL_PERMISSIONS : inserted.length ? role.permissions : [];
     if (permissions.length) {
       await tx
         .insert(s.rolePermissions)
@@ -57,7 +66,10 @@ async function seedAdmin(tx: DbExecutor, log: Log, admin: SeedOptions["admin"]) 
   } else {
     log(`admin account ${admin.email} created`);
   }
-  const [adminRole] = await tx.select({ id: s.roles.id }).from(s.roles).where(eq(s.roles.key, "ADMIN"));
+  const [adminRole] = await tx
+    .select({ id: s.roles.id })
+    .from(s.roles)
+    .where(eq(s.roles.key, "ADMIN"));
   if (!adminRole) throw new Error("ADMIN role missing");
   await tx.insert(s.users).values({
     email: admin.email.toLowerCase(),
@@ -68,7 +80,11 @@ async function seedAdmin(tx: DbExecutor, log: Log, admin: SeedOptions["admin"]) 
   });
 }
 
-async function isEmpty(tx: DbExecutor, table: typeof s.socialLinks | typeof s.navigationItems | typeof s.focusAreas | typeof s.approachSteps) {
+async function isEmpty(
+  tx: DbExecutor,
+  table:
+    typeof s.socialLinks | typeof s.navigationItems | typeof s.focusAreas | typeof s.approachSteps,
+) {
   const [row] = await tx.select({ value: count() }).from(table);
   return (row?.value ?? 0) === 0;
 }
@@ -87,17 +103,19 @@ async function seedSite(tx: DbExecutor, log: Log) {
     .onConflictDoNothing();
 
   if (await isEmpty(tx, s.socialLinks)) {
-    await tx.insert(s.socialLinks).values(
-      data.SOCIAL_LINKS.map((link, index) => ({ ...link, displayOrder: index })),
-    );
+    await tx
+      .insert(s.socialLinks)
+      .values(data.SOCIAL_LINKS.map((link, index) => ({ ...link, displayOrder: index })));
   }
   if (await isEmpty(tx, s.navigationItems)) {
-    await tx.insert(s.navigationItems).values(
-      data.NAVIGATION.map((item, index) => ({ ...item, displayOrder: index })),
-    );
+    await tx
+      .insert(s.navigationItems)
+      .values(data.NAVIGATION.map((item, index) => ({ ...item, displayOrder: index })));
   }
   if (await isEmpty(tx, s.focusAreas)) {
-    await tx.insert(s.focusAreas).values(data.FOCUS_AREAS.map((area, index) => ({ ...area, displayOrder: index })));
+    await tx
+      .insert(s.focusAreas)
+      .values(data.FOCUS_AREAS.map((area, index) => ({ ...area, displayOrder: index })));
   }
   if (await isEmpty(tx, s.approachSteps)) {
     await tx
@@ -117,7 +135,12 @@ async function seedCareer(tx: DbExecutor, log: Log) {
     const [existing] = await tx
       .select({ id: s.experiences.id })
       .from(s.experiences)
-      .where(and(eq(s.experiences.company, experience.company), eq(s.experiences.position, experience.position)));
+      .where(
+        and(
+          eq(s.experiences.company, experience.company),
+          eq(s.experiences.position, experience.position),
+        ),
+      );
     if (existing) continue;
     await tx.insert(s.experiences).values({
       ...experience,
@@ -160,7 +183,12 @@ async function idBySlug(
   return row?.id ?? null;
 }
 
-async function seedResearch(tx: DbExecutor, log: Log, educationIds: Map<string, string>, now: Date) {
+async function seedResearch(
+  tx: DbExecutor,
+  log: Log,
+  educationIds: Map<string, string>,
+  now: Date,
+) {
   for (const { educationKey, ...entry } of data.RESEARCH) {
     const inserted = await tx
       .insert(s.research)
@@ -213,7 +241,10 @@ async function ensureTag(tx: DbExecutor, name: string): Promise<string> {
 
 async function seedProjects(tx: DbExecutor, log: Log, now: Date) {
   for (const category of data.PROJECT_CATEGORIES) {
-    await tx.insert(s.projectCategories).values(category).onConflictDoNothing({ target: s.projectCategories.slug });
+    await tx
+      .insert(s.projectCategories)
+      .values(category)
+      .onConflictDoNothing({ target: s.projectCategories.slug });
   }
 
   for (const project of data.PROJECTS) {
@@ -247,10 +278,13 @@ async function seedProjects(tx: DbExecutor, log: Log, now: Date) {
     const created = inserted[0];
     if (!created) continue;
     for (const tag of project.tags) {
-      await tx.insert(s.projectTags).values({ projectId: created.id, tagId: await ensureTag(tx, tag) });
+      await tx
+        .insert(s.projectTags)
+        .values({ projectId: created.id, tagId: await ensureTag(tx, tag) });
     }
     const researchId = await idBySlug(tx, s.research, project.researchSlug);
-    if (researchId) await tx.insert(s.projectResearch).values({ projectId: created.id, researchId });
+    if (researchId)
+      await tx.insert(s.projectResearch).values({ projectId: created.id, researchId });
     log(`project ${project.slug} created`);
   }
 }
@@ -292,7 +326,11 @@ async function seedSkills(tx: DbExecutor, log: Log) {
   if (createdSkills) log(`${createdSkills} skills created`);
 }
 
-async function skillIdByPath(tx: DbExecutor, categorySlug: string, skillSlug: string): Promise<string | null> {
+async function skillIdByPath(
+  tx: DbExecutor,
+  categorySlug: string,
+  skillSlug: string,
+): Promise<string | null> {
   const [row] = await tx
     .select({ id: s.skills.id })
     .from(s.skills)
@@ -309,7 +347,10 @@ async function seedCredentials(tx: DbExecutor, log: Log) {
       .onConflictDoNothing({ target: s.credentialTypes.slug });
   }
   for (const provider of data.CREDENTIAL_PROVIDERS) {
-    await tx.insert(s.credentialProviders).values(provider).onConflictDoNothing({ target: s.credentialProviders.slug });
+    await tx
+      .insert(s.credentialProviders)
+      .values(provider)
+      .onConflictDoNothing({ target: s.credentialProviders.slug });
   }
   let created = 0;
   for (const [index, credential] of data.CREDENTIALS.entries()) {

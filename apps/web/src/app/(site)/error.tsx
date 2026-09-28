@@ -9,7 +9,13 @@ import { Icon } from "@/components/ui/icon";
  * Error boundary for public pages. The API layer already turns outages into
  * "unavailable" notices, so this only catches unexpected rendering errors.
  */
-export default function SiteError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function SiteError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
   useEffect(() => {
     console.error(error);
   }, [error]);
@@ -20,7 +26,8 @@ export default function SiteError({ error, reset }: { error: Error & { digest?: 
         <div className="col-span-4 space-y-6 sm:col-span-8 lg:col-span-9">
           <h1 className="display text-4xl text-ink">This page could not be displayed.</h1>
           <p className="max-w-measure text-lg text-ink-2">
-            An unexpected error occurred. Try again; if it keeps happening, the problem has been logged
+            An unexpected error occurred. Try again; if it keeps happening, the problem has been
+            logged
             {error.digest ? (
               <>
                 {" "}
