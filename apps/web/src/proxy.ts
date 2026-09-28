@@ -29,12 +29,14 @@ function contentSecurityPolicy(nonce: string, isDev: boolean): string {
 
 /**
  * Runs before every page: issues a per-request CSP nonce and sends visitors
- * without a session cookie to the admin login. The cookie check is only a
- * convenience — every admin API call is authorised by the API itself.
+ * without a session cookie from the admin and draft previews to the login.
+ * The cookie check is only a convenience — every admin API call (previews
+ * included) is authorised by the API itself.
  */
 export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
-  if (pathname.startsWith("/admin") && !PUBLIC_ADMIN_PATHS.has(pathname)) {
+  const needsSession = (pathname.startsWith("/admin") && !PUBLIC_ADMIN_PATHS.has(pathname)) || pathname.startsWith("/preview/");
+  if (needsSession) {
     const hasSession = SESSION_COOKIES.some((name) => request.cookies.has(name));
     if (!hasSession) {
       const url = request.nextUrl.clone();

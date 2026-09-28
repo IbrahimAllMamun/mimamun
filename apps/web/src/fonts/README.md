@@ -13,3 +13,14 @@ licensed under the SIL Open Font License 1.1 (see the `OFL-*.txt` files).
 
 Only the Latin subset is included. To update, `npm pack` the package version
 above and copy the same files from its `files/` directory.
+
+## Social image fonts (`og/`)
+
+The Open Graph image renderer (`next/og`) cannot read WOFF2, so the social
+cards and icons use static WOFF files of the same families:
+
+| File | Family | Weight | Source |
+| --- | --- | --- | --- |
+| `og/newsreader-latin-500-normal.woff` | Newsreader | 500 | `@fontsource/newsreader@5.3.0` |
+| `og/ibm-plex-sans-latin-400-normal.woff` | IBM Plex Sans | 400 | `@fontsource/ibm-plex-sans@5.3.0` |
+| `og/ibm-plex-mono-latin-500-normal.woff` | IBM Plex Mono | 500 | `@fontsource/ibm-plex-mono@5.3.0` |

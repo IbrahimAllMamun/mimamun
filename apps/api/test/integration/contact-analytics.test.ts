@@ -106,6 +106,13 @@ describe("analytics", () => {
     expect(await ctx.deps.db.select().from(analyticsEvents)).toHaveLength(0);
   });
 
+  it("never counts admin screens or draft previews", async () => {
+    await ctx.deps.db.delete(analyticsEvents);
+    await send({ type: "page_view", path: "/admin/projects" }).expect(204);
+    await send({ type: "page_view", path: "/preview/projects/0b0e3c1e-5f5d-4a4b-9a57-2c1f3d9e8a10" }).expect(204);
+    expect(await ctx.deps.db.select().from(analyticsEvents)).toHaveLength(0);
+  });
+
   it("stops recording when analytics is disabled", async () => {
     await ctx.deps.db.update(siteSettings).set({ analyticsEnabled: false });
     await send({ type: "page_view", path: "/about" }).expect(204);

@@ -21,6 +21,11 @@ function optedOut(): boolean {
   return nav.doNotTrack === "1" || nav.globalPrivacyControl === true;
 }
 
+/** Editors previewing drafts are not visitors. */
+function isPrivatePath(path: string): boolean {
+  return path.startsWith("/preview") || path.startsWith("/admin");
+}
+
 /**
  * Cookie-less, anonymous page-view and link tracking. Nothing is sent when
  * the visitor has Do Not Track or Global Privacy Control enabled.
@@ -30,7 +35,7 @@ export function AnalyticsBeacon() {
   const firstView = useRef(true);
 
   useEffect(() => {
-    if (optedOut()) return;
+    if (optedOut() || isPrivatePath(pathname)) return;
     send({ type: "page_view", path: pathname, referrer: firstView.current ? document.referrer || null : null });
     firstView.current = false;
   }, [pathname]);
@@ -38,6 +43,7 @@ export function AnalyticsBeacon() {
   useEffect(() => {
     if (optedOut()) return;
     const onClick = (event: MouseEvent) => {
+      if (isPrivatePath(window.location.pathname)) return;
       const anchor = (event.target as Element | null)?.closest?.("a[href]");
       if (!(anchor instanceof HTMLAnchorElement)) return;
       const url = new URL(anchor.href, window.location.href);

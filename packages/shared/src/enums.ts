@@ -171,6 +171,19 @@ export const ENTITY_TYPES = [
   "page",
 ] as const;
 export type EntityType = (typeof ENTITY_TYPES)[number];
+export const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
+  project: "Project",
+  research: "Research",
+  publication: "Publication",
+  presentation: "Presentation",
+  blog_post: "Writing",
+  credential: "Certification",
+  experience: "Experience",
+  education: "Education",
+  skill: "Skill",
+  media: "Media",
+  page: "Page",
+};
 
 export const SOCIAL_PLATFORMS = [
   "github",

@@ -44,6 +44,11 @@ async function dailySalt(db: DbExecutor, day: string): Promise<string> {
   return row?.salt ?? "";
 }
 
+/** Admin screens and draft previews are never counted as visits. */
+export function isPrivatePath(path: string): boolean {
+  return /^\/(admin|preview)(\/|$)/.test(path);
+}
+
 /** Returns false when the event should not be recorded (opt-out, bot, disabled). */
 export function shouldTrack(req: Request): boolean {
   if (req.header("dnt") === "1" || req.header("sec-gpc") === "1") return false;
@@ -58,6 +63,7 @@ export async function recordEvent(
 ): Promise<void> {
   const ua = classifyUserAgent(req.header("user-agent"));
   const path = input.path.split(/[?#]/)[0]?.slice(0, 300) ?? "/";
+  if (isPrivatePath(path)) return;
   const ownHost = new URL(config.appUrl).hostname.replace(/^www\./, "");
   const day = isoDay();
   const salt = await dailySalt(db, day);
