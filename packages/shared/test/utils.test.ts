@@ -66,7 +66,7 @@ describe("dates", () => {
 
   it("formats periods including unknown starts and current roles", () => {
     expect(formatPeriod("2026-08-01", null, true)).toBe("Aug 2026 – Present");
-    expect(formatPeriod("2020-01-01", "2024-09-01")).toBe("Jan 2020 – Sept 2024");
+    expect(formatPeriod("2020-01-01", "2024-09-01")).toBe("Jan 2020 – Sep 2024");
     expect(formatPeriod(null, "2026-08-01")).toBe("Until Aug 2026");
     expect(formatPeriod(null, null)).toBe("");
   });

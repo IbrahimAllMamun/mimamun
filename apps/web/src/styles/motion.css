@@ -1,0 +1,204 @@
+/*
+ * Motion (see docs/design-system.md §9). Transform and opacity only.
+ * Every effect has a visible resting state, and nothing here runs when the
+ * visitor prefers reduced motion.
+ */
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes draw-rule {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes grow-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes draw-line {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Load-time stagger for the front matter; --i is the item index. */
+  .motion-enter {
+    animation: var(--animate-enter);
+    animation-delay: calc(min(var(--i, 0), 6) * var(--stagger-step));
+  }
+
+  .motion-rule {
+    transform-origin: left center;
+    animation: draw-rule var(--duration-entrance) var(--ease-out) both;
+    animation-delay: 200ms;
+  }
+
+  /* Scroll-driven reveals: progressive enhancement, no JavaScript. */
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 5% entry 45%;
+    }
+
+    .reveal-bar {
+      transform-origin: left center;
+      animation: grow-x linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 35%;
+    }
+
+    .reveal-column {
+      transform-origin: center bottom;
+      animation: grow-y linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 35%;
+    }
+
+    .reveal-line {
+      stroke-dasharray: 1;
+      animation: draw-line linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 40%;
+    }
+  }
+}
+
+/* Global safety net required by the motion guidelines. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mobile-sheet[open] {
+    animation: sheet-in var(--duration-base) var(--ease-out);
+  }
+  .mobile-sheet[open]::backdrop,
+  .dialog-panel[open]::backdrop {
+    animation: fade-in var(--duration-base) var(--ease-out);
+  }
+  .dialog-panel[open] {
+    animation: dialog-in var(--duration-fast) var(--ease-out);
+  }
+  .toast-enter {
+    animation: toast-in var(--duration-base) var(--ease-out) both;
+  }
+}

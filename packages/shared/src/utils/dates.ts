@@ -4,7 +4,8 @@
  * formatting happens in UTC so a date never shifts by a day across timezones.
  */
 
-const MONTH_FORMAT = new Intl.DateTimeFormat("en-GB", {
+// en-US gives three-letter months ("Sep"); en-GB would give "Sept".
+const MONTH_FORMAT = new Intl.DateTimeFormat("en-US", {
   month: "short",
   year: "numeric",
   timeZone: "UTC",

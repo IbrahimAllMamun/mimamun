@@ -1,0 +1,169 @@
+/* Long-form reading: case studies, research, posts and the biography. */
+
+@layer components {
+  .prose {
+    font-family: var(--font-serif);
+    font-size: var(--text-lg);
+    line-height: 1.7;
+    color: var(--color-ink);
+    max-width: var(--container-measure);
+    font-variation-settings: "opsz" 16;
+
+    & > * + * {
+      margin-top: 1.1em;
+    }
+
+    & h2,
+    & h3,
+    & h4 {
+      margin-top: 1.9em;
+      line-height: 1.2;
+      font-variation-settings: "opsz" 36;
+    }
+    & h2 {
+      font-size: var(--text-2xl);
+    }
+    & h3 {
+      font-size: var(--text-xl);
+    }
+    & h4 {
+      font-size: var(--text-lg);
+      font-weight: 560;
+    }
+    & :is(h2, h3, h4) + * {
+      margin-top: 0.6em;
+    }
+
+    & a {
+      color: var(--color-primary);
+      text-decoration-line: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.2em;
+      text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+      &:hover {
+        text-decoration-color: currentColor;
+        text-decoration-thickness: 2px;
+      }
+    }
+
+    & strong {
+      font-weight: 620;
+    }
+
+    & ul,
+    & ol {
+      padding-left: 1.4em;
+    }
+    & ul {
+      list-style: none;
+      & > li {
+        position: relative;
+      }
+      & > li::before {
+        content: "";
+        position: absolute;
+        left: -1.05em;
+        top: 0.72em;
+        width: 0.38em;
+        height: 1px;
+        background: var(--color-ink-3);
+      }
+    }
+    & ol {
+      list-style: decimal;
+      & > li::marker {
+        font-family: var(--font-mono);
+        font-size: 0.8em;
+        color: var(--color-ink-3);
+      }
+    }
+    & li + li {
+      margin-top: 0.35em;
+    }
+
+    & blockquote {
+      border-left: 2px solid var(--color-secondary);
+      padding-left: 1.1em;
+      color: var(--color-ink-2);
+      font-style: italic;
+      font-family: var(--font-serif-italic);
+    }
+
+    & code {
+      font-family: var(--font-mono);
+      font-size: 0.82em;
+      background: var(--color-muted);
+      padding: 0.12em 0.35em;
+      border-radius: var(--radius-xs);
+    }
+
+    & hr {
+      margin-block: 2.2em;
+    }
+
+    & table {
+      width: 100%;
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+      border-collapse: collapse;
+      font-variant-numeric: tabular-nums;
+      border-top: 2px solid var(--color-ink);
+      border-bottom: 2px solid var(--color-ink);
+    }
+    & th {
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 1px solid var(--color-ink);
+      padding: 0.5em 0.75em 0.5em 0;
+    }
+    & td {
+      padding: 0.45em 0.75em 0.45em 0;
+      border-top: 1px solid var(--color-rule);
+    }
+  }
+
+  /* Compact prose for summaries and UI contexts (sans, base size). */
+  .prose-ui {
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: 1.6;
+    font-variation-settings: normal;
+  }
+}
+
+/* Syntax highlighting (highlight.js classes) mapped to design tokens. */
+.hljs-comment,
+.hljs-quote {
+  color: var(--color-ink-3);
+  font-style: italic;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in,
+.hljs-literal {
+  color: var(--color-secondary);
+}
+.hljs-string,
+.hljs-regexp,
+.hljs-addition {
+  color: var(--color-primary);
+}
+.hljs-number,
+.hljs-symbol,
+.hljs-bullet {
+  color: var(--color-accent);
+}
+.hljs-title,
+.hljs-section,
+.hljs-function .hljs-title {
+  color: var(--color-info);
+}
+.hljs-attr,
+.hljs-attribute,
+.hljs-variable,
+.hljs-params {
+  color: var(--color-ink-2);
+}
+.hljs-deletion {
+  color: var(--color-error);
+}
