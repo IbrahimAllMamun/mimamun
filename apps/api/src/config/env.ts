@@ -52,7 +52,11 @@ const envSchema = z
       .min(1)
       .max(24 * 60)
       .default(15),
-    LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).optional(),
+    // An empty value (as in .env.example) means "use the default for NODE_ENV".
+    LOG_LEVEL: z
+      .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent", ""])
+      .optional()
+      .transform((value) => value || undefined),
     UPLOAD_DIR: z.string().default("uploads"),
     UPLOAD_MAX_IMAGE_MB: z.coerce.number().min(1).max(50).default(10),
     UPLOAD_MAX_DOCUMENT_MB: z.coerce.number().min(1).max(100).default(20),

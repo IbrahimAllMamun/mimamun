@@ -52,6 +52,8 @@ services:
       DATABASE_URL: postgres://${POSTGRES_USER:-portfolio}:${POSTGRES_PASSWORD:-portfolio}@postgres:5432/${POSTGRES_DB:-portfolio}
       WEB_INTERNAL_URL: http://web:3000
       APP_URL: http://localhost:3000
+      # .env's UPLOAD_DIR is a host path; inside the container use the volume.
+      UPLOAD_DIR: /data/uploads
     volumes:
       - uploads:/data/uploads
     depends_on:

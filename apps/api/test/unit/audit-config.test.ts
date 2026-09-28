@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { parseEnv } from "node:util";
 import { describe, expect, it } from "vitest";
 import { loadConfig } from "../../src/config/env";
 import { diffSnapshots } from "../../src/modules/audit/service";
@@ -41,5 +43,17 @@ describe("configuration", () => {
     expect(() =>
       loadConfig({ DATABASE_URL: "postgres://x", SMTP_HOST: "smtp.example.com" }),
     ).toThrow(/MAIL_FROM/);
+  });
+
+  it("accepts .env.example unchanged, treating empty values as unset", () => {
+    const example = parseEnv(
+      readFileSync(new URL("../../../../.env.example", import.meta.url), "utf8"),
+    );
+    const config = loadConfig(example);
+    expect(config.env).toBe("development");
+    expect(config.logLevel).toBe("debug");
+    expect(config.session.cookieSecure).toBe(false);
+    expect(config.mail.host).toBeNull();
+    expect(config.github.token).toBeNull();
   });
 });
