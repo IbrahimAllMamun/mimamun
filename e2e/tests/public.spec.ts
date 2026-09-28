@@ -13,8 +13,13 @@ test.describe("public site", () => {
     await expect(facts).toContainText("since Aug 2026");
     await expect(facts).toContainText("Data Analyst, IDLC Finance PLC");
     await expect(facts).toContainText("until Aug 2026");
-    // The CV lists IDLC as "Present"; the site must not.
-    await expect(page.getByText(/IDLC[^.]*Present/)).toHaveCount(0);
+    // The CV lists IDLC as "Present"; no entry about IDLC may say so. Entries
+    // are checked one by one: the next entry (City Bank) is rightly "Present".
+    const idlcEntries = page.getByRole("listitem").filter({ hasText: "IDLC Finance PLC" });
+    await expect(idlcEntries).not.toHaveCount(0);
+    for (const entry of await idlcEntries.all()) {
+      await expect(entry).not.toContainText("Present");
+    }
     expect(errors).toEqual([]);
   });
 

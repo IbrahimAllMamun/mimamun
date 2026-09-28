@@ -1,0 +1,8 @@
+/*
+ * Applied while taking visual-regression screenshots. The Next.js development
+ * overlay (its error badge in particular) only exists under `next dev` and must
+ * never end up in a baseline that CI compares against the production build.
+ */
+nextjs-portal {
+  display: none !important;
+}

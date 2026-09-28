@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig, devices } from "@playwright/test";
 
 /**
@@ -40,7 +41,12 @@ export default defineConfig({
       snapshotPathTemplate: "{testDir}/__screenshots__/{arg}{ext}",
       use: { ...devices["Desktop Chrome"] },
       expect: {
-        toHaveScreenshot: { maxDiffPixelRatio: 0.01, animations: "disabled", caret: "hide" },
+        toHaveScreenshot: {
+          maxDiffPixelRatio: 0.01,
+          animations: "disabled",
+          caret: "hide",
+          stylePath: fileURLToPath(new URL("./e2e/visual/screenshot.css", import.meta.url)),
+        },
       },
     },
   ],
