@@ -89,7 +89,9 @@ notify.
 
 **`migrate` fails, so the API never starts.**
 Read `docker compose -f docker-compose.prod.yml --env-file .env.production
-logs migrate`. A password error after changing `POSTGRES_PASSWORD` means the
+logs migrate`. `Invalid environment configuration` names the variables to fix
+in `.env.production` (`.env` in development): `migrate` checks the same
+settings as the API. A password error after changing `POSTGRES_PASSWORD` means the
 database volume was initialised with the old one — PostgreSQL only reads that
 variable when the volume is first created. Change the password inside
 PostgreSQL (`ALTER ROLE`) or restore the old value.
