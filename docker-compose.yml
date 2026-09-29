@@ -38,7 +38,10 @@ services:
     profiles: ["app"]
     build: { context: ., dockerfile: apps/api/Dockerfile }
     command: ["node", "dist/migrate.js"]
+    # migrate.js checks the same settings as the API (the image defaults to production).
+    env_file: [.env]
     environment:
+      NODE_ENV: development
       DATABASE_URL: postgres://${POSTGRES_USER:-portfolio}:${POSTGRES_PASSWORD:-portfolio}@postgres:5432/${POSTGRES_DB:-portfolio}
     depends_on:
       postgres: { condition: service_healthy }

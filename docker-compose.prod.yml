@@ -61,12 +61,15 @@ services:
     depends_on:
       migrate: { condition: service_completed_successfully }
 
-  # Applies pending migrations, then exits. Runs on every `up`.
+  # Applies pending migrations, then exits. Runs on every `up`. It checks the
+  # same settings as the API, so it reads the same env file.
   migrate:
     image: portfolio-api:${IMAGE_TAG:-latest}
     build: { context: ., dockerfile: apps/api/Dockerfile }
     command: ["node", "dist/migrate.js"]
+    env_file: [.env.production]
     environment:
+      NODE_ENV: production
       DATABASE_URL: postgres://${POSTGRES_USER:-portfolio}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-portfolio}
     depends_on:
       postgres: { condition: service_healthy }
