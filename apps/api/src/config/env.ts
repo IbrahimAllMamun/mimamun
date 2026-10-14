@@ -67,6 +67,8 @@ const envSchema = z
     SMTP_USER: optionalString,
     SMTP_PASSWORD: optionalString,
     MAIL_FROM: optionalString,
+    GOOGLE_CLIENT_ID: optionalString,
+    GOOGLE_CLIENT_SECRET: optionalString,
     GITHUB_TOKEN: optionalString,
     GITHUB_API_URL: z.url().default("https://api.github.com"),
     GITHUB_SYNC_INTERVAL_MINUTES: z.coerce
@@ -97,6 +99,13 @@ const envSchema = z
           message: "APP_URL must use https in production",
         });
       }
+    }
+    if (Boolean(env.GOOGLE_CLIENT_ID) !== Boolean(env.GOOGLE_CLIENT_SECRET)) {
+      ctx.addIssue({
+        code: "custom",
+        path: [env.GOOGLE_CLIENT_ID ? "GOOGLE_CLIENT_SECRET" : "GOOGLE_CLIENT_ID"],
+        message: "GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set together",
+      });
     }
     if (env.SMTP_HOST && !env.MAIL_FROM) {
       ctx.addIssue({
@@ -138,6 +147,8 @@ export interface AppConfig {
     password: string | null;
     from: string | null;
   };
+  /** Google sign-in; null when GOOGLE_CLIENT_ID/GOOGLE_CLIENT_SECRET are not set. */
+  google: { clientId: string; clientSecret: string; redirectUri: string } | null;
   github: { token: string | null; apiUrl: string; syncIntervalMinutes: number };
   web: { internalUrl: string | null; revalidateSecret: string | null };
   analytics: { countryHeader: string | null };
@@ -165,6 +176,7 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
   const isProduction = env.NODE_ENV === "production";
   const cookieSecure = env.COOKIE_SECURE ? env.COOKIE_SECURE === "true" : isProduction;
   const mb = 1024 * 1024;
+  const appUrl = env.APP_URL.replace(/\/$/, "");
   return {
     env: env.NODE_ENV,
     isProduction,
@@ -172,7 +184,7 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
     version: env.APP_VERSION,
     host: env.HOST,
     port: env.PORT,
-    appUrl: env.APP_URL.replace(/\/$/, ""),
+    appUrl,
     appOrigin: new URL(env.APP_URL).origin,
     appSecret: env.APP_SECRET ?? DEV_SECRET,
     trustProxy: parseTrustProxy(env.TRUST_PROXY),
@@ -203,6 +215,14 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
       password: env.SMTP_PASSWORD,
       from: env.MAIL_FROM,
     },
+    google:
+      env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+        ? {
+            clientId: env.GOOGLE_CLIENT_ID,
+            clientSecret: env.GOOGLE_CLIENT_SECRET,
+            redirectUri: `${appUrl}/api/auth/google/callback`,
+          }
+        : null,
     github: {
       token: env.GITHUB_TOKEN,
       apiUrl: env.GITHUB_API_URL.replace(/\/$/, ""),

@@ -73,3 +73,24 @@ export const roleInput = z.object({
   permissions: z.array(z.enum(ALL_PERMISSIONS as [string, ...string[]])).max(50),
 });
 export type RoleInput = z.infer<typeof roleInput>;
+
+/**
+ * Google sign-in failures. The API redirects to `/admin/login?error=<code>`
+ * and the sign-in page shows the matching message.
+ */
+export const GOOGLE_SIGN_IN_ERRORS = {
+  google_unavailable: "Google sign-in is not set up on this site.",
+  google_cancelled: "Google sign-in was cancelled.",
+  google_failed: "Google sign-in did not complete. Please try again.",
+  google_no_account: "No active admin account uses this Google account's email address.",
+  google_conflict:
+    "Your admin account is linked to a different Google account. Sign in with your password and unlink it under Account.",
+} as const;
+export type GoogleSignInError = keyof typeof GOOGLE_SIGN_IN_ERRORS;
+
+export function googleSignInMessage(code: string | string[] | undefined | null): string | null {
+  const value = Array.isArray(code) ? code[0] : code;
+  return value && Object.hasOwn(GOOGLE_SIGN_IN_ERRORS, value)
+    ? GOOGLE_SIGN_IN_ERRORS[value as GoogleSignInError]
+    : null;
+}

@@ -3,6 +3,7 @@ import type { Permission } from "@portfolio/shared";
 import type { AppConfig } from "./config/env";
 import type { Database } from "./database/client";
 import type { GithubClient } from "./integrations/github/client";
+import type { GoogleOAuthClient } from "./integrations/google";
 import type { Mailer } from "./integrations/mailer";
 import type { Revalidator } from "./integrations/revalidator";
 import type { StorageDriver } from "./integrations/storage";
@@ -18,6 +19,8 @@ export interface AppDeps {
   mailer: Mailer;
   revalidator: Revalidator;
   github: GithubClient;
+  /** Null when Google sign-in is not configured. */
+  google: GoogleOAuthClient | null;
   startedAt: Date;
 }
 
@@ -32,6 +35,7 @@ export interface AuthContext {
     roleId: string;
     roleKey: string;
     roleName: string;
+    googleLinked: boolean;
   };
   permissions: Permission[];
 }

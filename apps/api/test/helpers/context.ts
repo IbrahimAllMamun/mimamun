@@ -10,6 +10,11 @@ import { createDatabase } from "../../src/database/client";
 import { seed } from "../../src/database/seed/index";
 import { roles, users } from "../../src/database/schema";
 import type { GithubClient, GithubRepositoryPayload } from "../../src/integrations/github/client";
+import {
+  GoogleSignInError,
+  type GoogleIdentity,
+  type GoogleOAuthClient,
+} from "../../src/integrations/google";
 import { MemoryMailer } from "../../src/integrations/mailer";
 import { NoopRevalidator } from "../../src/integrations/revalidator";
 import { LocalStorage } from "../../src/integrations/storage";
@@ -32,12 +37,36 @@ export class FakeGithubClient implements GithubClient {
   }
 }
 
+/** Stands in for Google: returns `identity` for any code and records what it was given. */
+export class FakeGoogleClient implements GoogleOAuthClient {
+  identity: GoogleIdentity | null = null;
+  calls: { code: string; codeVerifier: string; nonce: string }[] = [];
+  authorizationUrl(params: { state: string; nonce: string; codeChallenge: string }): string {
+    const query = new URLSearchParams({
+      state: params.state,
+      nonce: params.nonce,
+      code_challenge: params.codeChallenge,
+    });
+    return `https://accounts.google.test/auth?${query.toString()}`;
+  }
+  async signIn(params: {
+    code: string;
+    codeVerifier: string;
+    nonce: string;
+  }): Promise<GoogleIdentity> {
+    this.calls.push(params);
+    if (!this.identity) throw new GoogleSignInError("token exchange failed");
+    return this.identity;
+  }
+}
+
 export interface TestContext {
   app: Express;
   deps: AppDeps;
   mailer: MemoryMailer;
   revalidator: NoopRevalidator;
   github: FakeGithubClient;
+  google: FakeGoogleClient;
   uploadDir: string;
   close: () => Promise<void>;
 }
@@ -62,6 +91,7 @@ export async function createTestContext(
   const mailer = new MemoryMailer();
   const revalidator = new NoopRevalidator();
   const github = new FakeGithubClient();
+  const google = new FakeGoogleClient();
   const deps: AppDeps = {
     config,
     db: database.db,
@@ -71,6 +101,7 @@ export async function createTestContext(
     mailer,
     revalidator,
     github,
+    google,
     startedAt: new Date(),
   };
   return {
@@ -79,6 +110,7 @@ export async function createTestContext(
     mailer,
     revalidator,
     github,
+    google,
     uploadDir,
     close: async () => {
       await database.close();

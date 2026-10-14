@@ -3,6 +3,7 @@ import { createApp } from "./app";
 import { loadConfig } from "./config/env";
 import { createDatabase } from "./database/client";
 import { HttpGithubClient } from "./integrations/github/client";
+import { HttpGoogleOAuthClient } from "./integrations/google";
 import { createMailer } from "./integrations/mailer";
 import { HttpRevalidator, NoopRevalidator } from "./integrations/revalidator";
 import { LocalStorage } from "./integrations/storage";
@@ -28,6 +29,7 @@ async function main() {
         ? new HttpRevalidator(config.web.internalUrl, config.web.revalidateSecret, logger)
         : new NoopRevalidator(),
     github: new HttpGithubClient(config.github.apiUrl, config.github.token),
+    google: config.google ? new HttpGoogleOAuthClient(config.google) : null,
     startedAt: new Date(),
   };
 

@@ -79,6 +79,7 @@ export function toSessionDTO(auth: AuthContext): SessionDTO {
       name: auth.user.name,
       role: { id: auth.user.roleId, key: auth.user.roleKey, name: auth.user.roleName },
       permissions: auth.permissions,
+      googleLinked: auth.user.googleLinked,
     },
     csrfToken: auth.csrfToken,
     expiresAt: isoRequired(auth.expiresAt),

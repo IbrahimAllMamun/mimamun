@@ -57,6 +57,7 @@ export async function loadSession(
       roleId: roles.id,
       roleKey: roles.key,
       roleName: roles.name,
+      googleLinked: sql<boolean>`${users.googleSubject} is not null`,
       permissions: sql<
         string[]
       >`coalesce(array_agg(${rolePermissions.permission}) filter (where ${rolePermissions.permission} is not null), '{}')`,
@@ -91,6 +92,7 @@ export async function loadSession(
       roleId: row.roleId,
       roleKey: row.roleKey,
       roleName: row.roleName,
+      googleLinked: row.googleLinked,
     },
     permissions: row.permissions.filter(isPermission) as Permission[],
   };
