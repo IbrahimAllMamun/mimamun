@@ -4,11 +4,12 @@ External services are optional. Each sits behind a small interface, fails
 without breaking the site, and reports its state on **Admin → System** and
 **Admin → Integrations**.
 
-| Integration      | Purpose                                     | Code                                                                               | Needs                                   |
-| ---------------- | ------------------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------- |
-| GitHub           | Show selected public repositories           | `apps/api/src/integrations/github`                                                 | a username (token optional)             |
-| Email (SMTP)     | Contact notifications, password-reset links | `apps/api/src/integrations/mailer.ts`                                              | `SMTP_*`, `MAIL_FROM`                   |
-| Web revalidation | Refresh cached public pages after edits     | `apps/api/src/integrations/revalidator.ts`, `apps/web/src/app/internal/revalidate` | `WEB_INTERNAL_URL`, `REVALIDATE_SECRET` |
+| Integration      | Purpose                                     | Code                                                                               | Needs                                      |
+| ---------------- | ------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------ |
+| GitHub           | Show selected public repositories           | `apps/api/src/integrations/github`                                                 | a username (token optional)                |
+| Email (SMTP)     | Contact notifications, password-reset links | `apps/api/src/integrations/mailer.ts`                                              | `SMTP_*`, `MAIL_FROM`                      |
+| Google sign-in   | "Continue with Google" on the admin sign-in | `apps/api/src/integrations/google.ts`, `apps/api/src/modules/auth/google.ts`       | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
+| Web revalidation | Refresh cached public pages after edits     | `apps/api/src/integrations/revalidator.ts`, `apps/web/src/app/internal/revalidate` | `WEB_INTERNAL_URL`, `REVALIDATE_SECRET`    |
 
 ## GitHub
 
@@ -90,6 +91,14 @@ calls `POST {WEB_INTERNAL_URL}/internal/revalidate` with the
 
 Caddy blocks `/internal/*` from the internet; the API reaches the web
 container over the Compose network.
+
+## Google sign-in
+
+An optional second way into the admin; the public site never contacts Google.
+Without `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` the button is hidden and the
+Google routes redirect to the sign-in page with "not set up". If Google is
+unreachable, sign-in with Google fails with a message and passwords keep
+working. Setup and the security model are in `authentication.md`.
 
 ## Not implemented
 

@@ -10,12 +10,19 @@ export interface SessionUserDTO {
   name: string;
   role: { id: string; key: string; name: string };
   permissions: Permission[];
+  /** Whether a Google account is linked for "Continue with Google". */
+  googleLinked: boolean;
 }
 
 export interface SessionDTO {
   user: SessionUserDTO;
   csrfToken: string;
   expiresAt: string;
+}
+
+/** Sign-in methods offered besides email and password (`GET /api/auth/providers`). */
+export interface AuthProvidersDTO {
+  google: boolean;
 }
 
 /** Row shape used by every admin list view. Extra columns are resource-specific. */

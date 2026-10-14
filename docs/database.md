@@ -64,14 +64,14 @@ erDiagram
 
 ### Identity and administration
 
-| Table                   | Purpose                             | Key columns / constraints                                                                                     |
-| ----------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `roles`                 | Named roles (ADMIN, EDITOR, custom) | `key` unique, `is_system` protects built-ins                                                                  |
-| `role_permissions`      | Permission keys granted to a role   | PK (`role_id`, `permission`); keys defined in `packages/shared/src/permissions.ts`                            |
-| `users`                 | Admin/editor accounts               | unique `lower(email)`, Argon2id `password_hash`, `status` (active/disabled), lockout counters                 |
-| `sessions`              | Server-side sessions                | PK = SHA-256 of the cookie token (raw token never stored), `csrf_token`, absolute + idle expiry, `revoked_at` |
-| `password_reset_tokens` | One-time reset tokens               | `token_hash` unique, `expires_at`, `used_at`                                                                  |
-| `audit_logs`            | Record of administrative actions    | actor, action, entity type/id, summary, `previous_value`/`new_value` JSONB (secrets removed)                  |
+| Table                   | Purpose                             | Key columns / constraints                                                                                                                      |
+| ----------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `roles`                 | Named roles (ADMIN, EDITOR, custom) | `key` unique, `is_system` protects built-ins                                                                                                   |
+| `role_permissions`      | Permission keys granted to a role   | PK (`role_id`, `permission`); keys defined in `packages/shared/src/permissions.ts`                                                             |
+| `users`                 | Admin/editor accounts               | unique `lower(email)`, Argon2id `password_hash`, `status` (active/disabled), lockout counters, unique `google_subject` (linked Google account) |
+| `sessions`              | Server-side sessions                | PK = SHA-256 of the cookie token (raw token never stored), `csrf_token`, absolute + idle expiry, `revoked_at`                                  |
+| `password_reset_tokens` | One-time reset tokens               | `token_hash` unique, `expires_at`, `used_at`                                                                                                   |
+| `audit_logs`            | Record of administrative actions    | actor, action, entity type/id, summary, `previous_value`/`new_value` JSONB (secrets removed)                                                   |
 
 ### Profile and site
 

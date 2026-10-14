@@ -3,8 +3,9 @@
 The admin CMS uses server-side sessions stored in PostgreSQL, a cookie that
 holds only a random token, and a per-session CSRF token. There is no public
 sign-up: accounts are created by an administrator (or by the seed for the
-first account). Code: `apps/api/src/modules/auth`, `middleware/session.ts`,
-`middleware/csrf.ts`, `lib/password.ts`.
+first account). Besides email and password, existing accounts can optionally
+sign in with Google. Code: `apps/api/src/modules/auth`, `middleware/session.ts`,
+`middleware/csrf.ts`, `lib/password.ts`, `integrations/google.ts`.
 
 ## Passwords
 
@@ -53,6 +54,74 @@ limit. An administrator can clear a lockout early with **Users → Unlock**
 The rate limiter keeps its counters in memory, which is correct for the single
 API instance this project deploys. See `security.md` before running more than
 one instance.
+
+## Signing in with Google
+
+Optional, off until `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set.
+Google sign-in never creates accounts: it only signs in to an account an
+administrator already created, so the users list stays the single list of who
+can reach the admin.
+
+### Setting it up
+
+1. In [Google Cloud Console](https://console.cloud.google.com/) create a
+   project, configure the **OAuth consent screen** (External, app name, your
+   support email; only the `openid` and `email` scopes are requested, so no
+   verification review is needed) and add yourself as a test user while the
+   app is in "Testing", or publish it.
+2. **APIs & Services → Credentials → Create credentials → OAuth client ID**,
+   type **Web application**. Authorised redirect URI:
+   `https://<your-domain>/api/auth/google/callback` (and
+   `http://localhost:3000/api/auth/google/callback` for development).
+   No JavaScript origins are needed.
+3. Put the client ID and secret in `GOOGLE_CLIENT_ID` and
+   `GOOGLE_CLIENT_SECRET` (`.env` / `.env.production`) and restart the API.
+   The sign-in page now shows **Continue with Google**.
+4. Choose the Google account whose email matches your admin account. The first
+   successful sign-in links that Google account; **Account → Google sign-in**
+   shows the link and can remove it.
+
+### How it works
+
+`GET /api/auth/google?next=…` starts an OpenID Connect authorization-code flow
+with PKCE:
+
+1. The API creates a random `state`, `nonce` and PKCE verifier and stores them,
+   with the validated `next` path, in a signed cookie (`portfolio_google`,
+   `__Secure-` prefixed when secure; `HttpOnly`, `SameSite=Lax`, path
+   `/api/auth/google`, 10 minutes, cleared on the callback whatever happens).
+   It then redirects to Google asking for `openid email`.
+2. Google redirects back to `/api/auth/google/callback`. The API checks the
+   cookie's signature and age and that `state` matches (login CSRF), exchanges
+   the code (with the client secret and PKCE verifier) for an ID token, and
+   verifies the token: RS256 signature against Google's published keys
+   (cached as long as Google allows), issuer, audience (our client ID),
+   expiry and the `nonce`.
+3. The account is found by the linked Google account id (`users.google_subject`).
+   If none is linked, an **active** account whose email equals the token's
+   email — only when Google reports the email as verified — is linked on the
+   spot. A different Google account for an already-linked user is refused.
+4. On success the same session as a password sign-in is created (any session
+   already on the request is revoked), an `auth.login` audit entry is written
+   and the browser returns to `next` (`safeNext` rules, so never off-site).
+
+Failures redirect to `/admin/login?error=<code>` (`GOOGLE_SIGN_IN_ERRORS` in
+`packages/shared/src/schemas/auth.ts`): `google_unavailable`, `google_cancelled`,
+`google_failed` (state, token or network problem), `google_no_account`
+(no active account with that verified email) and `google_conflict`. Failures
+for a known email are audited as `auth.login_failed`. Both Google routes share
+a limit of 30 requests per IP per 15 minutes.
+
+Notes:
+
+- No Google access or refresh token is stored; only the Google account id.
+- The password lockout does not block Google sign-in (Google authenticates
+  the person), and a Google sign-in does not clear the lockout either.
+  Disabling an account blocks both.
+- Trusting a Google-verified email is no weaker than the password-reset email,
+  which already proves control of that address.
+- **Unlink** (`DELETE /api/auth/google/link`) is for when the Google account
+  changes; the next Google sign-in with the account's email links again.
 
 ## Sessions
 
@@ -136,5 +205,5 @@ revokes the user's other sessions (the current one stays signed in).
 
 ## Not implemented
 
-Two-factor authentication and single sign-on are not part of this version
+Two-factor authentication and other sign-in providers are not part of this version
 (see `ROADMAP.md`).

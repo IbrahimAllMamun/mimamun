@@ -8,6 +8,7 @@ import {
   PASSWORD_MIN_LENGTH,
   PERMISSION_DESCRIPTIONS,
   type AdminUserDTO,
+  type AuthProvidersDTO,
   type Permission,
   type RoleDTO,
   type SessionListItemDTO,
@@ -719,7 +720,64 @@ export function AccountPage() {
             <SessionsList onlyMine />
           </div>
         </Panel>
+        <GoogleSignInPanel />
       </div>
     </>
+  );
+}
+
+/**
+ * "Continue with Google" status. Linking happens on the first Google sign-in
+ * with the account's email; unlinking lets another Google account link next time.
+ */
+function GoogleSignInPanel() {
+  const session = useSession();
+  const router = useRouter();
+  const toast = useToast();
+  const confirm = useConfirm();
+  const providers = useApiQuery<AuthProvidersDTO>("/api/auth/providers");
+  const [linked, setLinked] = useState(session.user.googleLinked);
+  const [pending, setPending] = useState(false);
+
+  // Nothing to show or do until Google sign-in is configured (or an old link remains).
+  if (!linked && !providers.data?.google) return null;
+
+  const unlink = async () => {
+    if (
+      !(await confirm({
+        title: "Unlink your Google account?",
+        body: "You can still sign in with your password. The next Google sign-in with this email links again.",
+        confirmLabel: "Unlink",
+        tone: "danger",
+      }))
+    )
+      return;
+    setPending(true);
+    const result = await apiRequest("DELETE", "/api/auth/google/link");
+    setPending(false);
+    if (!result.ok) return toast.error(result.error.message);
+    setLinked(false);
+    toast.success("Google account unlinked");
+    router.refresh();
+  };
+
+  return (
+    <Panel title="Google sign-in">
+      {linked ? (
+        <div className="space-y-4">
+          <p className="text-sm text-ink-2">
+            A Google account is linked. You can sign in with “Continue with Google”.
+          </p>
+          <Button variant="secondary" pending={pending} onClick={unlink}>
+            Unlink Google account
+          </Button>
+        </div>
+      ) : (
+        <p className="text-sm text-ink-2">
+          Not linked. Sign out and choose “Continue with Google” with the Google account for{" "}
+          <span className="font-medium text-ink">{session.user.email}</span>; it links on first use.
+        </p>
+      )}
+    </Panel>
   );
 }

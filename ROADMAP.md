@@ -72,6 +72,7 @@ Status legend: `[x]` done · `[~]` partly done (see note) · `[ ]` not started.
 
 - [x] GitHub repository sync with cache, manual curation and failure isolation
 - [x] Email notifications and password-reset mail (SMTP, optional)
+- [x] Google sign-in for existing admin accounts (OpenID Connect + PKCE, optional)
 - [x] Web revalidation hook (debounced, secret-protected)
 - [ ] Publication metadata import (e.g. DOI/Crossref) — not started; publications are entered in the CMS
 

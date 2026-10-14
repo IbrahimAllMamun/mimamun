@@ -7,7 +7,7 @@ rules are obvious from the URL.
 | Prefix           | Audience                 | Auth                                    | Notes                                                   |
 | ---------------- | ------------------------ | --------------------------------------- | ------------------------------------------------------- |
 | `/api/health`    | Operators, orchestrators | none                                    | Liveness / database readiness. Never exposes internals. |
-| `/api/auth`      | Admin users              | session (except login/reset)            | Login, logout, session, password flows                  |
+| `/api/auth`      | Admin users              | session (except sign-in/reset)          | Sign-in (password, Google), logout, session, passwords  |
 | `/api/public`    | Everyone                 | none                                    | Published, public content only. Cacheable.              |
 | `/api/analytics` | Browsers                 | none                                    | Privacy-preserving event ingestion, rate limited        |
 | `/api/admin`     | Admin users              | session + permission (+ CSRF on writes) | CMS operations                                          |
@@ -95,6 +95,10 @@ filter controls; the blog accepts `q, category, tag, page, pageSize`.
 | POST   | `/api/auth/password/forgot` | `{ email }` → always 202; emails a reset link when the account exists              |
 | POST   | `/api/auth/password/reset`  | `{ token, password }` → sets the password, revokes all sessions                    |
 | POST   | `/api/auth/password/change` | `{ currentPassword, newPassword }` (authenticated)                                 |
+| GET    | `/api/auth/providers`       | `{ google }` — whether "Continue with Google" is offered                           |
+| GET    | `/api/auth/google`          | `?next=` → 302 to Google (sets a short-lived flow cookie)                          |
+| GET    | `/api/auth/google/callback` | Google's redirect → session cookie + 302 to `next`, or 302 to the login `?error=`  |
+| DELETE | `/api/auth/google/link`     | Unlinks the signed-in user's Google account (authenticated) → 204                  |
 
 ### Public content
 

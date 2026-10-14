@@ -88,6 +88,16 @@ The seed creates this account only when the `users` table is empty.
 Where contact notifications go is a CMS setting (**Settings → Contact form**),
 not an environment variable.
 
+## Google sign-in (optional)
+
+| Variable               | Default | Notes                                                                                 |
+| ---------------------- | ------- | ------------------------------------------------------------------------------------- |
+| `GOOGLE_CLIENT_ID`     | unset   | OAuth client ID of a "Web application" client in Google Cloud Console                 |
+| `GOOGLE_CLIENT_SECRET` | unset   | Its client secret. **Set both or neither**; with both, the sign-in page offers Google |
+
+The redirect URI to register with Google is `<APP_URL>/api/auth/google/callback`.
+See `authentication.md` → "Signing in with Google".
+
 ## GitHub (optional)
 
 | Variable                       | Default                  | Notes                                                                                                       |

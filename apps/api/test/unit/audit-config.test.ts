@@ -45,6 +45,20 @@ describe("configuration", () => {
     ).toThrow(/MAIL_FROM/);
   });
 
+  it("enables Google sign-in only with both client settings", () => {
+    const db = { DATABASE_URL: "postgres://x", APP_URL: "http://localhost:3000/" };
+    expect(loadConfig(db).google).toBeNull();
+    expect(() => loadConfig({ ...db, GOOGLE_CLIENT_ID: "id" })).toThrow(/GOOGLE_CLIENT_SECRET/);
+    expect(() => loadConfig({ ...db, GOOGLE_CLIENT_SECRET: "secret" })).toThrow(/GOOGLE_CLIENT_ID/);
+    expect(
+      loadConfig({ ...db, GOOGLE_CLIENT_ID: "id", GOOGLE_CLIENT_SECRET: "secret" }).google,
+    ).toEqual({
+      clientId: "id",
+      clientSecret: "secret",
+      redirectUri: "http://localhost:3000/api/auth/google/callback",
+    });
+  });
+
   it("accepts .env.example unchanged, treating empty values as unset", () => {
     const example = parseEnv(
       readFileSync(new URL("../../../../.env.example", import.meta.url), "utf8"),
@@ -55,5 +69,6 @@ describe("configuration", () => {
     expect(config.session.cookieSecure).toBe(false);
     expect(config.mail.host).toBeNull();
     expect(config.github.token).toBeNull();
+    expect(config.google).toBeNull();
   });
 });

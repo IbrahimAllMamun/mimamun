@@ -51,10 +51,13 @@ export const users = pgTable(
     lockedUntil: timestamptz(),
     lastLoginAt: timestamptz(),
     passwordChangedAt: timestamptz(),
+    /** Google account id (`sub`), linked on the first "Continue with Google" sign-in. */
+    googleSubject: text(),
     ...timestamps(),
   },
   (t) => [
     uniqueIndex("users_email_lower_idx").on(sql`lower(${t.email})`),
+    uniqueIndex("users_google_subject_idx").on(t.googleSubject),
     index("users_role_idx").on(t.roleId),
   ],
 );

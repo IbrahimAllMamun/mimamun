@@ -17,3 +17,4 @@ export * from "./utils/text";
 export * from "./utils/dates";
 export * from "./utils/chart";
 export * from "./utils/citation";
+export * from "./utils/redirects";

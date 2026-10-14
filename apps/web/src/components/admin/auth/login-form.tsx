@@ -5,15 +5,27 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CircleAlert } from "lucide-react";
 import type { SessionDTO } from "@portfolio/shared";
-import { Button } from "@/components/ui/button";
+import { Button, buttonClass } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
 import { Icon } from "@/components/ui/icon";
 import { apiRequest, fieldErrors } from "@/lib/api/client";
 
-export function LoginForm({ next, notice }: { next: string; notice?: string | null }) {
+export function LoginForm({
+  next,
+  notice,
+  initialError = null,
+  google = false,
+}: {
+  next: string;
+  notice?: string | null;
+  /** A message from a failed Google sign-in (`?error=`). */
+  initialError?: string | null;
+  /** Offer "Continue with Google" (configured in the API). */
+  google?: boolean;
+}) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(initialError);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -64,6 +76,22 @@ export function LoginForm({ next, notice }: { next: string; notice?: string | nu
       <Button type="submit" pending={pending} className="w-full">
         {pending ? "Signing in…" : "Sign in"}
       </Button>
+      {google ? (
+        <>
+          <p className="flex items-center gap-3 text-xs text-ink-3">
+            <span aria-hidden className="h-px flex-1 bg-rule" />
+            or
+            <span aria-hidden className="h-px flex-1 bg-rule" />
+          </p>
+          {/* A full-page navigation: the API redirects to Google and back. */}
+          <a
+            href={`/api/auth/google?${new URLSearchParams({ next }).toString()}`}
+            className={buttonClass("secondary", "md", "w-full")}
+          >
+            Continue with Google
+          </a>
+        </>
+      ) : null}
       <p className="text-center text-sm">
         <Link href="/admin/forgot-password" className="link">
           Forgot your password?

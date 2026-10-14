@@ -1,15 +1,28 @@
 import { Router, type CookieOptions, type Request, type Response } from "express";
+import { parseCookie } from "cookie";
 import {
   changePasswordInput,
   forgotPasswordInput,
   loginInput,
   resetPasswordInput,
+  type AuthProvidersDTO,
+  type GoogleSignInError,
 } from "@portfolio/shared";
 import { requireAuth } from "../../middleware/auth";
 import { createRateLimit, minutes } from "../../middleware/rate-limit";
 import { ok, noContent, parse } from "../../lib/http";
 import type { AppDeps } from "../../types";
+import { GoogleSignInError as GoogleFailure } from "../../integrations/google";
 import { recordAudit } from "../audit/service";
+import {
+  GOOGLE_FLOW_MAX_AGE_MS,
+  codeChallenge,
+  newGoogleFlow,
+  openGoogleFlow,
+  resolveGoogleUser,
+  sealGoogleFlow,
+  unlinkGoogle,
+} from "./google";
 import {
   changePassword,
   createPasswordResetToken,
@@ -61,8 +74,32 @@ export function authRouter(deps: AppDeps): Router {
     key: emailKey,
   });
 
-  const setSessionCookie = (res: Response, token: string, expiresAt: Date) => {
-    res.cookie(config.session.cookieName, token, { ...cookieOptions, expires: expiresAt });
+  const googleLimit = createRateLimit({
+    windowMs: minutes(15),
+    limit: 30,
+    message: tooManyLogins,
+  });
+
+  // The Google flow cookie is only sent back to the Google routes. SameSite=Lax
+  // lets it travel on the top-level redirect back from Google.
+  const googleCookieName = `${config.session.cookieSecure ? "__Secure-" : ""}portfolio_google`;
+  const googleCookieOptions: CookieOptions = { ...cookieOptions, path: "/api/auth/google" };
+
+  /** Replaces any session on the request (prevents session fixation) and sets the cookie. */
+  const startSession = async (req: Request, res: Response, userId: string) => {
+    if (req.auth) await revokeSession(db, req.auth.sessionId);
+    const session = await createSession(db, config.session, userId, {
+      ipAddress: req.ip ?? null,
+      userAgent: req.header("user-agent") ?? null,
+    });
+    const auth = await loadSession(db, config.session, session.token);
+    if (!auth) throw new Error("Session could not be loaded after creation");
+    req.auth = auth;
+    res.cookie(config.session.cookieName, session.token, {
+      ...cookieOptions,
+      expires: session.expiresAt,
+    });
+    return auth;
   };
 
   router.post("/login", loginByIp, loginByEmail, async (req, res) => {
@@ -79,15 +116,7 @@ export function authRouter(deps: AppDeps): Router {
       logger.warn({ requestId: req.id, userId: result.userId }, "failed sign-in");
       throw result.error;
     }
-    // A fresh session on every login prevents session fixation.
-    if (req.auth) await revokeSession(db, req.auth.sessionId);
-    const session = await createSession(db, config.session, result.userId, {
-      ipAddress: req.ip ?? null,
-      userAgent: req.header("user-agent") ?? null,
-    });
-    const auth = await loadSession(db, config.session, session.token);
-    if (!auth) throw new Error("Session could not be loaded after creation");
-    req.auth = auth;
+    const auth = await startSession(req, res, result.userId);
     await recordAudit(db, req, {
       action: "auth.login",
       entityType: "user",
@@ -95,8 +124,106 @@ export function authRouter(deps: AppDeps): Router {
       summary: `${result.email} signed in`,
     });
     logger.info({ requestId: req.id, userId: result.userId }, "signed in");
-    setSessionCookie(res, session.token, session.expiresAt);
     ok(res, toSessionDTO(auth));
+  });
+
+  // ── Google sign-in ─────────────────────────────────────────────────────
+  router.get("/providers", (_req, res) => {
+    const providers: AuthProvidersDTO = { google: deps.google !== null };
+    ok(res, providers);
+  });
+
+  const toLogin = (res: Response, error: GoogleSignInError, next = "/admin") => {
+    const query = new URLSearchParams({ error });
+    if (next !== "/admin") query.set("next", next);
+    res.redirect(302, `${config.appUrl}/admin/login?${query.toString()}`);
+  };
+
+  router.get("/google", googleLimit, (req, res) => {
+    const google = deps.google;
+    if (!google) return toLogin(res, "google_unavailable");
+    const flow = newGoogleFlow(req.query.next);
+    res.cookie(googleCookieName, sealGoogleFlow(config.appSecret, flow), {
+      ...googleCookieOptions,
+      maxAge: GOOGLE_FLOW_MAX_AGE_MS,
+    });
+    res.redirect(
+      302,
+      google.authorizationUrl({
+        state: flow.state,
+        nonce: flow.nonce,
+        codeChallenge: codeChallenge(flow.codeVerifier),
+      }),
+    );
+  });
+
+  router.get("/google/callback", googleLimit, async (req, res) => {
+    const google = deps.google;
+    const cookies = parseCookie(req.headers.cookie ?? "");
+    const flow = openGoogleFlow(config.appSecret, cookies[googleCookieName]);
+    // Single use: the flow cookie is cleared whatever the outcome.
+    res.clearCookie(googleCookieName, googleCookieOptions);
+    if (!google) return toLogin(res, "google_unavailable");
+    const next = flow?.next ?? "/admin";
+    const { code, state, error } = req.query;
+    if (typeof error === "string") return toLogin(res, "google_cancelled", next);
+    if (
+      !flow ||
+      typeof code !== "string" ||
+      typeof state !== "string" ||
+      code.length > 2000 ||
+      state !== flow.state
+    ) {
+      logger.warn({ requestId: req.id }, "Google sign-in with a missing or mismatched state");
+      return toLogin(res, "google_failed", next);
+    }
+
+    let identity;
+    try {
+      identity = await google.signIn({ code, codeVerifier: flow.codeVerifier, nonce: flow.nonce });
+    } catch (failure) {
+      if (!(failure instanceof GoogleFailure)) throw failure;
+      logger.warn({ requestId: req.id, reason: failure.message }, "Google sign-in failed");
+      return toLogin(res, "google_failed", next);
+    }
+
+    const result = await resolveGoogleUser(db, identity);
+    if (!result.ok) {
+      await recordAudit(db, req, {
+        action: "auth.login_failed",
+        entityType: "user",
+        entityId: result.userId,
+        summary: `Failed Google sign-in for ${identity.email}`,
+        actor: { id: result.userId, email: identity.email, name: null },
+      });
+      logger.warn({ requestId: req.id, userId: result.userId }, "failed Google sign-in");
+      return toLogin(res, result.error, next);
+    }
+
+    await startSession(req, res, result.userId);
+    await recordAudit(db, req, {
+      action: "auth.login",
+      entityType: "user",
+      entityId: result.userId,
+      summary: result.linked
+        ? `${result.email} signed in with Google (account linked)`
+        : `${result.email} signed in with Google`,
+    });
+    logger.info({ requestId: req.id, userId: result.userId }, "signed in with Google");
+    res.redirect(302, `${config.appUrl}${next}`);
+  });
+
+  router.delete("/google/link", requireAuth, async (req, res) => {
+    const auth = req.auth!;
+    if (await unlinkGoogle(db, auth.user.id)) {
+      await recordAudit(db, req, {
+        action: "auth.google_unlinked",
+        entityType: "user",
+        entityId: auth.user.id,
+        summary: `${auth.user.email} unlinked their Google account`,
+      });
+    }
+    noContent(res);
   });
 
   router.post("/logout", async (req, res) => {
